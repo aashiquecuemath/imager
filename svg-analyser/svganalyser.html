@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SVG / HTML Analyser</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:#ebebeb; --bg-panel:#d8d8d8; --bg-pane:#ffffff;
+  --border:#c0c0c0; --text:#1a1a1a; --text-dim:#666666;
+  --accent:#b07000;
+  --tok-tag:#0060b0; --tok-attr:#6020a0; --tok-string:#b03000;
+  --tok-comment:#207820; --tok-doctype:#8020b0; --tok-punct:#888888;
+  --hl-bg:rgba(176,112,0,.09); --hl-border:#b07000;
+}
+
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);
+  font-family:'Segoe UI',system-ui,sans-serif;font-size:13px}
+
+.app{display:flex;flex-direction:column;height:100vh}
+
+/* header */
+.header{display:flex;align-items:center;gap:10px;padding:7px 14px;
+  background:var(--bg-panel);border-bottom:1px solid var(--border);
+  flex-shrink:0;font-size:14px;font-weight:600;letter-spacing:.02em}
+.logo{color:var(--accent);font-size:18px;line-height:1}
+.badge{padding:2px 8px;border-radius:3px;font-size:10px;font-weight:700;
+  letter-spacing:.08em;text-transform:uppercase;background:#d0d0d0;color:var(--text-dim)}
+.badge.SVG{background:#c5e8e0;color:#005a48}
+.badge.HTML{background:#eddcc8;color:#7a3800}
+.badge.ERR{background:#f5cccc;color:#b01818}
+.hdr-right{margin-left:auto;display:flex;align-items:center;gap:14px;
+  font-size:11px;color:var(--text-dim)}
+
+/* tools bar */
+.tools-bar{display:flex;align-items:center;flex-shrink:0;
+  background:#e0e0e0;border-bottom:1px solid var(--border);
+  padding:0 4px;overflow-x:auto;white-space:nowrap;height:38px}
+.tb-group{display:flex;align-items:center;gap:7px;padding:0 14px;flex-shrink:0}
+.tb-group+.tb-group{border-left:1px solid var(--border)}
+.tb-label{font-size:10px;font-weight:700;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--text-dim);min-width:38px}
+.tb-sub{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-dim)}
+input.ti{background:#fff;border:1px solid #aaa;border-radius:3px;
+  color:var(--text);font-size:12px;padding:2px 7px;outline:none;
+  font-family:'Cascadia Code','Fira Code',Consolas,monospace}
+input.ti:focus{border-color:#888}
+input.ti-n{width:62px}
+input.ti-t{width:108px}
+select.ti{background:#fff;border:1px solid #aaa;border-radius:3px;
+  color:var(--text);font-size:12px;padding:2px 5px;outline:none;cursor:pointer}
+.lock-btn{padding:2px 7px;font-size:13px;line-height:1.2;letter-spacing:0}
+.lock-btn.on{color:var(--accent);border-color:#a08000}
+#repl-msg{font-size:11px;color:var(--text-dim);min-width:60px}
+
+/* main grid */
+.main-grid{display:grid;grid-template-columns:1fr 1.15fr;flex:1;overflow:hidden}
+.left-col{display:grid;grid-template-rows:1fr 1fr;
+  border-right:1px solid var(--border);overflow:hidden}
+
+/* panes */
+.pane{display:flex;flex-direction:column;overflow:hidden;background:var(--bg-pane)}
+.left-col .pane:first-child{border-bottom:1px solid var(--border)}
+
+.pane-hdr{display:flex;align-items:center;justify-content:space-between;
+  padding:5px 12px;background:var(--bg-panel);border-bottom:1px solid var(--border);
+  flex-shrink:0;font-size:10px;font-weight:700;letter-spacing:.07em;
+  text-transform:uppercase;color:var(--text-dim)}
+.pane-hdr .ctl{display:flex;gap:5px;align-items:center}
+.pane-hint{font-size:10px;font-weight:400;letter-spacing:0;
+  text-transform:none;color:#999;margin-left:6px}
+
+/* buttons */
+button{padding:3px 9px;background:#e8e8e8;border:1px solid #bbb;border-radius:3px;
+  color:var(--text);font-size:11px;cursor:pointer;transition:background .12s}
+button:hover{background:#d8d8d8}
+button:active{background:#c8c8c8}
+button:disabled{opacity:.38;cursor:default}
+
+/* textarea */
+#raw-input{flex:1;resize:none;border:none;outline:none;background:#f8f8f8;
+  color:var(--text);font-family:'Cascadia Code','Fira Code',Consolas,monospace;
+  font-size:12px;padding:10px 12px;line-height:1.65;tab-size:2}
+#raw-input::placeholder{color:#aaa}
+
+/* formatted code view */
+.code-view{flex:1;overflow:auto;background:#fff;
+  font-family:'Cascadia Code','Fira Code',Consolas,monospace;
+  font-size:12px;line-height:1.7;padding:4px 0}
+
+.code-line{display:flex;align-items:center;padding-right:12px;
+  white-space:nowrap;cursor:text;transition:background .1s;position:relative}
+.code-line:hover{background:rgba(0,0,0,.04)}
+.code-line:hover .edit-hint{opacity:1}
+.code-line.hl{background:var(--hl-bg)!important;border-left:2px solid var(--hl-border)}
+.code-line.hl .ln{color:var(--accent)}
+.code-line.editing{background:rgba(176,112,0,.07)!important;border-left:2px solid var(--hl-border)}
+
+.ln{min-width:44px;padding:0 10px 0 8px;text-align:right;
+  color:#aaa;user-select:none;flex-shrink:0;font-size:11px;line-height:1.7}
+.lc{white-space:pre;flex:1;min-width:0}
+
+.lc[contenteditable="true"]{
+  background:#fffde7;outline:2px solid var(--accent);
+  border-radius:2px;caret-color:var(--accent);
+  white-space:pre;min-width:60px}
+
+.edit-hint{position:absolute;right:6px;font-size:10px;
+  color:#ccc;opacity:0;transition:opacity .15s;pointer-events:none;user-select:none}
+.code-line.editing .edit-hint{display:none}
+
+/* SVG dotted boundary */
+.svg-boundary{display:inline-block;border:2px dashed #b07000;
+  line-height:0;position:relative}
+
+/* syntax tokens */
+.tok-tag{color:var(--tok-tag)}
+.tok-attr{color:var(--tok-attr)}
+.tok-str{color:var(--tok-string)}
+.tok-cmt{color:var(--tok-comment);font-style:italic}
+.tok-dt{color:var(--tok-doctype)}
+.tok-p{color:var(--tok-punct)}
+.tok-txt{color:var(--text)}
+
+.empty-hint{color:#ccc;font-size:13px;padding:24px;text-align:center;
+  margin:auto;user-select:none}
+
+/* preview pane */
+#preview-pane{display:flex;flex-direction:column;overflow:hidden}
+
+.preview-wrap{flex:1;overflow:auto;display:flex;
+  align-items:flex-start;justify-content:center;padding:20px;
+  background:#fff}
+
+.preview-wrap svg{max-width:100%;height:auto;display:block}
+.preview-wrap [data-fline]{cursor:grab}
+.preview-wrap [data-fline]:hover{filter:brightness(.9) drop-shadow(0 0 3px rgba(176,112,0,.5))}
+.preview-wrap [data-fline].dragging{cursor:grabbing;opacity:.75}
+.preview-wrap .psel{filter:brightness(.85) drop-shadow(0 0 7px rgba(176,112,0,.8))!important}
+
+.hr-wrap{width:100%;font-family:Georgia,serif;color:var(--text);padding:8px}
+.hr-wrap h1,.hr-wrap h2,.hr-wrap h3{color:#111;margin:8px 0 4px}
+.hr-wrap a{color:var(--accent)}
+.hr-wrap p{margin-bottom:6px;line-height:1.55}
+.hr-wrap nav{display:flex;gap:14px;margin:6px 0}
+.hr-wrap header,.hr-wrap footer{border-bottom:1px solid var(--border);padding:6px 0;margin-bottom:12px}
+
+.el-info{flex-shrink:0;padding:4px 12px;background:var(--bg-panel);
+  border-top:1px solid var(--border);
+  font-family:'Cascadia Code',Consolas,monospace;
+  font-size:11px;color:var(--text-dim);min-height:24px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ei-tag{color:var(--tok-tag)}
+.ei-attr{color:var(--tok-attr)}
+.ei-val{color:var(--tok-string)}
+
+::-webkit-scrollbar{width:7px;height:7px}
+::-webkit-scrollbar-track{background:#e0e0e0}
+::-webkit-scrollbar-thumb{background:#b0b0b0;border-radius:4px}
+::-webkit-scrollbar-thumb:hover{background:#888}
+
+/* font popup */
+.font-popup{
+  position:fixed;z-index:9999;
+  background:#fff;border:1px solid #bbb;border-radius:7px;
+  box-shadow:0 6px 24px rgba(0,0,0,.18);
+  padding:14px;min-width:215px;font-size:12px;display:none
+}
+.fp-title{font-weight:700;font-size:11px;text-transform:uppercase;
+  letter-spacing:.06em;color:var(--text-dim);margin-bottom:10px;
+  padding-bottom:7px;border-bottom:1px solid var(--border)}
+.fp-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.fp-row label{min-width:52px;font-size:11px;color:var(--text-dim)}
+.fp-btns{display:flex;gap:6px;margin-top:10px;padding-top:8px;border-top:1px solid var(--border)}
+.fp-btns button{flex:1}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="header">
+    <span class="logo">&#9671;</span>
+    <span>SVG / HTML Analyser</span>
+    <span class="badge" id="mode-badge">—</span>
+    <div class="hdr-right">
+      <span id="stat-el"></span>
+      <span id="stat-ln"></span>
+    </div>
+  </div>
+
+  <div class="tools-bar">
+
+    <!-- Canvas resize -->
+    <div class="tb-group">
+      <span class="tb-label">Canvas</span>
+      <div class="tb-sub">
+        <label>W</label>
+        <input id="gp-w" class="ti ti-n" type="number" min="1" placeholder="—" oninput="onWChange(this.value)">
+      </div>
+      <button class="lock-btn on" id="lock-btn" onclick="toggleLock()" title="Lock aspect ratio">⛓</button>
+      <div class="tb-sub">
+        <label>H</label>
+        <input id="gp-h" class="ti ti-n" type="number" min="1" placeholder="—" oninput="onHChange(this.value)">
+      </div>
+      <button onclick="applyResize()">Resize</button>
+    </div>
+
+    <!-- Scale -->
+    <div class="tb-group">
+      <span class="tb-label">Scale</span>
+      <div class="tb-sub">
+        <label>×</label>
+        <input id="gp-scale" class="ti ti-n" type="number" value="2" min="0.01" step="0.25">
+      </div>
+      <button onclick="applyScale()">Apply</button>
+    </div>
+
+    <!-- Trim margins -->
+    <div class="tb-group">
+      <span class="tb-label">Trim</span>
+      <button onclick="trimWhitespace()" title="Fit viewBox tightly around content">Trim Margins</button>
+    </div>
+
+    <!-- Find & Replace -->
+    <div class="tb-group">
+      <span class="tb-label">Replace</span>
+      <input id="gp-find" class="ti ti-t" placeholder="Find…" onkeydown="if(event.key==='Enter')applyReplace()">
+      <input id="gp-repl" class="ti ti-t" placeholder="Replace with…" onkeydown="if(event.key==='Enter')applyReplace()">
+      <button onclick="applyReplace()">Replace All</button>
+      <span id="repl-msg"></span>
+    </div>
+
+  </div>
+
+  <div class="main-grid">
+    <div class="left-col">
+
+      <div class="pane">
+        <div class="pane-hdr">
+          <span>Input</span>
+          <div class="ctl">
+            <button onclick="loadSample('svg')">SVG sample</button>
+            <button onclick="loadSample('html')">HTML sample</button>
+            <button onclick="clearInput()">Clear</button>
+            <button id="btn-ci" onclick="copyInput()">Copy</button>
+          </div>
+        </div>
+        <textarea id="raw-input" placeholder="Paste SVG or HTML code here…"></textarea>
+      </div>
+
+      <div class="pane">
+        <div class="pane-hdr">
+          <span>Formatted Code <span class="pane-hint">— click to edit · Enter=commit · Esc=cancel</span></span>
+          <div class="ctl">
+            <button id="btn-undo" onclick="undo()" disabled title="Undo (Ctrl+Z)">Undo</button>
+            <button id="btn-cf" onclick="copyFmt()">Copy</button>
+          </div>
+        </div>
+        <div id="fmt-code" class="code-view">
+          <div class="empty-hint">Formatted code will appear here</div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="pane" id="preview-pane">
+      <div class="pane-hdr">
+        <span>Preview <span class="pane-hint">— drag to move · click text to style</span></span>
+        <div class="ctl">
+          <button onclick="fitSVG()">Fit</button>
+          <button onclick="resetSVG()">1:1</button>
+        </div>
+      </div>
+      <div class="preview-wrap" id="preview"></div>
+      <div class="el-info" id="el-info">Hover over elements to inspect</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Font popup -->
+<div id="font-popup" class="font-popup">
+  <div class="fp-title">&#9998; Text Style</div>
+  <div class="fp-row">
+    <label>Size</label>
+    <input type="number" id="fp-size" class="ti ti-n" min="0.5" step="0.5">
+  </div>
+  <div class="fp-row">
+    <label>Family</label>
+    <input type="text" id="fp-family" class="ti" style="width:130px" placeholder="sans-serif">
+  </div>
+  <div class="fp-row">
+    <label>Weight</label>
+    <select id="fp-weight" class="ti">
+      <option value="normal">Normal</option>
+      <option value="bold">Bold</option>
+      <option value="100">100</option><option value="200">200</option>
+      <option value="300">300</option><option value="400">400</option>
+      <option value="500">500</option><option value="600">600</option>
+      <option value="700">700</option><option value="800">800</option>
+      <option value="900">900</option>
+    </select>
+  </div>
+  <div class="fp-row">
+    <label>Style</label>
+    <select id="fp-style" class="ti">
+      <option value="normal">Normal</option>
+      <option value="italic">Italic</option>
+      <option value="oblique">Oblique</option>
+    </select>
+  </div>
+  <div class="fp-row">
+    <label>Anchor</label>
+    <select id="fp-anchor" class="ti">
+      <option value="start">Start</option>
+      <option value="middle">Middle</option>
+      <option value="end">End</option>
+    </select>
+  </div>
+  <div class="fp-btns">
+    <button onclick="applyFontChanges()">Apply</button>
+    <button onclick="closeFontPopup()">Close</button>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+/* ═══════════ STATE ═══════════ */
+let currentMode = 'none';
+let plainFmt    = '';
+let fmtLines    = [];
+let elLineNums  = [];
+let aspectLock  = true;
+let origAspect  = 1;
+let undoStack   = [];
+
+/* ═══════════ UTILS ═══════════ */
+const esc = s => String(s)
+  .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+  .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+function debounce(fn,ms){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),ms)}}
+
+function flash(id,label,ms=1300){
+  const b=document.getElementById(id);if(!b)return;
+  const o=b.textContent;b.textContent=label;setTimeout(()=>b.textContent=o,ms);
+}
+
+function reEsc(s){return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}
+
+/* ═══════════ UNDO ═══════════ */
+function saveUndo(){
+  const code=document.getElementById('raw-input').value;
+  if(!code)return;
+  if(undoStack.length&&undoStack[undoStack.length-1]===code)return;
+  undoStack.push(code);
+  if(undoStack.length>100)undoStack.shift();
+  _syncUndoBtn();
+}
+function undo(){
+  if(!undoStack.length)return;
+  const prev=undoStack.pop();
+  document.getElementById('raw-input').value=prev;
+  process(prev);
+  _syncUndoBtn();
+}
+function _syncUndoBtn(){
+  const btn=document.getElementById('btn-undo');
+  if(btn)btn.disabled=undoStack.length===0;
+}
+
+/* ═══════════ TOKENISER ═══════════ */
+function tokenize(text){
+  const toks=[];let i=0;
+  while(i<text.length){
+    if(text[i]!=='<'){
+      const e=text.indexOf('<',i),ep=e<0?text.length:e;
+      const v=text.slice(i,ep);
+      if(v.trim())toks.push({type:'text',value:v.trim()});
+      i=ep;continue;
+    }
+    if(text.startsWith('<!--',i)){
+      const e=text.indexOf('-->',i),ep=e<0?text.length:e+3;
+      toks.push({type:'comment',value:text.slice(i,ep)});i=ep;continue;
+    }
+    if(text.startsWith('<![CDATA[',i)){
+      const e=text.indexOf(']]>',i),ep=e<0?text.length:e+3;
+      toks.push({type:'cdata',value:text.slice(i,ep)});i=ep;continue;
+    }
+    if(text.startsWith('<?',i)){
+      const e=text.indexOf('?>',i),ep=e<0?text.length:e+2;
+      toks.push({type:'pi',value:text.slice(i,ep)});i=ep;continue;
+    }
+    if(text.startsWith('<!',i)){
+      const e=text.indexOf('>',i),ep=e<0?text.length:e+1;
+      toks.push({type:'doctype',value:text.slice(i,ep)});i=ep;continue;
+    }
+    if(i+1<text.length&&text[i+1]==='/'){
+      const e=text.indexOf('>',i),ep=e<0?text.length:e+1;
+      const raw=text.slice(i,ep);
+      const m=raw.match(/^<\/([a-zA-Z][a-zA-Z0-9:.-]*)/);
+      toks.push({type:'close',name:m?m[1]:'',value:raw});i=ep;continue;
+    }
+    let j=i+1,inS=null;
+    while(j<text.length){
+      const c=text[j];
+      if(inS){if(c===inS)inS=null}
+      else if(c==='"'||c==="'"){inS=c}
+      else if(c==='>'){break}
+      j++;
+    }
+    const raw=text.slice(i,j+1);
+    const sc=/\s*\/>$/.test(raw);
+    const m=raw.match(/^<([a-zA-Z][a-zA-Z0-9:.-]*)/);
+    toks.push({type:'open',name:m?m[1]:'',attrs:parseAttrs(raw,m?m[1]:''),selfClosing:sc,value:raw});
+    i=j+1;
+  }
+  return toks;
+}
+
+function parseAttrs(raw,name){
+  const attrs=[];
+  const inner=raw.slice(1+name.length).replace(/\s*\/?>$/,'');
+  const re=/\s+([a-zA-Z_:][a-zA-Z0-9_:.-]*)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>\/']*)))?/g;
+  let m;
+  while((m=re.exec(inner))!==null){
+    let val=null,q=null;
+    if(m[2]!==undefined){val=m[2];q='"'}
+    else if(m[3]!==undefined){val=m[3];q="'"}
+    else if(m[4]!==undefined){val=m[4];q=''}
+    attrs.push({name:m[1],value:val,quote:q});
+  }
+  return attrs;
+}
+
+/* ═══════════ FORMATTER ═══════════ */
+const VOID=new Set(['area','base','br','col','embed','hr','img','input',
+                    'link','meta','param','source','track','wbr']);
+
+function format(tokens){
+  const lines=[],elLines=[],plainArr=[];
+  let ln=1,indent=0,ei=0;
+  for(const t of tokens){
+    const sp='  '.repeat(indent);
+    switch(t.type){
+      case 'open':{
+        elLines.push(ln);
+        const plain=sp+openPlain(t);
+        lines.push({html:sp+openHtml(t),plainText:plain,lineNum:ln,elIdx:ei});
+        plainArr.push(plain);ei++;ln++;
+        if(!t.selfClosing&&!VOID.has(t.name.toLowerCase()))indent++;
+        break;
+      }
+      case 'close':{
+        indent=Math.max(0,indent-1);
+        const sp2='  '.repeat(indent);
+        const plain=sp2+`</${t.name}>`;
+        lines.push({html:sp2+`<span class="tok-p">&lt;/</span><span class="tok-tag">${esc(t.name)}</span><span class="tok-p">&gt;</span>`,
+          plainText:plain,lineNum:ln,elIdx:-1});
+        plainArr.push(plain);ln++;break;
+      }
+      case 'text':{
+        const plain=sp+t.value;
+        lines.push({html:sp+`<span class="tok-txt">${esc(t.value)}</span>`,
+          plainText:plain,lineNum:ln,elIdx:-1});
+        plainArr.push(plain);ln++;break;
+      }
+      case 'comment':{
+        const plain=sp+t.value;
+        lines.push({html:sp+`<span class="tok-cmt">${esc(t.value)}</span>`,
+          plainText:plain,lineNum:ln,elIdx:-1});
+        plainArr.push(plain);ln++;break;
+      }
+      case 'doctype':case 'pi':{
+        const plain=t.value;
+        lines.push({html:`<span class="tok-dt">${esc(t.value)}</span>`,
+          plainText:plain,lineNum:ln,elIdx:-1});
+        plainArr.push(plain);ln++;break;
+      }
+      case 'cdata':{
+        const plain=sp+t.value;
+        lines.push({html:sp+`<span class="tok-cmt">${esc(t.value)}</span>`,
+          plainText:plain,lineNum:ln,elIdx:-1});
+        plainArr.push(plain);ln++;break;
+      }
+    }
+  }
+  return{lines,elLines,plain:plainArr.join('\n')};
+}
+
+function openHtml(t){
+  let h=`<span class="tok-p">&lt;</span><span class="tok-tag">${esc(t.name)}</span>`;
+  for(const a of t.attrs){
+    h+=` <span class="tok-attr">${esc(a.name)}</span>`;
+    if(a.value!==null){
+      const q=esc(a.quote||'"');
+      h+=`<span class="tok-p">=</span><span class="tok-str">${q}${esc(a.value)}${q}</span>`;
+    }
+  }
+  h+=t.selfClosing?`<span class="tok-p"> /&gt;</span>`:`<span class="tok-p">&gt;</span>`;
+  return h;
+}
+
+function openPlain(t){
+  let s=`<${t.name}`;
+  for(const a of t.attrs){
+    s+=` ${a.name}`;
+    if(a.value!==null){const q=a.quote||'"';s+=`=${q}${a.value}${q}`}
+  }
+  return s+(t.selfClosing?' />':'>');
+}
+
+/* ═══════════ INJECT data-fline ═══════════ */
+function injectFline(text,elLines){
+  const out=[];let i=0,ei=0;
+  while(i<text.length){
+    if(text[i]!=='<'){out.push(text[i++]);continue}
+    if(text.startsWith('<!--',i)){const e=text.indexOf('-->',i),ep=e<0?text.length:e+3;out.push(text.slice(i,ep));i=ep;continue}
+    if(text.startsWith('<![CDATA[',i)){const e=text.indexOf(']]>',i),ep=e<0?text.length:e+3;out.push(text.slice(i,ep));i=ep;continue}
+    if(text.startsWith('<?',i)){const e=text.indexOf('?>',i),ep=e<0?text.length:e+2;out.push(text.slice(i,ep));i=ep;continue}
+    if(text.startsWith('<!',i)){const e=text.indexOf('>',i),ep=e<0?text.length:e+1;out.push(text.slice(i,ep));i=ep;continue}
+    if(i+1<text.length&&text[i+1]==='/'){const e=text.indexOf('>',i),ep=e<0?text.length:e+1;out.push(text.slice(i,ep));i=ep;continue}
+    let j=i+1,inS=null;
+    while(j<text.length){
+      const c=text[j];
+      if(inS){if(c===inS)inS=null}else if(c==='"'||c==="'"){inS=c}else if(c==='>'){break}
+      j++;
+    }
+    const raw=text.slice(i,j+1);
+    const sc=/\s*\/>$/.test(raw);
+    const ln=elLines[ei]!==undefined?elLines[ei]:0;
+    ei++;
+    const clean=raw.replace(/\s+data-fline="[^"]*"/,'');
+    if(sc)out.push(clean.replace(/\s*\/>$/,` data-fline="${ln}"/>`));
+    else  out.push(clean.slice(0,-1)+` data-fline="${ln}">`);
+    i=j+1;
+  }
+  return out.join('');
+}
+
+/* ═══════════ MAIN PROCESS ═══════════ */
+function process(raw){
+  raw=(raw||'').trim();
+  if(!raw){
+    setMode('none');
+    document.getElementById('fmt-code').innerHTML='<div class="empty-hint">Formatted code will appear here</div>';
+    document.getElementById('preview').innerHTML='';
+    document.getElementById('el-info').textContent='Hover over elements to inspect';
+    document.getElementById('stat-el').textContent='';
+    document.getElementById('stat-ln').textContent='';
+    return;
+  }
+  const mode=/^<\?xml|^<svg[\s>\/]/i.test(raw)||
+             (raw.includes('<svg')&&!/<html[\s>]/i.test(raw)&&!/<body[\s>]/i.test(raw))
+             ?'SVG':'HTML';
+  setMode(mode);
+
+  let tokens;
+  try{tokens=tokenize(raw);}catch(e){setMode('ERR');return;}
+
+  const{lines,elLines,plain}=format(tokens);
+  fmtLines=lines;elLineNums=elLines;plainFmt=plain;
+
+  renderCode(lines);
+  document.getElementById('stat-el').textContent=`${elLines.length} elements`;
+  document.getElementById('stat-ln').textContent=`${lines.length} lines`;
+
+  const processed=injectFline(raw,elLines);
+  renderPreview(processed,mode);
+
+  if(mode==='SVG')extractSVGDims(raw);
+}
+
+/* ═══════════ RENDER CODE ═══════════ */
+function renderCode(lines){
+  const wrap=document.getElementById('fmt-code');
+  const frag=document.createDocumentFragment();
+  for(const line of lines){
+    const row=document.createElement('div');
+    row.className='code-line';row.dataset.ln=line.lineNum;
+    const num=document.createElement('span');num.className='ln';num.textContent=line.lineNum;
+    const content=document.createElement('span');content.className='lc';content.innerHTML=line.html;
+    const hint=document.createElement('span');hint.className='edit-hint';hint.textContent='✎';
+    row.appendChild(num);row.appendChild(content);row.appendChild(hint);
+    frag.appendChild(row);
+  }
+  wrap.innerHTML='';wrap.appendChild(frag);
+}
+
+/* ═══════════ INLINE EDITING ═══════════ */
+document.getElementById('fmt-code').addEventListener('click',e=>{
+  const row=e.target.closest('.code-line[data-ln]');
+  if(!row)return;
+  if(row.classList.contains('editing'))return; // already editing — let browser handle cursor
+  const active=document.querySelector('.code-line.editing');
+  if(active&&active!==row)cancelLineEdit(active);
+  const ln=parseInt(row.dataset.ln,10);
+  highlightLine(ln);highlightPreviewEl(ln);
+  enterLineEdit(row,ln);
+});
+
+function enterLineEdit(row,ln){
+  const lineData=fmtLines.find(l=>l.lineNum===ln);if(!lineData)return;
+  row.classList.add('editing');
+  const content=row.querySelector('.lc');
+
+  content.textContent=lineData.plainText;
+  content.contentEditable='true';
+  content.setAttribute('spellcheck','false');
+  content.focus();
+
+  // place cursor at end on first activation
+  const range=document.createRange();
+  range.selectNodeContents(content);range.collapse(false);
+  const sel=window.getSelection();sel.removeAllRanges();sel.addRange(range);
+
+  let done=false;
+
+  function commit(){
+    if(done)return;done=true;
+    content.contentEditable='false';
+    row.classList.remove('editing');
+    delete row._editCancel;
+    saveUndo();
+    const val=content.textContent;
+    const arr=plainFmt.split('\n');arr[ln-1]=val;
+    const newCode=arr.join('\n');
+    document.getElementById('raw-input').value=newCode;
+    process(newCode);setTimeout(()=>highlightLine(ln),30);
+  }
+  function cancel(){
+    if(done)return;done=true;
+    content.contentEditable='false';
+    row.classList.remove('editing');
+    delete row._editCancel;
+    content.innerHTML=lineData.html;
+    highlightLine(ln);
+  }
+
+  // expose cancel so external callers can properly set done=true
+  row._editCancel=cancel;
+
+  content.addEventListener('keydown',e=>{
+    if(e.key==='Enter'){e.preventDefault();commit();}
+    else if(e.key==='Escape'){e.preventDefault();cancel();}
+    else if(e.key==='Tab'){
+      e.preventDefault();const delta=e.shiftKey?-1:1;commit();
+      setTimeout(()=>{
+        const nextRow=document.querySelector(`.code-line[data-ln="${ln+delta}"]`);
+        if(nextRow){highlightLine(ln+delta);enterLineEdit(nextRow,ln+delta);}
+      },50);
+    }
+    e.stopPropagation();
+  });
+  content.addEventListener('blur',()=>{setTimeout(()=>{if(!done)commit();},200);});
+}
+
+function cancelLineEdit(row){
+  // use the exposed cancel fn to ensure done=true is set in the closure
+  if(row._editCancel){row._editCancel();return;}
+  // fallback (shouldn't normally be needed)
+  const ln=parseInt(row.dataset.ln,10);
+  const lineData=fmtLines.find(l=>l.lineNum===ln);
+  row.classList.remove('editing');
+  const c=row.querySelector('.lc');
+  if(c){c.contentEditable='false';if(lineData)c.innerHTML=lineData.html;}
+}
+
+/* ═══════════ HIGHLIGHT ═══════════ */
+function highlightLine(ln){
+  document.querySelectorAll('.code-line.hl').forEach(r=>r.classList.remove('hl'));
+  const row=document.querySelector(`.code-line[data-ln="${ln}"]`);if(!row)return;
+  row.classList.add('hl');row.scrollIntoView({behavior:'smooth',block:'center'});
+}
+function highlightPreviewEl(ln){
+  document.querySelectorAll('#preview .psel').forEach(x=>x.classList.remove('psel'));
+  const pel=document.querySelector(`#preview [data-fline="${ln}"]`);if(!pel)return;
+  pel.classList.add('psel');setTimeout(()=>pel.classList.remove('psel'),1600);
+}
+
+/* ═══════════ RENDER PREVIEW ═══════════ */
+function renderPreview(text,mode){
+  const wrap=document.getElementById('preview');
+  const safe=text.replace(/<script[\s\S]*?<\/script>/gi,'');
+  if(mode==='SVG'){
+    wrap.innerHTML=safe;
+    const svg=wrap.querySelector('svg');
+    if(svg){
+      if(!svg.getAttribute('viewBox')){
+        const w=parseFloat(svg.getAttribute('width')||'0');
+        const h=parseFloat(svg.getAttribute('height')||'0');
+        if(w&&h)svg.setAttribute('viewBox',`0 0 ${w} ${h}`);
+      }
+      svg.style.maxWidth='100%';svg.style.height='auto';
+      // wrap in dotted boundary showing region occupied
+      const boundary=document.createElement('div');
+      boundary.className='svg-boundary';
+      svg.parentNode.insertBefore(boundary,svg);
+      boundary.appendChild(svg);
+    }
+  } else {
+    wrap.innerHTML=`<div class="hr-wrap">${safe}</div>`;
+  }
+  wrap.onmouseover=onPreviewOver;
+  wrap.onmouseout=onPreviewOut;
+}
+
+/* ═══════════ DRAG ═══════════ */
+let dragState=null;
+
+function getSvgCoords(svg,cx,cy){
+  const pt=svg.createSVGPoint();pt.x=cx;pt.y=cy;
+  try{return pt.matrixTransform(svg.getScreenCTM().inverse());}
+  catch(e){return{x:cx,y:cy};}
+}
+
+document.getElementById('preview').addEventListener('mousedown',e=>{
+  if(currentMode!=='SVG')return;
+  const preview=document.getElementById('preview');
+  const el=findFlineEl(e.target,preview);if(!el)return;
+  const svg=preview.querySelector('svg');if(!svg)return;
+  const fline=parseInt(el.dataset.fline,10);
+  const svgPt=getSvgCoords(svg,e.clientX,e.clientY);
+  dragState={el,fline,svg,
+    startCX:e.clientX,startCY:e.clientY,
+    startSX:svgPt.x,startSY:svgPt.y,moved:false};
+  e.preventDefault();
+});
+
+document.addEventListener('mousemove',e=>{
+  if(!dragState)return;
+  const dx=e.clientX-dragState.startCX;
+  const dy=e.clientY-dragState.startCY;
+  if(Math.abs(dx)>3||Math.abs(dy)>3){
+    dragState.moved=true;
+    dragState.el.classList.add('dragging');
+    dragState.el.style.transform=`translate(${dx}px,${dy}px)`;
+  }
+});
+
+document.addEventListener('mouseup',e=>{
+  if(!dragState)return;
+  const ds=dragState;dragState=null;
+  ds.el.style.transform='';
+  ds.el.classList.remove('dragging');
+
+  if(!ds.moved){
+    // plain click
+    highlightLine(ds.fline);
+    ds.el.classList.add('psel');
+    setTimeout(()=>ds.el.classList.remove('psel'),1600);
+    const tag=ds.el.tagName.toLowerCase();
+    if(tag==='text'||tag==='tspan')openFontPopup(ds.el,ds.fline,e.clientX,e.clientY);
+    return;
+  }
+
+  const endPt=getSvgCoords(ds.svg,e.clientX,e.clientY);
+  const dx=endPt.x-ds.startSX;
+  const dy=endPt.y-ds.startSY;
+  applyDragToCode(ds.fline,ds.el,dx,dy);
+});
+
+function applyDragToCode(fline,el,dx,dy){
+  const tag=el.tagName.toLowerCase();
+  const arr=plainFmt.split('\n');
+  let line=arr[fline-1];if(!line)return;
+  dx=Math.round(dx*10)/10;dy=Math.round(dy*10)/10;
+  const prev=line;
+
+  if(tag==='circle'||tag==='ellipse'){
+    line=shiftAttr(line,'cx',dx);line=shiftAttr(line,'cy',dy);
+  } else if(tag==='line'){
+    line=shiftAttr(line,'x1',dx);line=shiftAttr(line,'y1',dy);
+    line=shiftAttr(line,'x2',dx);line=shiftAttr(line,'y2',dy);
+  } else if(tag==='polygon'||tag==='polyline'){
+    line=shiftPoints(line,dx,dy);
+  } else if(tag==='rect'||tag==='image'||tag==='text'||tag==='tspan'||
+            tag==='use'||tag==='foreignObject'){
+    line=shiftAttr(line,'x',dx);line=shiftAttr(line,'y',dy);
+  } else {
+    line=addTranslate(line,dx,dy);
+  }
+  if(line===prev)line=addTranslate(line,dx,dy);
+
+  arr[fline-1]=line;
+  const newCode=arr.join('\n');
+  pushCode(newCode);
+  setTimeout(()=>highlightLine(fline),30);
+}
+
+function shiftAttr(line,attr,delta){
+  const re=new RegExp(`(\\b${attr}\\s*=\\s*)(["\']?)(-?[\\d.]+)\\2`,'i');
+  return line.replace(re,(m,pre,q,val)=>{
+    const nv=Math.round((parseFloat(val)+delta)*10)/10;
+    return `${pre}${q}${nv}${q}`;
+  });
+}
+
+function shiftPoints(line,dx,dy){
+  return line.replace(/points=["']([^"']*)["']/,(m,pts)=>{
+    const nums=pts.trim().split(/[\s,]+/);
+    const shifted=nums.map((v,i)=>Math.round((parseFloat(v)+(i%2===0?dx:dy))*10)/10);
+    const pairs=[];
+    for(let i=0;i<shifted.length;i+=2)pairs.push(`${shifted[i]},${shifted[i+1]??''}`);
+    return `points="${pairs.join(' ')}"`;
+  });
+}
+
+function addTranslate(line,dx,dy){
+  const tRe=/(\btransform\s*=\s*)["']([^"']*)["']/;
+  const m=line.match(tRe);
+  if(m){
+    let ex=m[2];
+    const tRe2=/translate\s*\(\s*(-?[\d.]+)(?:\s*[,\s]\s*(-?[\d.]+))?\s*\)/;
+    const tm=ex.match(tRe2);
+    if(tm){
+      const tx=Math.round((parseFloat(tm[1]||0)+dx)*10)/10;
+      const ty=Math.round((parseFloat(tm[2]||0)+dy)*10)/10;
+      ex=ex.replace(tRe2,`translate(${tx},${ty})`);
+    } else {
+      ex=`translate(${Math.round(dx*10)/10},${Math.round(dy*10)/10}) ${ex}`;
+    }
+    return line.replace(tRe,`$1"${ex}"`);
+  }
+  const tx=Math.round(dx*10)/10,ty=Math.round(dy*10)/10;
+  return line.replace(/(\s*\/?>)$/,` transform="translate(${tx},${ty})"$1`);
+}
+
+/* ═══════════ FONT POPUP ═══════════ */
+let fontPopupLine=null;
+
+function openFontPopup(el,fline,cx,cy){
+  const popup=document.getElementById('font-popup');
+  fontPopupLine=fline;
+
+  const fs=el.getAttribute('font-size')||getComputedStyle(el).fontSize.replace('px','')||'12';
+  const ff=el.getAttribute('font-family')||getComputedStyle(el).fontFamily||'sans-serif';
+  const fw=el.getAttribute('font-weight')||getComputedStyle(el).fontWeight||'normal';
+  const fst=el.getAttribute('font-style')||getComputedStyle(el).fontStyle||'normal';
+  const ta=el.getAttribute('text-anchor')||'start';
+
+  document.getElementById('fp-size').value=parseFloat(fs)||12;
+  document.getElementById('fp-family').value=ff.replace(/['"]/g,'').trim();
+  const wSel=document.getElementById('fp-weight');
+  wSel.value=fw==='400'?'normal':fw==='700'?'bold':fw;
+  if(!wSel.value)wSel.value='normal';
+  const sSel=document.getElementById('fp-style');
+  sSel.value=fst;if(!sSel.value)sSel.value='normal';
+  const aSel=document.getElementById('fp-anchor');
+  aSel.value=ta;if(!aSel.value)aSel.value='start';
+
+  const pw=220,ph=230;
+  let left=cx+12,top=cy+8;
+  if(left+pw>window.innerWidth)left=cx-pw-8;
+  if(top+ph>window.innerHeight)top=cy-ph-8;
+  popup.style.left=left+'px';popup.style.top=top+'px';
+  popup.style.display='block';
+}
+
+function closeFontPopup(){
+  document.getElementById('font-popup').style.display='none';
+  fontPopupLine=null;
+}
+
+function applyFontChanges(){
+  if(!fontPopupLine)return;
+  const size=document.getElementById('fp-size').value;
+  const family=document.getElementById('fp-family').value.trim();
+  const weight=document.getElementById('fp-weight').value;
+  const style=document.getElementById('fp-style').value;
+  const anchor=document.getElementById('fp-anchor').value;
+
+  const arr=plainFmt.split('\n');
+  let line=arr[fontPopupLine-1];if(!line)return;
+
+  if(size) line=setAttr(line,'font-size',size);
+  if(family) line=setAttr(line,'font-family',family);
+  line=setAttr(line,'font-weight',weight);
+  line=setAttr(line,'font-style',style);
+  line=setAttr(line,'text-anchor',anchor);
+
+  arr[fontPopupLine-1]=line;
+  const newCode=arr.join('\n');
+  const savedLine=fontPopupLine;
+  pushCode(newCode);
+  closeFontPopup();
+  setTimeout(()=>highlightLine(savedLine),30);
+}
+
+function setAttr(line,attr,value){
+  const attrEsc=attr.replace(/-/g,'\\-');
+  const re=new RegExp(`(\\b${attrEsc}\\s*=\\s*)["']([^"']*)["']`);
+  if(re.test(line))return line.replace(re,`$1"${value}"`);
+  return line.replace(/(\s*\/?>)$/,` ${attr}="${value}"$1`);
+}
+
+/* close popup on outside click or Escape */
+document.addEventListener('mousedown',e=>{
+  const popup=document.getElementById('font-popup');
+  if(popup.style.display!=='none'&&!popup.contains(e.target))closeFontPopup();
+});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    const popup=document.getElementById('font-popup');
+    if(popup.style.display!=='none')closeFontPopup();
+  }
+  if((e.ctrlKey||e.metaKey)&&e.key==='z'&&!e.shiftKey){
+    // let textarea and contenteditable handle their own native undo
+    const ae=document.activeElement;
+    if(ae&&(ae.id==='raw-input'||ae.contentEditable==='true'))return;
+    e.preventDefault();undo();
+  }
+});
+
+/* ═══════════ PREVIEW EVENTS ═══════════ */
+function findFlineEl(target,stop){
+  let el=target;
+  while(el&&el!==stop){
+    if(el.dataset&&el.dataset.fline)return el;
+    el=el.parentElement;
+  }
+  return null;
+}
+
+function onPreviewOver(e){
+  const el=findFlineEl(e.target,this);
+  if(!el){document.getElementById('el-info').textContent='Hover over elements to inspect';return}
+  const tag=el.tagName.toLowerCase();
+  const attrs=Array.from(el.attributes).filter(a=>a.name!=='data-fline');
+  let html=`<span class="ei-tag">&lt;${esc(tag)}</span>`;
+  attrs.slice(0,7).forEach(a=>{
+    html+=` <span class="ei-attr">${esc(a.name)}</span>`;
+    if(a.value)html+=`=<span class="ei-val">"${esc(a.value)}"</span>`;
+  });
+  if(attrs.length>7)html+=` <span style="color:#aaa">…+${attrs.length-7}</span>`;
+  html+=`<span class="ei-tag">&gt;</span>  <span style="color:#aaa">line ${el.dataset.fline}</span>`;
+  document.getElementById('el-info').innerHTML=html;
+}
+function onPreviewOut(){
+  document.getElementById('el-info').textContent='Hover over elements to inspect';
+}
+
+/* ═══════════ MODE BADGE ═══════════ */
+function setMode(m){
+  currentMode=m;
+  const b=document.getElementById('mode-badge');
+  b.className='badge '+m;b.textContent=m==='none'?'—':m;
+}
+
+/* ═══════════ SVG DIM HELPERS ═══════════ */
+function extractSVGDims(raw){
+  const svgMatch=raw.match(/<svg\b((?:[^>"']|"[^"]*"|'[^']*')*?)>/i);if(!svgMatch)return;
+  const tag=svgMatch[1];
+  const wm=tag.match(/\bwidth=["']?(\d+\.?\d*)["']?/);
+  const hm=tag.match(/\bheight=["']?(\d+\.?\d*)["']?/);
+  const vb=tag.match(/viewBox=["'](\S+)\s+(\S+)\s+(\S+)\s+(\S+)["']/);
+  let w=null,h=null;
+  if(wm)w=parseFloat(wm[1]);else if(vb)w=parseFloat(vb[3]);
+  if(hm)h=parseFloat(hm[1]);else if(vb)h=parseFloat(vb[4]);
+  if(w!==null)document.getElementById('gp-w').value=w;
+  if(h!==null)document.getElementById('gp-h').value=h;
+  if(w&&h)origAspect=w/h;
+}
+
+function setSVGRootAttrs(code,updates){
+  const re=/<svg\b((?:[^>"']|"[^"]*"|'[^']*')*?)>/i;
+  const m=code.match(re);if(!m)return code;
+  let inner=m[1];
+  for(const[attr,val]of Object.entries(updates)){
+    const dq=new RegExp(`(\\b${attr}\\s*=\\s*)"[^"]*"`);
+    const sq=new RegExp(`(\\b${attr}\\s*=\\s*)'[^']*'`);
+    if(dq.test(inner))      inner=inner.replace(dq,`$1"${val}"`);
+    else if(sq.test(inner)) inner=inner.replace(sq,`$1"${val}"`);
+    else                    inner=` ${attr}="${val}"`+inner;
+  }
+  return code.slice(0,m.index)+'<svg'+inner+'>'+code.slice(m.index+m[0].length);
+}
+
+/* ═══════════ TOOLBAR ACTIONS ═══════════ */
+function toggleLock(){
+  aspectLock=!aspectLock;
+  const btn=document.getElementById('lock-btn');
+  btn.classList.toggle('on',aspectLock);
+  btn.title=aspectLock?'Aspect ratio locked':'Aspect ratio unlocked';
+}
+function onWChange(val){
+  if(!aspectLock)return;const w=parseFloat(val);
+  if(isNaN(w)||w<=0||!origAspect)return;
+  document.getElementById('gp-h').value=Math.round(w/origAspect);
+}
+function onHChange(val){
+  if(!aspectLock)return;const h=parseFloat(val);
+  if(isNaN(h)||h<=0||!origAspect)return;
+  document.getElementById('gp-w').value=Math.round(h*origAspect);
+}
+
+function applyResize(){
+  const newW=parseFloat(document.getElementById('gp-w').value);
+  const newH=parseFloat(document.getElementById('gp-h').value);
+  if(isNaN(newW)||isNaN(newH)||newW<=0||newH<=0)return;
+  let code=document.getElementById('raw-input').value;
+  code=setSVGRootAttrs(code,{width:newW,height:newH});
+  pushCode(code);origAspect=newW/newH;
+}
+
+function applyScale(){
+  const f=parseFloat(document.getElementById('gp-scale').value);if(isNaN(f)||f<=0)return;
+  const raw=document.getElementById('raw-input').value;
+  const svgMatch=raw.match(/<svg\b((?:[^>"']|"[^"]*"|'[^']*')*?)>/i);if(!svgMatch)return;
+  const tag=svgMatch[1];
+  const wm=tag.match(/\bwidth=["']?(\d+\.?\d*)["']?/);
+  const hm=tag.match(/\bheight=["']?(\d+\.?\d*)["']?/);
+  const updates={};
+  if(wm)updates.width=Math.round(parseFloat(wm[1])*f);
+  if(hm)updates.height=Math.round(parseFloat(hm[1])*f);
+  if(!Object.keys(updates).length)return;
+  pushCode(setSVGRootAttrs(raw,updates));
+}
+
+function trimWhitespace(){
+  const svg=document.querySelector('#preview svg');if(!svg)return;
+  try{
+    let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
+    svg.querySelectorAll('*').forEach(el=>{
+      try{
+        if(el.closest('defs'))return;
+        const bb=el.getBBox();
+        if(bb.width>0||bb.height>0){
+          minX=Math.min(minX,bb.x);minY=Math.min(minY,bb.y);
+          maxX=Math.max(maxX,bb.x+bb.width);maxY=Math.max(maxY,bb.y+bb.height);
+        }
+      }catch(ex){}
+    });
+    if(minX===Infinity)return;
+    const pad=4;
+    const vx=Math.floor(minX-pad),vy=Math.floor(minY-pad);
+    const vw=Math.ceil(maxX-minX+pad*2),vh=Math.ceil(maxY-minY+pad*2);
+    let code=document.getElementById('raw-input').value;
+    code=setSVGRootAttrs(code,{viewBox:`${vx} ${vy} ${vw} ${vh}`});
+    pushCode(code);
+  }catch(ex){console.warn('Trim failed',ex);}
+}
+
+function applyReplace(){
+  const find=document.getElementById('gp-find').value;
+  const repl=document.getElementById('gp-repl').value;
+  const msg=document.getElementById('repl-msg');
+  if(!find){msg.textContent='Nothing to find';setTimeout(()=>msg.textContent='',1500);return;}
+  let code=document.getElementById('raw-input').value;
+  const count=(code.match(new RegExp(reEsc(find),'g'))||[]).length;
+  if(!count){
+    msg.style.color='#c04040';msg.textContent='Not found';
+    setTimeout(()=>{msg.textContent='';msg.style.color='';},1800);return;
+  }
+  code=code.split(find).join(repl);
+  msg.style.color='var(--tok-tag)';msg.textContent=`Replaced ${count}`;
+  setTimeout(()=>{msg.textContent='';msg.style.color='';},2000);
+  pushCode(code);
+}
+
+function pushCode(code){saveUndo();document.getElementById('raw-input').value=code;process(code);}
+
+/* ═══════════ UI ACTIONS ═══════════ */
+function clearInput(){undoStack=[];_syncUndoBtn();document.getElementById('raw-input').value='';process('');}
+function copyInput(){navigator.clipboard.writeText(document.getElementById('raw-input').value).then(()=>flash('btn-ci','✓ Copied'));}
+function copyFmt(){navigator.clipboard.writeText(plainFmt).then(()=>flash('btn-cf','✓ Copied'));}
+function fitSVG(){const s=document.querySelector('#preview svg');if(s){s.style.maxWidth='100%';s.style.width='';s.style.height='auto'}}
+function resetSVG(){const s=document.querySelector('#preview svg');if(s){s.style.maxWidth='';s.style.width='';s.style.height=''}}
+
+/* ═══════════ SAMPLES ═══════════ */
+const SAMPLES={
+svg:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+  <defs>
+    <radialGradient id="rg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#4ec9b0"/>
+      <stop offset="100%" stop-color="#1a1a2e"/>
+    </radialGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="240" height="240" fill="#12121f"/>
+  <circle cx="120" cy="120" r="100" fill="url(#rg)" opacity="0.85"/>
+  <circle cx="120" cy="120" r="70" fill="none" stroke="#f0c040" stroke-width="1.5" stroke-dasharray="6 4"/>
+  <rect x="80" y="80" width="80" height="80" rx="10" fill="none" stroke="#9cdcfe" stroke-width="1.5"/>
+  <line x1="120" y1="20" x2="120" y2="220" stroke="rgba(240,192,64,.25)" stroke-width="1"/>
+  <line x1="20" y1="120" x2="220" y2="120" stroke="rgba(240,192,64,.25)" stroke-width="1"/>
+  <polygon points="120,85 133,110 160,114 140,133 145,160 120,148 95,160 100,133 80,114 107,110" fill="#f0c040" opacity="0.9" filter="url(#glow)"/>
+  <text x="120" y="195" text-anchor="middle" fill="#d4d4d4" font-size="11" font-family="sans-serif" letter-spacing="2">ANALYSER</text>
+</svg>`,
+
+html:`<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Sample Page</title>
+  </head>
+  <body>
+    <header>
+      <h1>Hello World</h1>
+      <nav>
+        <a href="#about">About</a>
+        <a href="#work">Work</a>
+        <a href="#contact">Contact</a>
+      </nav>
+    </header>
+    <main>
+      <section id="about">
+        <h2>About</h2>
+        <p>This is a sample HTML document for testing the SVG / HTML Analyser.</p>
+        <img src="" alt="placeholder" width="120" height="80">
+      </section>
+      <section id="work">
+        <h2>Work</h2>
+        <ul>
+          <li>Project A</li>
+          <li>Project B</li>
+        </ul>
+      </section>
+    </main>
+    <footer>
+      <p>Footer content here</p>
+    </footer>
+  </body>
+</html>`};
+
+function loadSample(t){undoStack=[];_syncUndoBtn();document.getElementById('raw-input').value=SAMPLES[t];process(SAMPLES[t]);}
+
+/* ═══════════ INIT ═══════════ */
+const dprocess=debounce(v=>process(v),350);
+document.getElementById('raw-input').addEventListener('input',e=>dprocess(e.target.value));
+loadSample('svg');
+</script>
+</body>
+</html>
