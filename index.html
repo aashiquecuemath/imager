@@ -1,0 +1,1854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vector Space</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<header>
+  <button id="btn-home" class="btn-home" style="display:none">← Vector Space</button>
+  <svg width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true">
+    <circle cx="13" cy="15" r="3" fill="rgba(255,255,255,.95)"/>
+    <line x1="13" y1="15" x2="13" y2="3" stroke="white" stroke-width="2" stroke-linecap="round"/>
+    <polygon points="13,0 10.5,5 15.5,5" fill="white"/>
+    <line x1="13" y1="15" x2="23" y2="21" stroke="rgba(255,255,255,.8)" stroke-width="2" stroke-linecap="round"/>
+    <polygon points="26,23.5 19.5,22 22,16.5" fill="rgba(255,255,255,.8)"/>
+    <line x1="13" y1="15" x2="3" y2="21" stroke="rgba(255,255,255,.55)" stroke-width="2" stroke-linecap="round"/>
+    <polygon points="0,23.5 4,16.5 6.5,22" fill="rgba(255,255,255,.55)"/>
+  </svg>
+  <h1>Vector Space</h1>
+  <span>SVG &amp; 3D creation tools</span>
+</header>
+
+<!-- ════════════════ HOME SCREEN ════════════════ -->
+<div id="home-screen" class="home-screen">
+  <div class="home-content">
+
+    <div class="home-logo">
+      <svg width="56" height="56" viewBox="0 0 56 56" fill="none" aria-hidden="true">
+        <circle cx="28" cy="32" r="5" fill="rgba(255,255,255,.95)"/>
+        <line x1="28" y1="32" x2="28" y2="8" stroke="white" stroke-width="3" stroke-linecap="round"/>
+        <polygon points="28,3 24,10 32,10" fill="white"/>
+        <line x1="28" y1="32" x2="48" y2="43" stroke="rgba(255,255,255,.8)" stroke-width="2.5" stroke-linecap="round"/>
+        <polygon points="52.5,46.5 44,44 47.5,37.5" fill="rgba(255,255,255,.8)"/>
+        <line x1="28" y1="32" x2="8" y2="43" stroke="rgba(255,255,255,.55)" stroke-width="2.5" stroke-linecap="round"/>
+        <polygon points="3.5,46.5 8.5,37.5 12,44" fill="rgba(255,255,255,.55)"/>
+      </svg>
+      <div class="home-logo-text">
+        <h2>Vector Space</h2>
+        <span class="home-logo-sub">Creation Studio</span>
+      </div>
+    </div>
+
+    <p class="home-subtitle">Five powerful tools for SVG design, animation &amp; 3D building</p>
+
+    <!-- Updates marquee — populated from updates.json, hidden when empty -->
+    <div id="home-marquee" class="home-marquee" style="display:none">
+      <span class="marquee-label">&#128227; Updates</span>
+      <div class="marquee-window">
+        <div class="marquee-track" id="marquee-track"></div>
+      </div>
+    </div>
+
+    <div class="home-tiles">
+
+      <button class="home-tile" data-tool="imager">
+        <div class="home-tile-icon">
+          <svg width="52" height="52" viewBox="0 0 52 52" fill="none" aria-hidden="true">
+            <rect x="4" y="19" width="44" height="16" rx="3" fill="var(--accent)" fill-opacity=".13" stroke="var(--accent)" stroke-width="1.8"/>
+            <line x1="4" y1="27" x2="48" y2="27" stroke="var(--accent)" stroke-width="1.8" stroke-dasharray="3 3"/>
+            <circle cx="26" cy="27" r="5.5" fill="var(--accent)"/>
+            <polygon points="8,23 4,27 8,31" fill="var(--accent)"/>
+            <polygon points="44,23 48,27 44,31" fill="var(--accent)"/>
+            <rect x="6" y="7" width="12" height="9" rx="2" fill="var(--accent2)" fill-opacity=".2" stroke="var(--accent2)" stroke-width="1.5"/>
+            <polygon points="34,5 26,18 42,18" fill="none" stroke="var(--accent2)" stroke-width="1.5"/>
+          </svg>
+        </div>
+        <h3>SVG Imager</h3>
+        <p>Shapes, number lines &amp; geometry diagrams</p>
+        <span class="tile-badge">Geometry</span>
+      </button>
+
+      <button class="home-tile" data-tool="grapher">
+        <div class="home-tile-icon">
+          <svg width="52" height="52" viewBox="0 0 52 52" fill="none" aria-hidden="true">
+            <line x1="8" y1="44" x2="8" y2="6" stroke="var(--accent2)" stroke-width="2" stroke-linecap="round"/>
+            <line x1="8" y1="44" x2="46" y2="44" stroke="var(--accent2)" stroke-width="2" stroke-linecap="round"/>
+            <polyline points="12,36 20,22 28,30 36,14 44,18" stroke="var(--accent)" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="12" cy="36" r="2.8" fill="var(--accent)"/>
+            <circle cx="20" cy="22" r="2.8" fill="var(--accent)"/>
+            <circle cx="28" cy="30" r="2.8" fill="var(--accent)"/>
+            <circle cx="36" cy="14" r="2.8" fill="var(--accent)"/>
+          </svg>
+        </div>
+        <h3>SVG Grapher</h3>
+        <p>Charts, plots &amp; function graphs</p>
+        <span class="tile-badge">Charts</span>
+      </button>
+
+      <button class="home-tile" data-tool="character">
+        <span class="wip-ribbon">WIP</span>
+        <div class="home-tile-icon">
+          <svg width="52" height="52" viewBox="200 240 680 680" aria-hidden="true">
+            <path d="M406 349C458 258 590 258 643 349L754 541C806 632 740 746 635 746H414C308 746 243 632 295 541Z" fill="#FFBA07" stroke="#995200" stroke-width="12"/>
+            <circle cx="474" cy="384" r="34" fill="white"/>
+            <circle cx="576" cy="384" r="34" fill="white"/>
+            <circle cx="482" cy="391" r="18" fill="#995200"/>
+            <circle cx="568" cy="391" r="18" fill="#995200"/>
+            <ellipse cx="472" cy="382" rx="54" ry="52" fill="none" stroke="#995200" stroke-width="10"/>
+            <ellipse cx="586" cy="382" rx="54" ry="52" fill="none" stroke="#995200" stroke-width="10"/>
+            <path d="M473 455H580C585 455 588 462 583 466C562 482 549 491 525 491C501 491 487 480 469 466C465 462 467 455 473 455Z" fill="#995200"/>
+          </svg>
+        </div>
+        <h3>SVG Character</h3>
+        <p>Jiggi &amp; character animations with speech bubbles</p>
+        <span class="tile-badge">Animation</span>
+      </button>
+
+      <button class="home-tile" data-tool="editor">
+        <div class="home-tile-icon">
+          <svg width="52" height="52" viewBox="0 0 52 52" fill="none" aria-hidden="true">
+            <polyline points="18,13 7,26 18,39" stroke="var(--accent4)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <polyline points="34,13 45,26 34,39" stroke="var(--accent4)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <line x1="30" y1="13" x2="22" y2="39" stroke="var(--accent4)" stroke-width="2.2" stroke-linecap="round" stroke-opacity=".6"/>
+            <circle cx="38" cy="36" r="7" fill="var(--accent4)" fill-opacity=".12" stroke="var(--accent4)" stroke-width="1.5"/>
+            <line x1="36" y1="36" x2="40" y2="36" stroke="var(--accent4)" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="38" y1="34" x2="38" y2="38" stroke="var(--accent4)" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <h3>SVG Editor</h3>
+        <p>Inspect, edit &amp; analyse SVG &amp; HTML code</p>
+        <span class="tile-badge">Code</span>
+      </button>
+
+      <button class="home-tile" data-tool="cube3d">
+        <div class="home-tile-icon">
+          <svg width="52" height="52" viewBox="0 0 52 52" fill="none" aria-hidden="true">
+            <polygon points="26,7 44,17 26,27 8,17" fill="var(--accent5)" fill-opacity=".14" stroke="var(--accent5)" stroke-width="1.7" stroke-linejoin="round"/>
+            <polygon points="8,17 26,27 26,47 8,37" fill="var(--accent5)" fill-opacity=".07" stroke="var(--accent5)" stroke-width="1.7" stroke-linejoin="round"/>
+            <polygon points="44,17 26,27 26,47 44,37" fill="var(--accent5)" fill-opacity=".11" stroke="var(--accent5)" stroke-width="1.7" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <h3>3D Builder</h3>
+        <p>Stack &amp; arrange 3D shapes on a grid canvas</p>
+        <span class="tile-badge">3D</span>
+      </button>
+
+    </div>
+  </div>
+</div>
+
+<div id="app-wrapper" class="app" style="display:none">
+
+<!-- ════════════════ LEFT CONTROLS ════════════════ -->
+<div class="controls-col">
+
+  <!-- ══════════ IMAGER TAB ══════════ -->
+  <div id="tab-imager" class="tab-content active">
+    <div class="controls">
+
+      <!-- ── Shape Selector ── -->
+      <div class="card col1">
+        <div class="card-title">Shape</div>
+        <div class="shape-selector">
+
+          <div>
+            <div class="shape-group-label">Fraction &amp; Number</div>
+            <div class="shape-grid">
+              <button class="shape-card active" data-shape="numberLine">
+                <svg width="44" height="24" viewBox="0 0 44 24" aria-hidden="true"><line x1="2" y1="12" x2="42" y2="12" stroke="currentColor" stroke-width="2"/><line x1="8" y1="8" x2="8" y2="16" stroke="currentColor" stroke-width="1.5"/><line x1="22" y1="8" x2="22" y2="16" stroke="currentColor" stroke-width="1.5"/><line x1="36" y1="8" x2="36" y2="16" stroke="currentColor" stroke-width="1.5"/><polygon points="40,9 44,12 40,15" fill="currentColor"/><polygon points="4,9 0,12 4,15" fill="currentColor"/></svg>
+                <span>Number Line</span>
+              </button>
+              <button class="shape-card" data-shape="fraction">
+                <svg width="32" height="28" viewBox="0 0 32 28" aria-hidden="true">
+                  <text x="16" y="10" font-family="Arial,sans-serif" font-size="10" font-weight="bold" fill="currentColor" text-anchor="middle">a</text>
+                  <line x1="5" y1="14" x2="27" y2="14" stroke="currentColor" stroke-width="1.5"/>
+                  <text x="16" y="26" font-family="Arial,sans-serif" font-size="10" font-weight="bold" fill="currentColor" text-anchor="middle">b</text>
+                </svg>
+                <span>Fraction</span>
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <div class="shape-group-label">Geometry</div>
+            <div class="shape-grid">
+              <button class="shape-card" data-shape="geometry">
+                <svg width="44" height="30" viewBox="0 0 44 30" aria-hidden="true">
+                  <rect x="2" y="8" width="18" height="12" fill="currentColor" fill-opacity=".18" stroke="currentColor" stroke-width="1.5"/>
+                  <circle cx="34" cy="15" r="8" fill="currentColor" fill-opacity=".18" stroke="currentColor" stroke-width="1.5"/>
+                  <polygon points="11,2 2,20 20,20" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".5"/>
+                </svg>
+                <span>Geometry</span>
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <div class="shape-group-label">Canvas</div>
+            <div class="shape-grid">
+              <button class="shape-card" data-shape="stage">
+                <svg width="44" height="36" viewBox="0 0 44 36" aria-hidden="true">
+                  <rect x="2" y="2" width="18" height="14" rx="2" fill="currentColor" fill-opacity=".18" stroke="currentColor" stroke-width="1.5"/>
+                  <rect x="24" y="2" width="18" height="14" rx="2" fill="currentColor" fill-opacity=".35" stroke="currentColor" stroke-width="1.5"/>
+                  <rect x="2" y="20" width="18" height="14" rx="2" fill="currentColor" fill-opacity=".35" stroke="currentColor" stroke-width="1.5"/>
+                  <rect x="24" y="20" width="18" height="14" rx="2" fill="currentColor" fill-opacity=".18" stroke="currentColor" stroke-width="1.5"/>
+                </svg>
+                <span>Multi-Shape Stage</span>
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <div class="shape-group-label">Lines &amp; Arrows</div>
+            <div class="shape-grid">
+              <button class="shape-card" data-shape="lineShape" data-line-preset="solid">
+                <svg width="44" height="16" viewBox="0 0 44 16" aria-hidden="true"><line x1="2" y1="8" x2="42" y2="8" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+                <span>Line</span>
+              </button>
+              <button class="shape-card" data-shape="lineShape" data-line-preset="dashed">
+                <svg width="44" height="16" viewBox="0 0 44 16" aria-hidden="true"><line x1="2" y1="8" x2="42" y2="8" stroke="currentColor" stroke-width="2.5" stroke-dasharray="8 5" stroke-linecap="round"/></svg>
+                <span>Dashed</span>
+              </button>
+              <button class="shape-card" data-shape="lineShape" data-line-preset="dotted">
+                <svg width="44" height="16" viewBox="0 0 44 16" aria-hidden="true"><line x1="2" y1="8" x2="42" y2="8" stroke="currentColor" stroke-width="2.5" stroke-dasharray="2 5" stroke-linecap="round"/></svg>
+                <span>Dotted</span>
+              </button>
+              <button class="shape-card" data-shape="lineShape" data-line-preset="arrow">
+                <svg width="44" height="16" viewBox="0 0 44 16" aria-hidden="true"><line x1="2" y1="8" x2="36" y2="8" stroke="currentColor" stroke-width="2"/><polygon points="34,5 42,8 34,11" fill="currentColor"/></svg>
+                <span>Arrow</span>
+              </button>
+              <button class="shape-card" data-shape="lineShape" data-line-preset="double-arrow">
+                <svg width="44" height="16" viewBox="0 0 44 16" aria-hidden="true"><line x1="8" y1="8" x2="36" y2="8" stroke="currentColor" stroke-width="2"/><polygon points="10,5 2,8 10,11" fill="currentColor"/><polygon points="34,5 42,8 34,11" fill="currentColor"/></svg>
+                <span>↔ Arrow</span>
+              </button>
+            </div>
+          </div>
+
+        </div><!-- /shape-selector -->
+      </div><!-- /Shape card -->
+
+      <!-- ── Color Scheme (collapsible) ── -->
+      <div class="card col1 collapsible collapsed">
+        <button class="card-title" aria-expanded="false">
+          Color Scheme
+          <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="card-body">
+          <div class="scheme-grid">
+            <button class="scheme-btn active" data-scheme="ocean"   style="background:linear-gradient(135deg,#006B6B,#0080C7)">Ocean</button>
+            <button class="scheme-btn"        data-scheme="forest"  style="background:linear-gradient(135deg,#1B5E20,#4CAF50)">Forest</button>
+            <button class="scheme-btn"        data-scheme="magenta" style="background:linear-gradient(135deg,#8B008B,#C71585)">Magenta</button>
+            <button class="scheme-btn"        data-scheme="golden"  style="background:linear-gradient(135deg,#9a6000,#FF8C00)">Golden</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Parameters ── -->
+      <div class="card col2">
+        <div class="card-title">Parameters</div>
+
+        <!-- Number Line -->
+        <div class="param-section visible" id="params-numberLine">
+
+          <!-- Multi-line count -->
+          <input type="hidden" id="nl-count" value="1">
+          <div class="count-row" style="margin-bottom:8px">
+            <label>Lines</label>
+            <div class="count-btns" id="nl-count-btns">
+              <button class="count-btn active" data-count="1">1</button>
+              <button class="count-btn" data-count="2">2</button>
+              <button class="count-btn" data-count="3">3</button>
+              <button class="count-btn" data-count="4">4</button>
+            </div>
+            <label for="nl-gap" style="margin-left:8px">Gap (px)</label>
+            <input type="number" id="nl-gap" value="30" min="0" max="200" style="width:60px">
+          </div>
+
+          <!-- Line Style -->
+          <div class="sub-group collapsible collapsed sub-group--nl-line">
+            <div class="sub-group-title">
+              Line Style
+              <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="sub-body">
+              <div class="row2">
+                <div><label for="nl-start">Start</label><input type="number" id="nl-start" value="0" step="1"></div>
+                <div><label for="nl-end">End</label><input type="number" id="nl-end" value="10" step="1"></div>
+              </div>
+              <label for="nl-length">Total length (px)</label>
+              <input type="number" id="nl-length" value="700" min="200" max="1400" step="50">
+              <div class="row2" style="margin-top:6px">
+                <div><label for="nl-color">Line color</label><input type="color" id="nl-color" value="#000000"></div>
+                <div><label for="nl-line-width">Thickness (px)</label><input type="number" id="nl-line-width" value="3" min="0.5" max="10" step="0.5"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Integer Labels -->
+          <div class="sub-group collapsible collapsed sub-group--nl-labels">
+            <div class="sub-group-title">
+              Integer Labels
+              <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="sub-body">
+              <div class="check-row"><input type="checkbox" id="nl-labels" checked><label for="nl-labels">Show integer labels</label></div>
+              <label for="nl-lbl-interval" style="margin-top:6px">Show every N integers</label>
+              <input type="number" id="nl-lbl-interval" value="1" min="1" max="20" step="1">
+              <label for="nl-lbl-specific">Specific values <span class="hint" style="display:inline">(comma-sep, e.g. 0,5,10)</span></label>
+              <input type="text" id="nl-lbl-specific" placeholder="blank = use interval above">
+              <div class="row3" style="margin-top:7px">
+                <div><label for="nl-int-lbl-size">Font size</label><input type="number" id="nl-int-lbl-size" value="14" min="8" max="36"></div>
+                <div><label for="nl-int-lbl-color">Color</label><input type="color" id="nl-int-lbl-color" value="#111111"></div>
+                <div><div class="check-row" style="margin-top:20px"><input type="checkbox" id="nl-int-lbl-bold" checked><label for="nl-int-lbl-bold">Bold</label></div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Subdivisions -->
+          <div class="sub-group collapsible collapsed sub-group--nl-subs">
+            <div class="sub-group-title">
+              Subdivisions
+              <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="sub-body">
+              <label for="nl-subs">Subdivisions per unit <span class="hint" style="display:inline">(1 = none)</span></label>
+              <input type="number" id="nl-subs" value="1" min="1" max="20">
+              <div class="check-row" style="margin-top:7px"><input type="checkbox" id="nl-sub-labels"><label for="nl-sub-labels">Show subdivision labels</label></div>
+              <label for="nl-sub-lbl-interval" style="margin-top:6px">Show every Nth subdivision</label>
+              <input type="number" id="nl-sub-lbl-interval" value="1" min="1" max="20">
+              <label for="nl-sub-lbl-specific">Specific values <span class="hint" style="display:inline">(e.g. 0.5,1.5,2.5)</span></label>
+              <input type="text" id="nl-sub-lbl-specific" placeholder="blank = use interval above">
+              <div class="row2" style="margin-top:7px">
+                <div><label for="nl-sub-lbl-size">Font size</label><input type="number" id="nl-sub-lbl-size" value="11" min="7" max="24"></div>
+                <div><label for="nl-sub-lbl-color">Color</label><input type="color" id="nl-sub-lbl-color" value="#555555"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Point Markers -->
+          <div class="sub-group collapsible collapsed sub-group--nl-points">
+            <div class="sub-group-title">
+              Point Markers
+              <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="sub-body">
+              <label for="nl-points">Points <span class="hint" style="display:inline">(value:label:color:pos — fractions ok)</span></label>
+              <textarea id="nl-points" rows="4" placeholder="3.5:A&#10;7:B:#0000FF:below&#10;3/4:C:#009900"></textarea>
+              <div class="row3" style="margin-top:7px">
+                <div><label for="nl-pt-color">Default color</label><input type="color" id="nl-pt-color" value="#FF0000"></div>
+                <div><label for="nl-pt-radius">Radius (px)</label><input type="number" id="nl-pt-radius" value="6" min="2" max="20"></div>
+                <div>
+                  <label for="nl-pt-pos">Default pos</label>
+                  <select id="nl-pt-pos">
+                    <option value="above">Above</option>
+                    <option value="below">Below</option>
+                  </select>
+                </div>
+              </div>
+              <div class="row2" style="margin-top:5px">
+                <div><label for="nl-pt-lbl-size">Label size</label><input type="number" id="nl-pt-lbl-size" value="16" min="8" max="36"></div>
+                <div><label for="nl-pt-lbl-color">Label color</label><input type="color" id="nl-pt-lbl-color" value="#000000"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Jump Arrows -->
+          <div class="sub-group collapsible collapsed sub-group--nl-jumps">
+            <div class="sub-group-title">
+              Jump Arrows
+              <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="sub-body">
+              <div class="row2">
+                <div><label for="nl-jump-height">Arc height (px)</label><input type="number" id="nl-jump-height" value="35" min="10" max="120" step="5"></div>
+                <div><label for="nl-jump-color">Default color</label><input type="color" id="nl-jump-color" value="#0066CC"></div>
+              </div>
+              <label for="nl-jumps" style="margin-top:8px">Specific arrows <span class="hint" style="display:inline">(dir:from:to:label[:color])</span></label>
+              <textarea id="nl-jumps" rows="3" placeholder="right:2:4:y&#10;left:6:4:n&#10;right:0:3:+3:#CC0000"></textarea>
+              <p class="hint" style="margin-top:3px">label: <b>y</b> = auto (step / −step), <b>n</b> = none, or custom text. Append <b>:#hex</b> for per-arrow color.</p>
+
+              <div style="border-top:1px solid #dde3ec;margin-top:10px;padding-top:8px">
+                <div class="check-row"><input type="checkbox" id="nl-uniform-enable"><label for="nl-uniform-enable"><b>Uniform jump arrows</b></label></div>
+                <div class="row2" style="margin-top:6px">
+                  <div>
+                    <label for="nl-uniform-dir">Direction</label>
+                    <select id="nl-uniform-dir">
+                      <option value="right">→ Right</option>
+                      <option value="left">← Left</option>
+                    </select>
+                  </div>
+                  <div><label for="nl-uniform-step">Step size</label><input type="number" id="nl-uniform-step" value="1" min="0.1" max="20" step="0.1"></div>
+                </div>
+                <div class="row2">
+                  <div><label for="nl-uniform-from">From</label><input type="number" id="nl-uniform-from" value="0" step="0.5"></div>
+                  <div><label for="nl-uniform-to">To</label><input type="number" id="nl-uniform-to" value="10" step="0.5"></div>
+                </div>
+                <div class="row2" style="margin-top:5px">
+                  <div><label for="nl-uniform-color">Color</label><input type="color" id="nl-uniform-color" value="#CC6600"></div>
+                  <div><div class="check-row" style="margin-top:20px"><input type="checkbox" id="nl-uniform-labels" checked><label for="nl-uniform-labels">Show labels</label></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Extra Line 2 -->
+          <div id="nl-el-1" class="sub-group collapsible collapsed sub-group--nl-el1" style="display:none;margin-top:8px">
+            <div class="sub-group-title">
+              Line 2
+              <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="sub-body">
+              <div class="row2">
+                <div><label for="nl-start-1">Start</label><input type="number" id="nl-start-1" value="0" step="1"></div>
+                <div><label for="nl-end-1">End</label><input type="number" id="nl-end-1" value="10" step="1"></div>
+              </div>
+              <div class="check-row" style="margin-top:5px"><input type="checkbox" id="nl-labels-1" checked><label for="nl-labels-1">Show integer labels</label></div>
+              <label for="nl-subs-1" style="margin-top:6px">Subdivisions per unit</label>
+              <input type="number" id="nl-subs-1" value="1" min="1" max="20">
+              <label for="nl-points-1" style="margin-top:6px">Points <span class="hint" style="display:inline">(value:label:color:pos)</span></label>
+              <textarea id="nl-points-1" rows="2" placeholder="3.5:A&#10;7:B:#0000FF:below"></textarea>
+              <label for="nl-jumps-1" style="margin-top:6px">Jump arrows <span class="hint" style="display:inline">(dir:from:to:label)</span></label>
+              <textarea id="nl-jumps-1" rows="2" placeholder="right:2:4:y"></textarea>
+            </div>
+          </div>
+
+          <!-- Extra Line 3 -->
+          <div id="nl-el-2" class="sub-group collapsible collapsed sub-group--nl-el2" style="display:none;margin-top:8px">
+            <div class="sub-group-title">
+              Line 3
+              <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="sub-body">
+              <div class="row2">
+                <div><label for="nl-start-2">Start</label><input type="number" id="nl-start-2" value="0" step="1"></div>
+                <div><label for="nl-end-2">End</label><input type="number" id="nl-end-2" value="10" step="1"></div>
+              </div>
+              <div class="check-row" style="margin-top:5px"><input type="checkbox" id="nl-labels-2" checked><label for="nl-labels-2">Show integer labels</label></div>
+              <label for="nl-subs-2" style="margin-top:6px">Subdivisions per unit</label>
+              <input type="number" id="nl-subs-2" value="1" min="1" max="20">
+              <label for="nl-points-2" style="margin-top:6px">Points <span class="hint" style="display:inline">(value:label:color:pos)</span></label>
+              <textarea id="nl-points-2" rows="2" placeholder="3.5:A&#10;7:B:#0000FF:below"></textarea>
+              <label for="nl-jumps-2" style="margin-top:6px">Jump arrows <span class="hint" style="display:inline">(dir:from:to:label)</span></label>
+              <textarea id="nl-jumps-2" rows="2" placeholder="right:2:4:y"></textarea>
+            </div>
+          </div>
+
+          <!-- Extra Line 4 -->
+          <div id="nl-el-3" class="sub-group collapsible collapsed sub-group--nl-el3" style="display:none;margin-top:8px">
+            <div class="sub-group-title">
+              Line 4
+              <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="sub-body">
+              <div class="row2">
+                <div><label for="nl-start-3">Start</label><input type="number" id="nl-start-3" value="0" step="1"></div>
+                <div><label for="nl-end-3">End</label><input type="number" id="nl-end-3" value="10" step="1"></div>
+              </div>
+              <div class="check-row" style="margin-top:5px"><input type="checkbox" id="nl-labels-3" checked><label for="nl-labels-3">Show integer labels</label></div>
+              <label for="nl-subs-3" style="margin-top:6px">Subdivisions per unit</label>
+              <input type="number" id="nl-subs-3" value="1" min="1" max="20">
+              <label for="nl-points-3" style="margin-top:6px">Points <span class="hint" style="display:inline">(value:label:color:pos)</span></label>
+              <textarea id="nl-points-3" rows="2" placeholder="3.5:A&#10;7:B:#0000FF:below"></textarea>
+              <label for="nl-jumps-3" style="margin-top:6px">Jump arrows <span class="hint" style="display:inline">(dir:from:to:label)</span></label>
+              <textarea id="nl-jumps-3" rows="2" placeholder="right:2:4:y"></textarea>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Fraction (unified, multi-element) -->
+        <div class="param-section" id="params-fraction">
+
+          <!-- Count + layout -->
+          <input type="hidden" id="frac-count" value="1">
+          <div class="count-row">
+            <label>Elements</label>
+            <div class="count-btns" id="frac-count-btns">
+              <button class="count-btn active" data-count="1">1</button>
+              <button class="count-btn" data-count="2">2</button>
+              <button class="count-btn" data-count="3">3</button>
+              <button class="count-btn" data-count="4">4</button>
+            </div>
+          </div>
+          <div class="row2" style="margin-bottom:10px">
+            <div>
+              <label for="frac-layout">Layout</label>
+              <select id="frac-layout">
+                <option value="row">Row (side by side)</option>
+                <option value="col">Column (stacked)</option>
+              </select>
+            </div>
+            <div><label for="frac-gap">Gap (px)</label><input type="number" id="frac-gap" value="20" min="0" max="200"></div>
+          </div>
+
+          <!-- Element 1 (always visible) -->
+          <div id="frac-el-0" class="sub-group collapsible sub-group--frac-el0">
+            <div class="sub-group-title">
+              Element 1
+              <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="sub-body">
+              <label for="frac-shape-0">Shape</label>
+              <select id="frac-shape-0">
+                <option value="rectangle">Rectangle</option>
+                <option value="circle">Circle</option>
+                <option value="grid">Grid</option>
+                <option value="triangle">Triangle</option>
+                <option value="hexagon">Hexagon</option>
+                <option value="pentagon">Pentagon</option>
+                <option value="parallelogram">Parallelogram</option>
+              </select>
+              <div class="row2" style="margin-top:7px">
+                <div><label for="frac-den-0">Total parts</label><input type="number" id="frac-den-0" value="4" min="1" max="24"></div>
+                <div><label for="frac-num-0">Shaded parts</label><input type="number" id="frac-num-0" value="1" min="0" max="24"></div>
+              </div>
+              <div class="check-row" style="margin-top:6px"><input type="checkbox" id="frac-label-0" checked><label for="frac-label-0">Show fraction label</label></div>
+              <div class="check-row"><input type="checkbox" id="frac-cellnums-0"><label for="frac-cellnums-0">Number cells</label></div>
+            </div>
+          </div>
+
+          <!-- Element 2 -->
+          <div id="frac-el-1" class="sub-group collapsible collapsed sub-group--frac-el1" style="display:none">
+            <div class="sub-group-title">
+              Element 2
+              <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="sub-body">
+              <label for="frac-shape-1">Shape</label>
+              <select id="frac-shape-1">
+                <option value="rectangle">Rectangle</option>
+                <option value="circle">Circle</option>
+                <option value="grid">Grid</option>
+                <option value="triangle">Triangle</option>
+                <option value="hexagon">Hexagon</option>
+                <option value="pentagon">Pentagon</option>
+                <option value="parallelogram">Parallelogram</option>
+              </select>
+              <div class="row2" style="margin-top:7px">
+                <div><label for="frac-den-1">Total parts</label><input type="number" id="frac-den-1" value="4" min="1" max="24"></div>
+                <div><label for="frac-num-1">Shaded parts</label><input type="number" id="frac-num-1" value="1" min="0" max="24"></div>
+              </div>
+              <div class="check-row" style="margin-top:6px"><input type="checkbox" id="frac-label-1" checked><label for="frac-label-1">Show fraction label</label></div>
+              <div class="check-row"><input type="checkbox" id="frac-cellnums-1"><label for="frac-cellnums-1">Number cells</label></div>
+            </div>
+          </div>
+
+          <!-- Element 3 -->
+          <div id="frac-el-2" class="sub-group collapsible collapsed sub-group--frac-el2" style="display:none">
+            <div class="sub-group-title">
+              Element 3
+              <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="sub-body">
+              <label for="frac-shape-2">Shape</label>
+              <select id="frac-shape-2">
+                <option value="rectangle">Rectangle</option>
+                <option value="circle">Circle</option>
+                <option value="grid">Grid</option>
+                <option value="triangle">Triangle</option>
+                <option value="hexagon">Hexagon</option>
+                <option value="pentagon">Pentagon</option>
+                <option value="parallelogram">Parallelogram</option>
+              </select>
+              <div class="row2" style="margin-top:7px">
+                <div><label for="frac-den-2">Total parts</label><input type="number" id="frac-den-2" value="4" min="1" max="24"></div>
+                <div><label for="frac-num-2">Shaded parts</label><input type="number" id="frac-num-2" value="1" min="0" max="24"></div>
+              </div>
+              <div class="check-row" style="margin-top:6px"><input type="checkbox" id="frac-label-2" checked><label for="frac-label-2">Show fraction label</label></div>
+              <div class="check-row"><input type="checkbox" id="frac-cellnums-2"><label for="frac-cellnums-2">Number cells</label></div>
+            </div>
+          </div>
+
+          <!-- Element 4 -->
+          <div id="frac-el-3" class="sub-group collapsible collapsed sub-group--frac-el3" style="display:none">
+            <div class="sub-group-title">
+              Element 4
+              <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="sub-body">
+              <label for="frac-shape-3">Shape</label>
+              <select id="frac-shape-3">
+                <option value="rectangle">Rectangle</option>
+                <option value="circle">Circle</option>
+                <option value="grid">Grid</option>
+                <option value="triangle">Triangle</option>
+                <option value="hexagon">Hexagon</option>
+                <option value="pentagon">Pentagon</option>
+                <option value="parallelogram">Parallelogram</option>
+              </select>
+              <div class="row2" style="margin-top:7px">
+                <div><label for="frac-den-3">Total parts</label><input type="number" id="frac-den-3" value="4" min="1" max="24"></div>
+                <div><label for="frac-num-3">Shaded parts</label><input type="number" id="frac-num-3" value="1" min="0" max="24"></div>
+              </div>
+              <div class="check-row" style="margin-top:6px"><input type="checkbox" id="frac-label-3" checked><label for="frac-label-3">Show fraction label</label></div>
+              <div class="check-row"><input type="checkbox" id="frac-cellnums-3"><label for="frac-cellnums-3">Number cells</label></div>
+            </div>
+          </div>
+
+          <!-- Shared Label Style sub-group -->
+          <div class="sub-group collapsible collapsed sub-group--frac-label" style="margin-top:8px">
+            <div class="sub-group-title">
+              Label Style
+              <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="sub-body">
+              <div class="row3">
+                <div><label for="frac-lbl-size">Size</label><input type="number" id="frac-lbl-size" value="20" min="8" max="48"></div>
+                <div><label for="frac-lbl-color">Color</label><input type="color" id="frac-lbl-color" value="#000000"></div>
+                <div><div class="check-row" style="margin-top:20px"><input type="checkbox" id="frac-lbl-bold" checked><label for="frac-lbl-bold">Bold</label></div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Shared Cell Number Style sub-group -->
+          <div class="sub-group collapsible collapsed sub-group--frac-cells" style="margin-top:4px">
+            <div class="sub-group-title">
+              Cell Number Style
+              <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="sub-body">
+              <div class="row3">
+                <div><label for="frac-cell-size">Size</label><input type="number" id="frac-cell-size" value="13" min="6" max="32"></div>
+                <div><label for="frac-cell-color">Color</label><input type="color" id="frac-cell-color" value="#666666"></div>
+                <div><div class="check-row" style="margin-top:20px"><input type="checkbox" id="frac-cell-bold"><label for="frac-cell-bold">Bold</label></div></div>
+              </div>
+            </div>
+          </div>
+
+          <p class="hint" style="margin-top:7px">Click cells in the preview to toggle shading</p>
+        </div>
+
+        <!-- Geometry (unified multi-shape) -->
+        <div class="param-section" id="params-geometry">
+          <input type="hidden" id="geo-count" value="1">
+          <div class="count-row">
+            <label>Shapes</label>
+            <div class="count-btns" id="geo-count-btns">
+              <button class="count-btn active" data-count="1">1</button>
+              <button class="count-btn" data-count="2">2</button>
+              <button class="count-btn" data-count="3">3</button>
+              <button class="count-btn" data-count="4">4</button>
+            </div>
+          </div>
+          <div class="row2" style="margin-bottom:10px">
+            <div><label for="geo-layout">Layout</label><select id="geo-layout"><option value="row">Row (side by side)</option><option value="col">Column (stacked)</option></select></div>
+            <div><label for="geo-gap">Gap (px)</label><input type="number" id="geo-gap" value="20" min="0" max="200"></div>
+          </div>
+
+          <!-- ── Element 1 ── -->
+          <div id="geo-el-0" class="sub-group collapsible collapsed sub-group--geo-el0">
+            <div class="sub-group-title">Shape 1
+              <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="sub-body">
+              <label for="geo-type-0">Shape type</label>
+              <select id="geo-type-0">
+                <option value="rectangle">Rectangle</option>
+                <option value="square">Square</option>
+                <option value="circle">Circle</option>
+                <option value="ellipse">Ellipse</option>
+                <option value="triangle">Triangle</option>
+                <option value="parallelogram">Parallelogram</option>
+                <option value="rhombus">Rhombus</option>
+                <option value="trapezoid">Trapezoid</option>
+                <option value="pentagon">Pentagon</option>
+                <option value="hexagon">Hexagon</option>
+                <option value="octagon">Octagon</option>
+                <option value="sector">Sector / Arc</option>
+              </select>
+              <!-- Rectangle -->
+              <div id="geo-rect-0" class="geo-shape-params" style="margin-top:6px">
+                <div class="row2"><div><label>Width</label><input type="number" id="geo-rect-w-0" value="6" min="0.5" max="30" step="0.5"></div><div><label>Height</label><input type="number" id="geo-rect-h-0" value="4" min="0.5" max="30" step="0.5"></div></div>
+                <div class="row2"><div><label>Corner radius</label><input type="number" id="geo-rect-corner-0" value="0" min="0" max="50"></div><div><label>Diagonal</label><select id="geo-rect-diag-0"><option value="none">None</option><option value="one">One</option><option value="both">Both</option></select></div></div>
+                <div class="check-row"><input type="checkbox" id="geo-rect-ra-0"><label for="geo-rect-ra-0">Right-angle marks</label></div>
+                <div class="row2"><div><label>Width label</label><input type="text" id="geo-rect-wlbl-0" placeholder="e.g. 6 cm"></div><div><label>Height label</label><input type="text" id="geo-rect-hlbl-0" placeholder="e.g. 4 cm"></div></div>
+              </div>
+              <!-- Square -->
+              <div id="geo-sq-0" class="geo-shape-params" style="display:none;margin-top:6px">
+                <label>Side</label><input type="number" id="geo-sq-side-0" value="5" min="0.5" max="30" step="0.5">
+                <div class="check-row"><input type="checkbox" id="geo-sq-diag-0"><label for="geo-sq-diag-0">Show diagonals</label></div>
+                <label>Side label</label><input type="text" id="geo-sq-lbl-0" placeholder="e.g. 5 cm">
+              </div>
+              <!-- Circle -->
+              <div id="geo-circ-0" class="geo-shape-params" style="display:none;margin-top:6px">
+                <label>Radius</label><input type="number" id="geo-circ-r-0" value="5" min="0.5" max="30" step="0.5">
+                <div class="row2"><div><label>Radius label</label><input type="text" id="geo-circ-rlbl-0" value="r"></div><div><label>Diameter label</label><input type="text" id="geo-circ-dlbl-0" placeholder="2r"></div></div>
+                <div class="check-row"><input type="checkbox" id="geo-circ-center-0" checked><label for="geo-circ-center-0">Show center</label></div>
+                <div class="check-row"><input type="checkbox" id="geo-circ-rl-0"><label for="geo-circ-rl-0">Show radius line</label></div>
+                <div class="check-row"><input type="checkbox" id="geo-circ-diam-0"><label for="geo-circ-diam-0">Show diameter line</label></div>
+              </div>
+              <!-- Ellipse -->
+              <div id="geo-ellip-0" class="geo-shape-params" style="display:none;margin-top:6px">
+                <div class="row2"><div><label>Semi-major (a)</label><input type="number" id="geo-ellip-a-0" value="6" min="0.5" max="30" step="0.5"></div><div><label>Semi-minor (b)</label><input type="number" id="geo-ellip-b-0" value="4" min="0.5" max="30" step="0.5"></div></div>
+                <div class="row2"><div><label>a label</label><input type="text" id="geo-ellip-albl-0" value="a"></div><div><label>b label</label><input type="text" id="geo-ellip-blbl-0" value="b"></div></div>
+                <div class="check-row"><input type="checkbox" id="geo-ellip-axes-0" checked><label for="geo-ellip-axes-0">Show axes</label></div>
+              </div>
+              <!-- Triangle -->
+              <div id="geo-tri-0" class="geo-shape-params" style="display:none;margin-top:6px">
+                <label>Triangle type</label>
+                <select id="geo-tri-type-0">
+                  <option value="equilateral">Equilateral</option>
+                  <option value="isosceles">Isosceles</option>
+                  <option value="scalene">Scalene</option>
+                  <option value="right">Right-angled</option>
+                </select>
+                <div id="geo-tri-eq-0" style="margin-top:5px"><label>Side</label><input type="number" id="geo-tri-eq-side-0" value="6" min="0.5" max="30" step="0.5"></div>
+                <div id="geo-tri-iso-0" style="display:none;margin-top:5px"><div class="row2"><div><label>Base</label><input type="number" id="geo-tri-iso-base-0" value="4" min="0.5" max="30" step="0.5"></div><div><label>Leg (equal side)</label><input type="number" id="geo-tri-iso-leg-0" value="5" min="0.5" max="30" step="0.5"></div></div></div>
+                <div id="geo-tri-sc-0" style="display:none;margin-top:5px"><div class="row3"><div><label>Side a</label><input type="number" id="geo-tri-sc-a-0" value="5" min="0.5" max="30" step="0.5"></div><div><label>Side b</label><input type="number" id="geo-tri-sc-b-0" value="7" min="0.5" max="30" step="0.5"></div><div><label>Side c</label><input type="number" id="geo-tri-sc-c-0" value="6" min="0.5" max="30" step="0.5"></div></div></div>
+                <div id="geo-tri-rt-0" style="display:none;margin-top:5px"><div class="row2"><div><label>Base</label><input type="number" id="geo-tri-rt-base-0" value="5" min="0.5" max="30" step="0.5"></div><div><label>Height</label><input type="number" id="geo-tri-rt-height-0" value="4" min="0.5" max="30" step="0.5"></div></div></div>
+                <div class="check-row" style="margin-top:6px"><input type="checkbox" id="geo-tri-height-0"><label for="geo-tri-height-0">Show altitude</label></div>
+                <input type="text" id="geo-tri-hlbl-0" placeholder="Altitude label (h)" style="margin-top:3px">
+                <div class="check-row"><input type="checkbox" id="geo-tri-angles-0"><label for="geo-tri-angles-0">Show angle arcs</label></div>
+                <div class="row3" style="margin-top:5px"><div><label>Label a</label><input type="text" id="geo-tri-lbla-0" placeholder="a"></div><div><label>Label b</label><input type="text" id="geo-tri-lblb-0" placeholder="b"></div><div><label>Label c</label><input type="text" id="geo-tri-lblc-0" placeholder="c"></div></div>
+              </div>
+              <!-- Parallelogram -->
+              <div id="geo-para-0" class="geo-shape-params" style="display:none;margin-top:6px">
+                <div class="row2"><div><label>Base</label><input type="number" id="geo-para-base-0" value="7" min="0.5" max="30" step="0.5"></div><div><label>Height</label><input type="number" id="geo-para-height-0" value="4" min="0.5" max="30" step="0.5"></div></div>
+                <label>Slant angle (°)</label><input type="number" id="geo-para-angle-0" value="60" min="20" max="85">
+                <div class="check-row"><input type="checkbox" id="geo-para-diag-0"><label for="geo-para-diag-0">Show diagonals</label></div>
+                <div class="check-row"><input type="checkbox" id="geo-para-hline-0"><label for="geo-para-hline-0">Show height line</label></div>
+                <div class="row2"><div><label>Base label</label><input type="text" id="geo-para-blbl-0" placeholder="b"></div><div><label>Height label</label><input type="text" id="geo-para-hlbl-0" placeholder="h"></div></div>
+              </div>
+              <!-- Rhombus -->
+              <div id="geo-rhom-0" class="geo-shape-params" style="display:none;margin-top:6px">
+                <div class="row2"><div><label>Side</label><input type="number" id="geo-rhom-side-0" value="5" min="0.5" max="30" step="0.5"></div><div><label>Acute angle (°)</label><input type="number" id="geo-rhom-angle-0" value="60" min="20" max="85"></div></div>
+                <div class="check-row"><input type="checkbox" id="geo-rhom-diag-0"><label for="geo-rhom-diag-0">Show diagonals</label></div>
+                <label>Side label</label><input type="text" id="geo-rhom-lbl-0" placeholder="a">
+              </div>
+              <!-- Trapezoid -->
+              <div id="geo-trap-0" class="geo-shape-params" style="display:none;margin-top:6px">
+                <div class="row2"><div><label>Top base</label><input type="number" id="geo-trap-top-0" value="3" min="0.5" max="30" step="0.5"></div><div><label>Bottom base</label><input type="number" id="geo-trap-bottom-0" value="6" min="0.5" max="30" step="0.5"></div></div>
+                <div class="row2"><div><label>Height</label><input type="number" id="geo-trap-height-0" value="4" min="0.5" max="30" step="0.5"></div><div><label>Type</label><select id="geo-trap-type-0"><option value="isosceles">Isosceles</option><option value="right">Right</option><option value="general">General</option></select></div></div>
+                <div class="check-row"><input type="checkbox" id="geo-trap-diag-0"><label for="geo-trap-diag-0">Show diagonals</label></div>
+                <div class="row3"><div><label>Top label</label><input type="text" id="geo-trap-tlbl-0" placeholder="a"></div><div><label>Bottom label</label><input type="text" id="geo-trap-blbl-0" placeholder="b"></div><div><label>Height label</label><input type="text" id="geo-trap-hlbl-0" placeholder="h"></div></div>
+              </div>
+              <!-- Pentagon / Hexagon / Octagon (shared params) -->
+              <div id="geo-poly-0" class="geo-shape-params" style="display:none;margin-top:6px">
+                <div class="row2"><div><label>Side length</label><input type="number" id="geo-poly-side-0" value="5" min="0.5" max="30" step="0.5"></div><div><label>Orientation</label><select id="geo-poly-orient-0"><option value="pointy">Pointy-top</option><option value="flat">Flat-top</option></select></div></div>
+                <div class="check-row"><input type="checkbox" id="geo-poly-diag-0"><label for="geo-poly-diag-0">Show diagonals</label></div>
+                <label>Center label</label><input type="text" id="geo-poly-lbl-0" placeholder="Optional">
+              </div>
+              <!-- Sector / Arc -->
+              <div id="geo-sec-0" class="geo-shape-params" style="display:none;margin-top:6px">
+                <label>Radius</label><input type="number" id="geo-sec-r-0" value="5" min="0.5" max="30" step="0.5">
+                <div class="row2"><div><label>Arc angle (°)</label><input type="number" id="geo-sec-arc-0" value="90" min="5" max="359"></div><div><label>Start angle (°)</label><input type="number" id="geo-sec-start-0" value="-90" step="15"></div></div>
+                <label>Type</label><select id="geo-sec-type-0"><option value="sector">Filled sector (pie)</option><option value="arc">Arc only</option></select>
+                <label>Label</label><input type="text" id="geo-sec-lbl-0" placeholder="Optional">
+              </div>
+              <!-- Common style -->
+              <div style="border-top:1px solid #e5e7eb;margin-top:9px;padding-top:8px">
+                <div class="check-row"><input type="checkbox" id="geo-fill-0" checked><label for="geo-fill-0">Filled</label></div>
+                <div class="row2" style="margin-top:5px"><div><label>Fill color</label><input type="color" id="geo-fill-color-0" value="#B0E0E6"></div><div><label>Opacity</label><input type="number" id="geo-fill-opacity-0" value="0.45" min="0" max="1" step="0.05"></div></div>
+                <div class="row2"><div><label>Stroke color</label><input type="color" id="geo-stroke-color-0" value="#006B6B"></div><div><label>Stroke width</label><input type="number" id="geo-stroke-width-0" value="2.5" min="0.5" max="8" step="0.5"></div></div>
+                <div class="row2" style="margin-top:4px"><div><div class="check-row"><input type="checkbox" id="geo-show-labels-0" checked><label for="geo-show-labels-0">Show labels</label></div></div><div><div class="check-row"><input type="checkbox" id="geo-arrows-0"><label for="geo-arrows-0">Dim. arrows</label></div></div></div>
+                <div style="margin-top:6px;padding-top:6px;border-top:1px dashed #e5e7eb">
+                  <div class="row2"><div><label>Label size</label><input type="number" id="geo-lbl-size-0" value="13" min="6" max="36"></div><div><label>Label color</label><input type="color" id="geo-lbl-color-0" value="#333333"></div></div>
+                  <div class="row2"><div><label>Weight</label><select id="geo-lbl-weight-0"><option value="normal">Normal</option><option value="bold">Bold</option></select></div><div><label>Style</label><select id="geo-lbl-fstyle-0"><option value="normal">Normal</option><option value="italic">Italic</option></select></div></div>
+                  <div><label>Font family</label><select id="geo-lbl-family-0"><option value="Arial,sans-serif">Arial (sans-serif)</option><option value="Georgia,serif">Georgia (serif)</option><option value="'Times New Roman',serif">Times New Roman</option><option value="'Courier New',monospace">Courier New (mono)</option><option value="'Trebuchet MS',sans-serif">Trebuchet MS</option></select></div>
+                  <div><label>Label offset</label><input type="number" id="geo-lbl-offset-0" value="0" min="-20" max="40"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── Element 2 ── -->
+          <div id="geo-el-1" class="sub-group collapsible collapsed sub-group--geo-el1" style="display:none">
+            <div class="sub-group-title">Shape 2
+              <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="sub-body">
+              <label for="geo-type-1">Shape type</label>
+              <select id="geo-type-1">
+                <option value="rectangle">Rectangle</option><option value="square">Square</option><option value="circle">Circle</option><option value="ellipse">Ellipse</option><option value="triangle">Triangle</option><option value="parallelogram">Parallelogram</option><option value="rhombus">Rhombus</option><option value="trapezoid">Trapezoid</option><option value="pentagon">Pentagon</option><option value="hexagon">Hexagon</option><option value="octagon">Octagon</option><option value="sector">Sector / Arc</option>
+              </select>
+              <div id="geo-rect-1" class="geo-shape-params" style="margin-top:6px">
+                <div class="row2"><div><label>Width</label><input type="number" id="geo-rect-w-1" value="6" min="0.5" max="30" step="0.5"></div><div><label>Height</label><input type="number" id="geo-rect-h-1" value="4" min="0.5" max="30" step="0.5"></div></div>
+                <div class="row2"><div><label>Corner radius</label><input type="number" id="geo-rect-corner-1" value="0" min="0" max="50"></div><div><label>Diagonal</label><select id="geo-rect-diag-1"><option value="none">None</option><option value="one">One</option><option value="both">Both</option></select></div></div>
+                <div class="check-row"><input type="checkbox" id="geo-rect-ra-1"><label for="geo-rect-ra-1">Right-angle marks</label></div>
+                <div class="row2"><div><label>Width label</label><input type="text" id="geo-rect-wlbl-1" placeholder="e.g. 6 cm"></div><div><label>Height label</label><input type="text" id="geo-rect-hlbl-1" placeholder="e.g. 4 cm"></div></div>
+              </div>
+              <div id="geo-sq-1" class="geo-shape-params" style="display:none;margin-top:6px"><label>Side</label><input type="number" id="geo-sq-side-1" value="5" min="0.5" max="30" step="0.5"><div class="check-row"><input type="checkbox" id="geo-sq-diag-1"><label for="geo-sq-diag-1">Show diagonals</label></div><label>Side label</label><input type="text" id="geo-sq-lbl-1" placeholder="e.g. 5 cm"></div>
+              <div id="geo-circ-1" class="geo-shape-params" style="display:none;margin-top:6px"><label>Radius</label><input type="number" id="geo-circ-r-1" value="5" min="0.5" max="30" step="0.5"><div class="row2"><div><label>Radius label</label><input type="text" id="geo-circ-rlbl-1" value="r"></div><div><label>Diameter label</label><input type="text" id="geo-circ-dlbl-1" placeholder="2r"></div></div><div class="check-row"><input type="checkbox" id="geo-circ-center-1" checked><label for="geo-circ-center-1">Show center</label></div><div class="check-row"><input type="checkbox" id="geo-circ-rl-1"><label for="geo-circ-rl-1">Show radius line</label></div><div class="check-row"><input type="checkbox" id="geo-circ-diam-1"><label for="geo-circ-diam-1">Show diameter line</label></div></div>
+              <div id="geo-ellip-1" class="geo-shape-params" style="display:none;margin-top:6px"><div class="row2"><div><label>Semi-major (a)</label><input type="number" id="geo-ellip-a-1" value="6" min="0.5" max="30" step="0.5"></div><div><label>Semi-minor (b)</label><input type="number" id="geo-ellip-b-1" value="4" min="0.5" max="30" step="0.5"></div></div><div class="row2"><div><label>a label</label><input type="text" id="geo-ellip-albl-1" value="a"></div><div><label>b label</label><input type="text" id="geo-ellip-blbl-1" value="b"></div></div><div class="check-row"><input type="checkbox" id="geo-ellip-axes-1" checked><label for="geo-ellip-axes-1">Show axes</label></div></div>
+              <div id="geo-tri-1" class="geo-shape-params" style="display:none;margin-top:6px">
+                <label>Triangle type</label><select id="geo-tri-type-1"><option value="equilateral">Equilateral</option><option value="isosceles">Isosceles</option><option value="scalene">Scalene</option><option value="right">Right-angled</option></select>
+                <div id="geo-tri-eq-1" style="margin-top:5px"><label>Side</label><input type="number" id="geo-tri-eq-side-1" value="6" min="0.5" max="30" step="0.5"></div>
+                <div id="geo-tri-iso-1" style="display:none;margin-top:5px"><div class="row2"><div><label>Base</label><input type="number" id="geo-tri-iso-base-1" value="4" min="0.5" max="30" step="0.5"></div><div><label>Leg</label><input type="number" id="geo-tri-iso-leg-1" value="5" min="0.5" max="30" step="0.5"></div></div></div>
+                <div id="geo-tri-sc-1" style="display:none;margin-top:5px"><div class="row3"><div><label>Side a</label><input type="number" id="geo-tri-sc-a-1" value="5" min="0.5" max="30" step="0.5"></div><div><label>Side b</label><input type="number" id="geo-tri-sc-b-1" value="7" min="0.5" max="30" step="0.5"></div><div><label>Side c</label><input type="number" id="geo-tri-sc-c-1" value="6" min="0.5" max="30" step="0.5"></div></div></div>
+                <div id="geo-tri-rt-1" style="display:none;margin-top:5px"><div class="row2"><div><label>Base</label><input type="number" id="geo-tri-rt-base-1" value="5" min="0.5" max="30" step="0.5"></div><div><label>Height</label><input type="number" id="geo-tri-rt-height-1" value="4" min="0.5" max="30" step="0.5"></div></div></div>
+                <div class="check-row" style="margin-top:6px"><input type="checkbox" id="geo-tri-height-1"><label for="geo-tri-height-1">Show altitude</label></div>
+                <input type="text" id="geo-tri-hlbl-1" placeholder="Altitude label (h)" style="margin-top:3px">
+                <div class="check-row"><input type="checkbox" id="geo-tri-angles-1"><label for="geo-tri-angles-1">Show angle arcs</label></div>
+                <div class="row3" style="margin-top:5px"><div><label>Label a</label><input type="text" id="geo-tri-lbla-1" placeholder="a"></div><div><label>Label b</label><input type="text" id="geo-tri-lblb-1" placeholder="b"></div><div><label>Label c</label><input type="text" id="geo-tri-lblc-1" placeholder="c"></div></div>
+              </div>
+              <div id="geo-para-1" class="geo-shape-params" style="display:none;margin-top:6px"><div class="row2"><div><label>Base</label><input type="number" id="geo-para-base-1" value="7" min="0.5" max="30" step="0.5"></div><div><label>Height</label><input type="number" id="geo-para-height-1" value="4" min="0.5" max="30" step="0.5"></div></div><label>Slant angle (°)</label><input type="number" id="geo-para-angle-1" value="60" min="20" max="85"><div class="check-row"><input type="checkbox" id="geo-para-diag-1"><label for="geo-para-diag-1">Show diagonals</label></div><div class="check-row"><input type="checkbox" id="geo-para-hline-1"><label for="geo-para-hline-1">Show height line</label></div><div class="row2"><div><label>Base label</label><input type="text" id="geo-para-blbl-1" placeholder="b"></div><div><label>Height label</label><input type="text" id="geo-para-hlbl-1" placeholder="h"></div></div></div>
+              <div id="geo-rhom-1" class="geo-shape-params" style="display:none;margin-top:6px"><div class="row2"><div><label>Side</label><input type="number" id="geo-rhom-side-1" value="5" min="0.5" max="30" step="0.5"></div><div><label>Acute angle (°)</label><input type="number" id="geo-rhom-angle-1" value="60" min="20" max="85"></div></div><div class="check-row"><input type="checkbox" id="geo-rhom-diag-1"><label for="geo-rhom-diag-1">Show diagonals</label></div><label>Side label</label><input type="text" id="geo-rhom-lbl-1" placeholder="a"></div>
+              <div id="geo-trap-1" class="geo-shape-params" style="display:none;margin-top:6px"><div class="row2"><div><label>Top base</label><input type="number" id="geo-trap-top-1" value="3" min="0.5" max="30" step="0.5"></div><div><label>Bottom base</label><input type="number" id="geo-trap-bottom-1" value="6" min="0.5" max="30" step="0.5"></div></div><div class="row2"><div><label>Height</label><input type="number" id="geo-trap-height-1" value="4" min="0.5" max="30" step="0.5"></div><div><label>Type</label><select id="geo-trap-type-1"><option value="isosceles">Isosceles</option><option value="right">Right</option><option value="general">General</option></select></div></div><div class="check-row"><input type="checkbox" id="geo-trap-diag-1"><label for="geo-trap-diag-1">Show diagonals</label></div><div class="row3"><div><label>Top label</label><input type="text" id="geo-trap-tlbl-1" placeholder="a"></div><div><label>Bottom label</label><input type="text" id="geo-trap-blbl-1" placeholder="b"></div><div><label>Height label</label><input type="text" id="geo-trap-hlbl-1" placeholder="h"></div></div></div>
+              <div id="geo-poly-1" class="geo-shape-params" style="display:none;margin-top:6px"><div class="row2"><div><label>Side length</label><input type="number" id="geo-poly-side-1" value="5" min="0.5" max="30" step="0.5"></div><div><label>Orientation</label><select id="geo-poly-orient-1"><option value="pointy">Pointy-top</option><option value="flat">Flat-top</option></select></div></div><div class="check-row"><input type="checkbox" id="geo-poly-diag-1"><label for="geo-poly-diag-1">Show diagonals</label></div><label>Center label</label><input type="text" id="geo-poly-lbl-1" placeholder="Optional"></div>
+              <div id="geo-sec-1" class="geo-shape-params" style="display:none;margin-top:6px"><label>Radius</label><input type="number" id="geo-sec-r-1" value="5" min="0.5" max="30" step="0.5"><div class="row2"><div><label>Arc angle (°)</label><input type="number" id="geo-sec-arc-1" value="90" min="5" max="359"></div><div><label>Start angle (°)</label><input type="number" id="geo-sec-start-1" value="-90" step="15"></div></div><label>Type</label><select id="geo-sec-type-1"><option value="sector">Filled sector</option><option value="arc">Arc only</option></select><label>Label</label><input type="text" id="geo-sec-lbl-1" placeholder="Optional"></div>
+              <div style="border-top:1px solid #e5e7eb;margin-top:9px;padding-top:8px">
+                <div class="check-row"><input type="checkbox" id="geo-fill-1" checked><label for="geo-fill-1">Filled</label></div>
+                <div class="row2" style="margin-top:5px"><div><label>Fill color</label><input type="color" id="geo-fill-color-1" value="#A5D6A7"></div><div><label>Opacity</label><input type="number" id="geo-fill-opacity-1" value="0.45" min="0" max="1" step="0.05"></div></div>
+                <div class="row2"><div><label>Stroke color</label><input type="color" id="geo-stroke-color-1" value="#1B5E20"></div><div><label>Stroke width</label><input type="number" id="geo-stroke-width-1" value="2.5" min="0.5" max="8" step="0.5"></div></div>
+                <div class="row2" style="margin-top:4px"><div><div class="check-row"><input type="checkbox" id="geo-show-labels-1" checked><label for="geo-show-labels-1">Show labels</label></div></div><div><div class="check-row"><input type="checkbox" id="geo-arrows-1"><label for="geo-arrows-1">Dim. arrows</label></div></div></div>
+                <div style="margin-top:6px;padding-top:6px;border-top:1px dashed #e5e7eb">
+                  <div class="row2"><div><label>Label size</label><input type="number" id="geo-lbl-size-1" value="13" min="6" max="36"></div><div><label>Label color</label><input type="color" id="geo-lbl-color-1" value="#333333"></div></div>
+                  <div class="row2"><div><label>Weight</label><select id="geo-lbl-weight-1"><option value="normal">Normal</option><option value="bold">Bold</option></select></div><div><label>Style</label><select id="geo-lbl-fstyle-1"><option value="normal">Normal</option><option value="italic">Italic</option></select></div></div>
+                  <div><label>Font family</label><select id="geo-lbl-family-1"><option value="Arial,sans-serif">Arial (sans-serif)</option><option value="Georgia,serif">Georgia (serif)</option><option value="'Times New Roman',serif">Times New Roman</option><option value="'Courier New',monospace">Courier New (mono)</option><option value="'Trebuchet MS',sans-serif">Trebuchet MS</option></select></div>
+                  <div><label>Label offset</label><input type="number" id="geo-lbl-offset-1" value="0" min="-20" max="40"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── Element 3 ── -->
+          <div id="geo-el-2" class="sub-group collapsible collapsed sub-group--geo-el2" style="display:none">
+            <div class="sub-group-title">Shape 3
+              <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="sub-body">
+              <label for="geo-type-2">Shape type</label>
+              <select id="geo-type-2">
+                <option value="rectangle">Rectangle</option><option value="square">Square</option><option value="circle">Circle</option><option value="ellipse">Ellipse</option><option value="triangle">Triangle</option><option value="parallelogram">Parallelogram</option><option value="rhombus">Rhombus</option><option value="trapezoid">Trapezoid</option><option value="pentagon">Pentagon</option><option value="hexagon">Hexagon</option><option value="octagon">Octagon</option><option value="sector">Sector / Arc</option>
+              </select>
+              <div id="geo-rect-2" class="geo-shape-params" style="margin-top:6px"><div class="row2"><div><label>Width</label><input type="number" id="geo-rect-w-2" value="6" min="0.5" max="30" step="0.5"></div><div><label>Height</label><input type="number" id="geo-rect-h-2" value="4" min="0.5" max="30" step="0.5"></div></div><div class="row2"><div><label>Corner radius</label><input type="number" id="geo-rect-corner-2" value="0" min="0" max="50"></div><div><label>Diagonal</label><select id="geo-rect-diag-2"><option value="none">None</option><option value="one">One</option><option value="both">Both</option></select></div></div><div class="check-row"><input type="checkbox" id="geo-rect-ra-2"><label for="geo-rect-ra-2">Right-angle marks</label></div><div class="row2"><div><label>Width label</label><input type="text" id="geo-rect-wlbl-2" placeholder="e.g. 6 cm"></div><div><label>Height label</label><input type="text" id="geo-rect-hlbl-2" placeholder="e.g. 4 cm"></div></div></div>
+              <div id="geo-sq-2" class="geo-shape-params" style="display:none;margin-top:6px"><label>Side</label><input type="number" id="geo-sq-side-2" value="5" min="0.5" max="30" step="0.5"><div class="check-row"><input type="checkbox" id="geo-sq-diag-2"><label for="geo-sq-diag-2">Show diagonals</label></div><label>Side label</label><input type="text" id="geo-sq-lbl-2" placeholder="e.g. 5 cm"></div>
+              <div id="geo-circ-2" class="geo-shape-params" style="display:none;margin-top:6px"><label>Radius</label><input type="number" id="geo-circ-r-2" value="5" min="0.5" max="30" step="0.5"><div class="row2"><div><label>Radius label</label><input type="text" id="geo-circ-rlbl-2" value="r"></div><div><label>Diameter label</label><input type="text" id="geo-circ-dlbl-2" placeholder="2r"></div></div><div class="check-row"><input type="checkbox" id="geo-circ-center-2" checked><label for="geo-circ-center-2">Show center</label></div><div class="check-row"><input type="checkbox" id="geo-circ-rl-2"><label for="geo-circ-rl-2">Show radius line</label></div><div class="check-row"><input type="checkbox" id="geo-circ-diam-2"><label for="geo-circ-diam-2">Show diameter line</label></div></div>
+              <div id="geo-ellip-2" class="geo-shape-params" style="display:none;margin-top:6px"><div class="row2"><div><label>Semi-major (a)</label><input type="number" id="geo-ellip-a-2" value="6" min="0.5" max="30" step="0.5"></div><div><label>Semi-minor (b)</label><input type="number" id="geo-ellip-b-2" value="4" min="0.5" max="30" step="0.5"></div></div><div class="row2"><div><label>a label</label><input type="text" id="geo-ellip-albl-2" value="a"></div><div><label>b label</label><input type="text" id="geo-ellip-blbl-2" value="b"></div></div><div class="check-row"><input type="checkbox" id="geo-ellip-axes-2" checked><label for="geo-ellip-axes-2">Show axes</label></div></div>
+              <div id="geo-tri-2" class="geo-shape-params" style="display:none;margin-top:6px">
+                <label>Triangle type</label><select id="geo-tri-type-2"><option value="equilateral">Equilateral</option><option value="isosceles">Isosceles</option><option value="scalene">Scalene</option><option value="right">Right-angled</option></select>
+                <div id="geo-tri-eq-2" style="margin-top:5px"><label>Side</label><input type="number" id="geo-tri-eq-side-2" value="6" min="0.5" max="30" step="0.5"></div>
+                <div id="geo-tri-iso-2" style="display:none;margin-top:5px"><div class="row2"><div><label>Base</label><input type="number" id="geo-tri-iso-base-2" value="4" min="0.5" max="30" step="0.5"></div><div><label>Leg</label><input type="number" id="geo-tri-iso-leg-2" value="5" min="0.5" max="30" step="0.5"></div></div></div>
+                <div id="geo-tri-sc-2" style="display:none;margin-top:5px"><div class="row3"><div><label>Side a</label><input type="number" id="geo-tri-sc-a-2" value="5" min="0.5" max="30" step="0.5"></div><div><label>Side b</label><input type="number" id="geo-tri-sc-b-2" value="7" min="0.5" max="30" step="0.5"></div><div><label>Side c</label><input type="number" id="geo-tri-sc-c-2" value="6" min="0.5" max="30" step="0.5"></div></div></div>
+                <div id="geo-tri-rt-2" style="display:none;margin-top:5px"><div class="row2"><div><label>Base</label><input type="number" id="geo-tri-rt-base-2" value="5" min="0.5" max="30" step="0.5"></div><div><label>Height</label><input type="number" id="geo-tri-rt-height-2" value="4" min="0.5" max="30" step="0.5"></div></div></div>
+                <div class="check-row" style="margin-top:6px"><input type="checkbox" id="geo-tri-height-2"><label for="geo-tri-height-2">Show altitude</label></div>
+                <input type="text" id="geo-tri-hlbl-2" placeholder="Altitude label (h)" style="margin-top:3px">
+                <div class="check-row"><input type="checkbox" id="geo-tri-angles-2"><label for="geo-tri-angles-2">Show angle arcs</label></div>
+                <div class="row3" style="margin-top:5px"><div><label>Label a</label><input type="text" id="geo-tri-lbla-2" placeholder="a"></div><div><label>Label b</label><input type="text" id="geo-tri-lblb-2" placeholder="b"></div><div><label>Label c</label><input type="text" id="geo-tri-lblc-2" placeholder="c"></div></div>
+              </div>
+              <div id="geo-para-2" class="geo-shape-params" style="display:none;margin-top:6px"><div class="row2"><div><label>Base</label><input type="number" id="geo-para-base-2" value="7" min="0.5" max="30" step="0.5"></div><div><label>Height</label><input type="number" id="geo-para-height-2" value="4" min="0.5" max="30" step="0.5"></div></div><label>Slant angle (°)</label><input type="number" id="geo-para-angle-2" value="60" min="20" max="85"><div class="check-row"><input type="checkbox" id="geo-para-diag-2"><label for="geo-para-diag-2">Show diagonals</label></div><div class="check-row"><input type="checkbox" id="geo-para-hline-2"><label for="geo-para-hline-2">Show height line</label></div><div class="row2"><div><label>Base label</label><input type="text" id="geo-para-blbl-2" placeholder="b"></div><div><label>Height label</label><input type="text" id="geo-para-hlbl-2" placeholder="h"></div></div></div>
+              <div id="geo-rhom-2" class="geo-shape-params" style="display:none;margin-top:6px"><div class="row2"><div><label>Side</label><input type="number" id="geo-rhom-side-2" value="5" min="0.5" max="30" step="0.5"></div><div><label>Acute angle (°)</label><input type="number" id="geo-rhom-angle-2" value="60" min="20" max="85"></div></div><div class="check-row"><input type="checkbox" id="geo-rhom-diag-2"><label for="geo-rhom-diag-2">Show diagonals</label></div><label>Side label</label><input type="text" id="geo-rhom-lbl-2" placeholder="a"></div>
+              <div id="geo-trap-2" class="geo-shape-params" style="display:none;margin-top:6px"><div class="row2"><div><label>Top base</label><input type="number" id="geo-trap-top-2" value="3" min="0.5" max="30" step="0.5"></div><div><label>Bottom base</label><input type="number" id="geo-trap-bottom-2" value="6" min="0.5" max="30" step="0.5"></div></div><div class="row2"><div><label>Height</label><input type="number" id="geo-trap-height-2" value="4" min="0.5" max="30" step="0.5"></div><div><label>Type</label><select id="geo-trap-type-2"><option value="isosceles">Isosceles</option><option value="right">Right</option><option value="general">General</option></select></div></div><div class="check-row"><input type="checkbox" id="geo-trap-diag-2"><label for="geo-trap-diag-2">Show diagonals</label></div><div class="row3"><div><label>Top label</label><input type="text" id="geo-trap-tlbl-2" placeholder="a"></div><div><label>Bottom label</label><input type="text" id="geo-trap-blbl-2" placeholder="b"></div><div><label>Height label</label><input type="text" id="geo-trap-hlbl-2" placeholder="h"></div></div></div>
+              <div id="geo-poly-2" class="geo-shape-params" style="display:none;margin-top:6px"><div class="row2"><div><label>Side length</label><input type="number" id="geo-poly-side-2" value="5" min="0.5" max="30" step="0.5"></div><div><label>Orientation</label><select id="geo-poly-orient-2"><option value="pointy">Pointy-top</option><option value="flat">Flat-top</option></select></div></div><div class="check-row"><input type="checkbox" id="geo-poly-diag-2"><label for="geo-poly-diag-2">Show diagonals</label></div><label>Center label</label><input type="text" id="geo-poly-lbl-2" placeholder="Optional"></div>
+              <div id="geo-sec-2" class="geo-shape-params" style="display:none;margin-top:6px"><label>Radius</label><input type="number" id="geo-sec-r-2" value="5" min="0.5" max="30" step="0.5"><div class="row2"><div><label>Arc angle (°)</label><input type="number" id="geo-sec-arc-2" value="90" min="5" max="359"></div><div><label>Start angle (°)</label><input type="number" id="geo-sec-start-2" value="-90" step="15"></div></div><label>Type</label><select id="geo-sec-type-2"><option value="sector">Filled sector</option><option value="arc">Arc only</option></select><label>Label</label><input type="text" id="geo-sec-lbl-2" placeholder="Optional"></div>
+              <div style="border-top:1px solid #e5e7eb;margin-top:9px;padding-top:8px">
+                <div class="check-row"><input type="checkbox" id="geo-fill-2" checked><label for="geo-fill-2">Filled</label></div>
+                <div class="row2" style="margin-top:5px"><div><label>Fill color</label><input type="color" id="geo-fill-color-2" value="#FFDB58"></div><div><label>Opacity</label><input type="number" id="geo-fill-opacity-2" value="0.45" min="0" max="1" step="0.05"></div></div>
+                <div class="row2"><div><label>Stroke color</label><input type="color" id="geo-stroke-color-2" value="#664400"></div><div><label>Stroke width</label><input type="number" id="geo-stroke-width-2" value="2.5" min="0.5" max="8" step="0.5"></div></div>
+                <div class="row2" style="margin-top:4px"><div><div class="check-row"><input type="checkbox" id="geo-show-labels-2" checked><label for="geo-show-labels-2">Show labels</label></div></div><div><div class="check-row"><input type="checkbox" id="geo-arrows-2"><label for="geo-arrows-2">Dim. arrows</label></div></div></div>
+                <div style="margin-top:6px;padding-top:6px;border-top:1px dashed #e5e7eb">
+                  <div class="row2"><div><label>Label size</label><input type="number" id="geo-lbl-size-2" value="13" min="6" max="36"></div><div><label>Label color</label><input type="color" id="geo-lbl-color-2" value="#333333"></div></div>
+                  <div class="row2"><div><label>Weight</label><select id="geo-lbl-weight-2"><option value="normal">Normal</option><option value="bold">Bold</option></select></div><div><label>Style</label><select id="geo-lbl-fstyle-2"><option value="normal">Normal</option><option value="italic">Italic</option></select></div></div>
+                  <div><label>Font family</label><select id="geo-lbl-family-2"><option value="Arial,sans-serif">Arial (sans-serif)</option><option value="Georgia,serif">Georgia (serif)</option><option value="'Times New Roman',serif">Times New Roman</option><option value="'Courier New',monospace">Courier New (mono)</option><option value="'Trebuchet MS',sans-serif">Trebuchet MS</option></select></div>
+                  <div><label>Label offset</label><input type="number" id="geo-lbl-offset-2" value="0" min="-20" max="40"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── Element 4 ── -->
+          <div id="geo-el-3" class="sub-group collapsible collapsed sub-group--geo-el3" style="display:none">
+            <div class="sub-group-title">Shape 4
+              <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="sub-body">
+              <label for="geo-type-3">Shape type</label>
+              <select id="geo-type-3">
+                <option value="rectangle">Rectangle</option><option value="square">Square</option><option value="circle">Circle</option><option value="ellipse">Ellipse</option><option value="triangle">Triangle</option><option value="parallelogram">Parallelogram</option><option value="rhombus">Rhombus</option><option value="trapezoid">Trapezoid</option><option value="pentagon">Pentagon</option><option value="hexagon">Hexagon</option><option value="octagon">Octagon</option><option value="sector">Sector / Arc</option>
+              </select>
+              <div id="geo-rect-3" class="geo-shape-params" style="margin-top:6px"><div class="row2"><div><label>Width</label><input type="number" id="geo-rect-w-3" value="6" min="0.5" max="30" step="0.5"></div><div><label>Height</label><input type="number" id="geo-rect-h-3" value="4" min="0.5" max="30" step="0.5"></div></div><div class="row2"><div><label>Corner radius</label><input type="number" id="geo-rect-corner-3" value="0" min="0" max="50"></div><div><label>Diagonal</label><select id="geo-rect-diag-3"><option value="none">None</option><option value="one">One</option><option value="both">Both</option></select></div></div><div class="check-row"><input type="checkbox" id="geo-rect-ra-3"><label for="geo-rect-ra-3">Right-angle marks</label></div><div class="row2"><div><label>Width label</label><input type="text" id="geo-rect-wlbl-3" placeholder="e.g. 6 cm"></div><div><label>Height label</label><input type="text" id="geo-rect-hlbl-3" placeholder="e.g. 4 cm"></div></div></div>
+              <div id="geo-sq-3" class="geo-shape-params" style="display:none;margin-top:6px"><label>Side</label><input type="number" id="geo-sq-side-3" value="5" min="0.5" max="30" step="0.5"><div class="check-row"><input type="checkbox" id="geo-sq-diag-3"><label for="geo-sq-diag-3">Show diagonals</label></div><label>Side label</label><input type="text" id="geo-sq-lbl-3" placeholder="e.g. 5 cm"></div>
+              <div id="geo-circ-3" class="geo-shape-params" style="display:none;margin-top:6px"><label>Radius</label><input type="number" id="geo-circ-r-3" value="5" min="0.5" max="30" step="0.5"><div class="row2"><div><label>Radius label</label><input type="text" id="geo-circ-rlbl-3" value="r"></div><div><label>Diameter label</label><input type="text" id="geo-circ-dlbl-3" placeholder="2r"></div></div><div class="check-row"><input type="checkbox" id="geo-circ-center-3" checked><label for="geo-circ-center-3">Show center</label></div><div class="check-row"><input type="checkbox" id="geo-circ-rl-3"><label for="geo-circ-rl-3">Show radius line</label></div><div class="check-row"><input type="checkbox" id="geo-circ-diam-3"><label for="geo-circ-diam-3">Show diameter line</label></div></div>
+              <div id="geo-ellip-3" class="geo-shape-params" style="display:none;margin-top:6px"><div class="row2"><div><label>Semi-major (a)</label><input type="number" id="geo-ellip-a-3" value="6" min="0.5" max="30" step="0.5"></div><div><label>Semi-minor (b)</label><input type="number" id="geo-ellip-b-3" value="4" min="0.5" max="30" step="0.5"></div></div><div class="row2"><div><label>a label</label><input type="text" id="geo-ellip-albl-3" value="a"></div><div><label>b label</label><input type="text" id="geo-ellip-blbl-3" value="b"></div></div><div class="check-row"><input type="checkbox" id="geo-ellip-axes-3" checked><label for="geo-ellip-axes-3">Show axes</label></div></div>
+              <div id="geo-tri-3" class="geo-shape-params" style="display:none;margin-top:6px">
+                <label>Triangle type</label><select id="geo-tri-type-3"><option value="equilateral">Equilateral</option><option value="isosceles">Isosceles</option><option value="scalene">Scalene</option><option value="right">Right-angled</option></select>
+                <div id="geo-tri-eq-3" style="margin-top:5px"><label>Side</label><input type="number" id="geo-tri-eq-side-3" value="6" min="0.5" max="30" step="0.5"></div>
+                <div id="geo-tri-iso-3" style="display:none;margin-top:5px"><div class="row2"><div><label>Base</label><input type="number" id="geo-tri-iso-base-3" value="4" min="0.5" max="30" step="0.5"></div><div><label>Leg</label><input type="number" id="geo-tri-iso-leg-3" value="5" min="0.5" max="30" step="0.5"></div></div></div>
+                <div id="geo-tri-sc-3" style="display:none;margin-top:5px"><div class="row3"><div><label>Side a</label><input type="number" id="geo-tri-sc-a-3" value="5" min="0.5" max="30" step="0.5"></div><div><label>Side b</label><input type="number" id="geo-tri-sc-b-3" value="7" min="0.5" max="30" step="0.5"></div><div><label>Side c</label><input type="number" id="geo-tri-sc-c-3" value="6" min="0.5" max="30" step="0.5"></div></div></div>
+                <div id="geo-tri-rt-3" style="display:none;margin-top:5px"><div class="row2"><div><label>Base</label><input type="number" id="geo-tri-rt-base-3" value="5" min="0.5" max="30" step="0.5"></div><div><label>Height</label><input type="number" id="geo-tri-rt-height-3" value="4" min="0.5" max="30" step="0.5"></div></div></div>
+                <div class="check-row" style="margin-top:6px"><input type="checkbox" id="geo-tri-height-3"><label for="geo-tri-height-3">Show altitude</label></div>
+                <input type="text" id="geo-tri-hlbl-3" placeholder="Altitude label (h)" style="margin-top:3px">
+                <div class="check-row"><input type="checkbox" id="geo-tri-angles-3"><label for="geo-tri-angles-3">Show angle arcs</label></div>
+                <div class="row3" style="margin-top:5px"><div><label>Label a</label><input type="text" id="geo-tri-lbla-3" placeholder="a"></div><div><label>Label b</label><input type="text" id="geo-tri-lblb-3" placeholder="b"></div><div><label>Label c</label><input type="text" id="geo-tri-lblc-3" placeholder="c"></div></div>
+              </div>
+              <div id="geo-para-3" class="geo-shape-params" style="display:none;margin-top:6px"><div class="row2"><div><label>Base</label><input type="number" id="geo-para-base-3" value="7" min="0.5" max="30" step="0.5"></div><div><label>Height</label><input type="number" id="geo-para-height-3" value="4" min="0.5" max="30" step="0.5"></div></div><label>Slant angle (°)</label><input type="number" id="geo-para-angle-3" value="60" min="20" max="85"><div class="check-row"><input type="checkbox" id="geo-para-diag-3"><label for="geo-para-diag-3">Show diagonals</label></div><div class="check-row"><input type="checkbox" id="geo-para-hline-3"><label for="geo-para-hline-3">Show height line</label></div><div class="row2"><div><label>Base label</label><input type="text" id="geo-para-blbl-3" placeholder="b"></div><div><label>Height label</label><input type="text" id="geo-para-hlbl-3" placeholder="h"></div></div></div>
+              <div id="geo-rhom-3" class="geo-shape-params" style="display:none;margin-top:6px"><div class="row2"><div><label>Side</label><input type="number" id="geo-rhom-side-3" value="5" min="0.5" max="30" step="0.5"></div><div><label>Acute angle (°)</label><input type="number" id="geo-rhom-angle-3" value="60" min="20" max="85"></div></div><div class="check-row"><input type="checkbox" id="geo-rhom-diag-3"><label for="geo-rhom-diag-3">Show diagonals</label></div><label>Side label</label><input type="text" id="geo-rhom-lbl-3" placeholder="a"></div>
+              <div id="geo-trap-3" class="geo-shape-params" style="display:none;margin-top:6px"><div class="row2"><div><label>Top base</label><input type="number" id="geo-trap-top-3" value="3" min="0.5" max="30" step="0.5"></div><div><label>Bottom base</label><input type="number" id="geo-trap-bottom-3" value="6" min="0.5" max="30" step="0.5"></div></div><div class="row2"><div><label>Height</label><input type="number" id="geo-trap-height-3" value="4" min="0.5" max="30" step="0.5"></div><div><label>Type</label><select id="geo-trap-type-3"><option value="isosceles">Isosceles</option><option value="right">Right</option><option value="general">General</option></select></div></div><div class="check-row"><input type="checkbox" id="geo-trap-diag-3"><label for="geo-trap-diag-3">Show diagonals</label></div><div class="row3"><div><label>Top label</label><input type="text" id="geo-trap-tlbl-3" placeholder="a"></div><div><label>Bottom label</label><input type="text" id="geo-trap-blbl-3" placeholder="b"></div><div><label>Height label</label><input type="text" id="geo-trap-hlbl-3" placeholder="h"></div></div></div>
+              <div id="geo-poly-3" class="geo-shape-params" style="display:none;margin-top:6px"><div class="row2"><div><label>Side length</label><input type="number" id="geo-poly-side-3" value="5" min="0.5" max="30" step="0.5"></div><div><label>Orientation</label><select id="geo-poly-orient-3"><option value="pointy">Pointy-top</option><option value="flat">Flat-top</option></select></div></div><div class="check-row"><input type="checkbox" id="geo-poly-diag-3"><label for="geo-poly-diag-3">Show diagonals</label></div><label>Center label</label><input type="text" id="geo-poly-lbl-3" placeholder="Optional"></div>
+              <div id="geo-sec-3" class="geo-shape-params" style="display:none;margin-top:6px"><label>Radius</label><input type="number" id="geo-sec-r-3" value="5" min="0.5" max="30" step="0.5"><div class="row2"><div><label>Arc angle (°)</label><input type="number" id="geo-sec-arc-3" value="90" min="5" max="359"></div><div><label>Start angle (°)</label><input type="number" id="geo-sec-start-3" value="-90" step="15"></div></div><label>Type</label><select id="geo-sec-type-3"><option value="sector">Filled sector</option><option value="arc">Arc only</option></select><label>Label</label><input type="text" id="geo-sec-lbl-3" placeholder="Optional"></div>
+              <div style="border-top:1px solid #e5e7eb;margin-top:9px;padding-top:8px">
+                <div class="check-row"><input type="checkbox" id="geo-fill-3" checked><label for="geo-fill-3">Filled</label></div>
+                <div class="row2" style="margin-top:5px"><div><label>Fill color</label><input type="color" id="geo-fill-color-3" value="#FFB6C1"></div><div><label>Opacity</label><input type="number" id="geo-fill-opacity-3" value="0.45" min="0" max="1" step="0.05"></div></div>
+                <div class="row2"><div><label>Stroke color</label><input type="color" id="geo-stroke-color-3" value="#8B008B"></div><div><label>Stroke width</label><input type="number" id="geo-stroke-width-3" value="2.5" min="0.5" max="8" step="0.5"></div></div>
+                <div class="row2" style="margin-top:4px"><div><div class="check-row"><input type="checkbox" id="geo-show-labels-3" checked><label for="geo-show-labels-3">Show labels</label></div></div><div><div class="check-row"><input type="checkbox" id="geo-arrows-3"><label for="geo-arrows-3">Dim. arrows</label></div></div></div>
+                <div style="margin-top:6px;padding-top:6px;border-top:1px dashed #e5e7eb">
+                  <div class="row2"><div><label>Label size</label><input type="number" id="geo-lbl-size-3" value="13" min="6" max="36"></div><div><label>Label color</label><input type="color" id="geo-lbl-color-3" value="#333333"></div></div>
+                  <div class="row2"><div><label>Weight</label><select id="geo-lbl-weight-3"><option value="normal">Normal</option><option value="bold">Bold</option></select></div><div><label>Style</label><select id="geo-lbl-fstyle-3"><option value="normal">Normal</option><option value="italic">Italic</option></select></div></div>
+                  <div><label>Font family</label><select id="geo-lbl-family-3"><option value="Arial,sans-serif">Arial (sans-serif)</option><option value="Georgia,serif">Georgia (serif)</option><option value="'Times New Roman',serif">Times New Roman</option><option value="'Courier New',monospace">Courier New (mono)</option><option value="'Trebuchet MS',sans-serif">Trebuchet MS</option></select></div>
+                  <div><label>Label offset</label><input type="number" id="geo-lbl-offset-3" value="0" min="-20" max="40"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Rectangle -->
+        <div class="param-section" id="params-rectangle">
+          <div class="row2">
+            <div><label for="rect-w">Width</label><input type="number" id="rect-w" value="6" min="0.5" max="30" step="0.5"></div>
+            <div><label for="rect-h">Height</label><input type="number" id="rect-h" value="4" min="0.5" max="30" step="0.5"></div>
+          </div>
+          <div class="row2">
+            <div><label for="rect-wl">Width label</label><input type="text" id="rect-wl" placeholder="e.g. 6 cm"></div>
+            <div><label for="rect-hl">Height label</label><input type="text" id="rect-hl" placeholder="e.g. 4 cm"></div>
+          </div>
+          <div class="check-row"><input type="checkbox" id="rect-fill" checked><label for="rect-fill">Filled (when no lines)</label></div>
+          <p class="hint" style="margin-top:7px">Draw horizontal/vertical lines across the rectangle to divide it into clickable shading regions</p>
+        </div>
+
+        <!-- Circle -->
+        <div class="param-section" id="params-circle">
+          <label for="circ-rlabel">Radius label</label>
+          <input type="text" id="circ-rlabel" value="r">
+          <div class="check-row"><input type="checkbox" id="circ-diameter"><label for="circ-diameter">Show diameter instead</label></div>
+          <div class="check-row"><input type="checkbox" id="circ-center" checked><label for="circ-center">Show center point</label></div>
+          <div class="check-row"><input type="checkbox" id="circ-fill" checked><label for="circ-fill">Filled interior</label></div>
+        </div>
+
+        <!-- Triangle -->
+        <div class="param-section" id="params-triangle">
+          <label for="tri-side">Side length</label>
+          <input type="number" id="tri-side" value="6" min="1" max="30" step="0.5">
+          <label for="tri-side-label">Side label</label>
+          <input type="text" id="tri-side-label" placeholder="e.g. 6 cm">
+          <div class="check-row"><input type="checkbox" id="tri-fill" checked><label for="tri-fill">Filled interior</label></div>
+          <div class="check-row"><input type="checkbox" id="tri-height"><label for="tri-height">Show height</label></div>
+          <label for="tri-height-label">Height label</label>
+          <input type="text" id="tri-height-label" value="h">
+          <p class="hint" style="margin-top:8px">Use <b>Draw Lines</b> → click two vertices to split into two shadeable regions.</p>
+        </div>
+
+        <!-- Right Triangle -->
+        <div class="param-section" id="params-rightTriangle">
+          <div class="row2">
+            <div><label for="rtri-b">Base</label><input type="number" id="rtri-b" value="5" min="0.5" max="30" step="0.5"></div>
+            <div><label for="rtri-h">Height</label><input type="number" id="rtri-h" value="4" min="0.5" max="30" step="0.5"></div>
+          </div>
+          <div class="row2">
+            <div><label for="rtri-bl">Base label</label><input type="text" id="rtri-bl" placeholder="e.g. 5 cm"></div>
+            <div><label for="rtri-hl">Height label</label><input type="text" id="rtri-hl" placeholder="e.g. 4 cm"></div>
+          </div>
+          <div class="check-row"><input type="checkbox" id="rtri-fill" checked><label for="rtri-fill">Filled interior</label></div>
+        </div>
+
+        <!-- Pentagon -->
+        <div class="param-section" id="params-pentagon">
+          <label for="pent-label">Center label</label>
+          <input type="text" id="pent-label" placeholder="Optional label">
+          <div class="check-row"><input type="checkbox" id="pent-fill" checked><label for="pent-fill">Filled interior</label></div>
+          <p class="hint" style="margin-top:8px">Use <b>Draw Lines</b> → click two non-adjacent vertices to split into two shadeable regions.</p>
+        </div>
+
+        <!-- Hexagon -->
+        <div class="param-section" id="params-hexagon">
+          <label for="hex-label">Center label</label>
+          <input type="text" id="hex-label" placeholder="Optional label">
+          <div class="check-row"><input type="checkbox" id="hex-fill" checked><label for="hex-fill">Filled interior</label></div>
+          <div class="check-row"><input type="checkbox" id="hex-flat"><label for="hex-flat">Flat-top orientation</label></div>
+          <p class="hint" style="margin-top:8px">Use <b>Draw Lines</b> → click two non-adjacent vertices to split into two shadeable regions.</p>
+        </div>
+
+        <!-- Stage -->
+        <div class="param-section" id="params-stage">
+          <p class="hint">Select a shape, configure it, then click <b>＋ Add to Stage</b>.</p>
+          <div id="stage-el-list" style="margin-top:8px"></div>
+          <button class="btn btn-ghost btn-danger" id="btn-clear-stage" style="margin-top:6px;font-size:.75rem">Clear All</button>
+          <p class="hint" style="margin-top:8px">Drag shapes in the preview to reposition. Snap to adjacent edges within 16 px.</p>
+        </div>
+
+        <!-- Line Shape -->
+        <div class="param-section" id="params-lineShape">
+          <label for="lshape-style">Style</label>
+          <select id="lshape-style">
+            <option value="solid">Solid</option>
+            <option value="dashed">Dashed</option>
+            <option value="dotted">Dotted</option>
+            <option value="arrow">Arrow →</option>
+            <option value="double-arrow">Double Arrow ↔</option>
+          </select>
+          <label for="lshape-length">Length (px)</label>
+          <input type="number" id="lshape-length" value="200" min="40" max="600">
+          <div class="row2">
+            <div><label for="lshape-color">Color</label><input type="color" id="lshape-color" value="#333333"></div>
+            <div><label for="lshape-width">Stroke width</label><input type="number" id="lshape-width" value="2" min="1" max="12" step="0.5"></div>
+          </div>
+        </div>
+
+      </div><!-- /Parameters -->
+
+      <!-- ── Draw Lines (collapsible) ── -->
+      <div class="card col2 collapsible collapsed">
+        <button class="card-title" aria-expanded="false">
+          Draw Lines on Canvas
+          <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="card-body">
+          <div class="row3">
+            <div><label>Color</label><input type="color" id="line-color" value="#333333"></div>
+            <div><label>Width</label><input type="number" id="line-width" value="2" min="1" max="10" step="0.5"></div>
+            <div>
+              <label>Style</label>
+              <select id="line-style">
+                <option value="solid">Solid</option>
+                <option value="dashed">Dashed</option>
+                <option value="dotted">Dotted</option>
+                <option value="arrow">Arrow</option>
+                <option value="double-arrow">↔ Arrow</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn btn-secondary" id="btn-draw-line" style="margin-top:8px">✏ Draw Line</button>
+          <p class="hint" style="margin-top:5px">Click start point then end point in the preview. <kbd>Esc</kbd> to cancel.</p>
+          <div id="line-list"></div>
+          <button class="btn btn-ghost btn-danger" id="btn-clear-lines" style="display:none;margin-top:6px;font-size:.75rem">Clear all lines</button>
+        </div>
+      </div>
+
+      <!-- ── Add Text (collapsible) ── -->
+      <div class="card col2 collapsible collapsed">
+        <button class="card-title" aria-expanded="false">
+          Add Text Label
+          <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="card-body">
+          <label for="text-content">Text</label>
+          <input type="text" id="text-content" placeholder="e.g. Area = 24 cm²">
+          <div class="row3" style="margin-top:7px">
+            <div><label>Size</label><input type="number" id="text-size" value="16" min="8" max="72"></div>
+            <div><label>Color</label><input type="color" id="text-color" value="#000000"></div>
+            <div><label>&nbsp;</label><div class="check-row" style="height:28px"><input type="checkbox" id="text-bold"><label for="text-bold">Bold</label></div></div>
+          </div>
+          <button class="btn btn-secondary" id="btn-add-text">+ Add Text</button>
+          <div id="text-list"></div>
+          <p class="hint" style="margin-top:5px">Drag text in the preview to reposition</p>
+        </div>
+      </div>
+
+      <!-- ── Add Image (collapsible) ── -->
+      <div class="card col2 collapsible collapsed">
+        <button class="card-title" aria-expanded="false">
+          Embed Image
+          <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="card-body">
+          <label for="img-file">Upload from device</label>
+          <input type="file" id="img-file" accept="image/*">
+          <label for="img-src" style="margin-top:6px">Or paste image URL / data URL</label>
+          <input type="text" id="img-src" placeholder="https://… or data:image/…">
+          <div class="row3" style="margin-top:7px">
+            <div><label for="img-w">Width</label><input type="number" id="img-w" value="100" min="10" max="2000"></div>
+            <div><label for="img-h">Height</label><input type="number" id="img-h" value="100" min="10" max="2000"></div>
+            <div><label for="img-opacity">Opacity</label><input type="number" id="img-opacity" value="1" min="0" max="1" step="0.1"></div>
+          </div>
+          <button class="btn btn-secondary" id="btn-add-image" style="margin-top:8px">↳ Embed Image</button>
+          <div id="image-list"></div>
+          <p class="hint" style="margin-top:5px">Drag image in the preview to reposition</p>
+        </div>
+      </div>
+
+    </div><!-- /controls -->
+  </div><!-- /#tab-imager -->
+
+  <!-- ══════════ GRAPHER TAB ══════════ -->
+  <div id="tab-grapher" class="tab-content">
+    <div class="controls controls--grapher">
+
+      <!-- ── Plot Setup card ── -->
+      <div class="card grapher-col1">
+        <div class="card-title">Plot Setup</div>
+
+        <div class="sub-group collapsible collapsed sub-group--axes">
+          <div class="sub-group-title">
+            Axes &amp; Range
+            <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="sub-body">
+            <label for="gp-quadrant">Quadrant</label>
+            <select id="gp-quadrant">
+              <option value="all">All four quadrants</option>
+              <option value="first">First quadrant only</option>
+            </select>
+            <div class="row2">
+              <div><label for="gp-xmin">X min</label><input type="number" id="gp-xmin" value="-5" step="1"></div>
+              <div><label for="gp-xmax">X max</label><input type="number" id="gp-xmax" value="5" step="1"></div>
+            </div>
+            <div class="row2">
+              <div id="gp-ymin-wrap"><label for="gp-ymin">Y min</label><input type="number" id="gp-ymin" value="-5" step="1"></div>
+              <div><label for="gp-ymax">Y max</label><input type="number" id="gp-ymax" value="5" step="1"></div>
+            </div>
+            <label for="gp-unit">Unit size (px per unit)</label>
+            <input type="number" id="gp-unit" value="40" min="15" max="120" step="5">
+            <label for="gp-width-preset" style="margin-top:7px">Canvas size preset</label>
+            <select id="gp-width-preset">
+              <option value="">— Custom —</option>
+              <option value="small">Small (~230 px wide)</option>
+              <option value="medium">Medium (~360 px wide)</option>
+              <option value="large">Large (~480 px wide)</option>
+            </select>
+            <div class="row2" style="margin-top:7px">
+              <div><label for="gp-axis-color">Axis color</label><input type="color" id="gp-axis-color" value="#333333"></div>
+              <div><div class="check-row" style="margin-top:20px"><input type="checkbox" id="gp-axis-arrows" checked><label for="gp-axis-arrows">Axis arrows</label></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sub-group collapsible collapsed sub-group--labels">
+          <div class="sub-group-title">
+            Labels &amp; Title
+            <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="sub-body">
+            <label for="gp-title">Graph title</label>
+            <input type="text" id="gp-title" placeholder="e.g. Linear Graph">
+            <div class="row2">
+              <div><label for="gp-xlabel">X-axis label</label><input type="text" id="gp-xlabel" placeholder="x"></div>
+              <div><label for="gp-ylabel">Y-axis label</label><input type="text" id="gp-ylabel" placeholder="y"></div>
+            </div>
+            <div class="row3" style="margin-top:7px">
+              <div><label for="gp-lbl-size">Label size</label><input type="number" id="gp-lbl-size" value="13" min="8" max="28"></div>
+              <div><label>Color</label><input type="color" id="gp-lbl-color" value="#333333"></div>
+              <div>
+                <label for="gp-lbl-style">Style</label>
+                <select id="gp-lbl-style">
+                  <option value="italic">Italic</option>
+                  <option value="normal">Normal</option>
+                </select>
+              </div>
+            </div>
+            <div class="check-row"><input type="checkbox" id="gp-lbl-bold"><label for="gp-lbl-bold">Bold</label></div>
+          </div>
+        </div>
+
+        <div class="sub-group collapsible collapsed sub-group--grid">
+          <div class="sub-group-title">
+            Grid &amp; Ticks
+            <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="sub-body">
+            <div class="check-row"><input type="checkbox" id="gp-grid" checked><label for="gp-grid">Show grid lines</label></div>
+            <div class="row2">
+              <div><label for="gp-grid-x">Grid X step</label><input type="number" id="gp-grid-x" value="1" min="0.25" max="20" step="0.25"></div>
+              <div><label for="gp-grid-y">Grid Y step</label><input type="number" id="gp-grid-y" value="1" min="0.25" max="20" step="0.25"></div>
+            </div>
+            <div class="check-row"><input type="checkbox" id="gp-ticks" checked><label for="gp-ticks">Show tick marks</label></div>
+            <div class="check-row"><input type="checkbox" id="gp-tick-labels" checked><label for="gp-tick-labels">Show tick labels</label></div>
+            <div class="check-row"><input type="checkbox" id="gp-legend"><label for="gp-legend">Show legend</label></div>
+            <div class="row3" style="margin-top:8px">
+              <div><label for="gp-tk-size">Tick size</label><input type="number" id="gp-tk-size" value="11" min="7" max="20"></div>
+              <div><label>Color</label><input type="color" id="gp-tk-color" value="#444444"></div>
+              <div>
+                <label for="gp-tk-style">Style</label>
+                <select id="gp-tk-style">
+                  <option value="normal">Normal</option>
+                  <option value="italic">Italic</option>
+                </select>
+              </div>
+            </div>
+            <div class="check-row"><input type="checkbox" id="gp-tk-bold"><label for="gp-tk-bold">Bold</label></div>
+            <div class="row2" style="margin-top:8px">
+              <div>
+                <label for="gp-grid-style">Grid line style</label>
+                <select id="gp-grid-style">
+                  <option value="solid">Solid</option>
+                  <option value="dashed">Dashed</option>
+                  <option value="dotted">Dotted</option>
+                </select>
+              </div>
+              <div><label for="gp-grid-color">Grid color</label><input type="color" id="gp-grid-color" value="#DDDDDD"></div>
+            </div>
+            <div class="row2" style="margin-top:7px">
+              <div><label for="gp-tick-x-step">X tick spacing</label><input type="number" id="gp-tick-x-step" value="1" min="0.25" max="20" step="0.25"></div>
+              <div><label for="gp-tick-y-step">Y tick spacing</label><input type="number" id="gp-tick-y-step" value="1" min="0.25" max="20" step="0.25"></div>
+            </div>
+            <label for="gp-tick-vals" style="margin-top:6px">Specific tick values <span class="hint" style="display:inline">(comma-sep, e.g. 0,8,24)</span></label>
+            <input type="text" id="gp-tick-vals" placeholder="blank = use tick interval">
+            <div class="check-row" style="margin-top:5px"><input type="checkbox" id="gp-show-zero" checked><label for="gp-show-zero">Show zero label at origin</label></div>
+          </div>
+        </div>
+
+      </div><!-- /Plot Setup -->
+
+      <!-- ── Series card ── -->
+      <div class="card grapher-col2">
+        <div class="card-title">Series</div>
+
+        <!-- Series 1 — always visible -->
+        <div class="sub-group collapsible collapsed sub-group--s1">
+          <div class="sub-group-title">
+            Series 1
+            <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="sub-body">
+            <div class="row2">
+              <div><label>Color</label><input type="color" id="gp-s1-color" value="#0066CC"></div>
+              <div><label for="gp-s1-label">Legend label</label><input type="text" id="gp-s1-label" placeholder="Series 1"></div>
+            </div>
+            <label for="gp-s1-curve-preset">Curve preset</label>
+            <select id="gp-s1-curve-preset">
+              <option value="">— Custom —</option>
+              <option value="prop">Proportional line  y = x</option>
+              <option value="line-pos">Line, +y-intercept  y = x + 2</option>
+              <option value="line-neg">Line, −y-intercept  y = x − 2</option>
+              <option value="horiz">Horizontal line  y = 3</option>
+              <option value="vert">Vertical line  x = 3</option>
+              <option value="parab">Parabola  y = x²</option>
+              <option value="parab-up">Parabola shifted up  y = x² + 2</option>
+              <option value="parab-down">Parabola shifted down  y = x² − 2</option>
+              <option value="cubic">Cubic  y = x³</option>
+              <option value="step">Step function</option>
+              <option value="zigzag">Zigzag / piecewise</option>
+            </select>
+            <label for="gp-s1-type" style="margin-top:7px">Input type</label>
+            <select id="gp-s1-type">
+              <option value="equation">Equation y = f(x)</option>
+              <option value="points">Points (x,y)</option>
+              <option value="vertical">Vertical line x = const</option>
+            </select>
+            <div id="gp-s1-eq-row">
+              <label id="gp-s1-eq-lbl" for="gp-s1-eq">Equation y = f(x) <span class="hint" style="display:inline">(e.g. 2*x+1, x^2)</span></label>
+              <input type="text" id="gp-s1-eq" value="2*x + 1" placeholder="e.g. x^2 - 2">
+              <div class="check-row"><input type="checkbox" id="gp-s1-dots"><label for="gp-s1-dots">Show dots at integer x values</label></div>
+            </div>
+            <div id="gp-s1-lpts-row" style="display:none">
+              <label for="gp-s1-line-pts">Plot points <span class="hint" style="display:inline">(x,y per line)</span></label>
+              <textarea id="gp-s1-line-pts" rows="3" placeholder="0,0&#10;1,2&#10;3,4"></textarea>
+            </div>
+            <div id="gp-s1-line-row">
+              <label for="gp-s1-line">Line style</label>
+              <select id="gp-s1-line">
+                <option value="solid">Solid</option>
+                <option value="dashed">Dashed</option>
+                <option value="dotted">Dotted</option>
+                <option value="step">Step function</option>
+                <option value="none">None (dots only)</option>
+              </select>
+              <label for="gp-s1-lw" style="margin-top:6px">Line width (px)</label>
+              <input type="number" id="gp-s1-lw" value="2.5" min="0.5" max="12" step="0.5">
+            </div>
+            <div class="check-row" style="margin-top:6px"><input type="checkbox" id="gp-s1-dashes"><label for="gp-s1-dashes">Projection lines to axes</label></div>
+            <div class="row2">
+              <div>
+                <label for="gp-s1-drop-style">Drop line style</label>
+                <select id="gp-s1-drop-style">
+                  <option value="dashed">Dashed</option>
+                  <option value="dotted">Dotted</option>
+                  <option value="solid">Solid</option>
+                </select>
+              </div>
+              <div><label for="gp-s1-drop-color">Drop line color</label><input type="color" id="gp-s1-drop-color" value="#999999"></div>
+            </div>
+            <label for="gp-s1-pts" style="margin-top:9px">Labeled points <span class="hint" style="display:inline">(x,y:Label per line)</span></label>
+            <textarea id="gp-s1-pts" rows="3" placeholder="1,3:A&#10;-2,-3:B"></textarea>
+            <div class="row2" style="margin-top:5px">
+              <div><label>Dot color</label><input type="color" id="gp-s1-dot-color" value="#0066CC"></div>
+              <div>
+                <label for="gp-s1-pt-style">Point style</label>
+                <select id="gp-s1-pt-style">
+                  <option value="filled">Filled dot</option>
+                  <option value="open">Open circle</option>
+                  <option value="cross">Cross ×</option>
+                </select>
+              </div>
+            </div>
+            <div class="row2" style="margin-top:5px">
+              <div>
+                <label for="gp-s1-pt-lbl-pos">Label position</label>
+                <select id="gp-s1-pt-lbl-pos">
+                  <option value="above">Above</option>
+                  <option value="below">Below</option>
+                  <option value="left">Left</option>
+                  <option value="right">Right</option>
+                </select>
+              </div>
+              <div><div class="check-row" style="margin-top:20px"><input type="checkbox" id="gp-s1-pt-labels" checked><label for="gp-s1-pt-labels">Show labels</label></div></div>
+            </div>
+            <div class="check-row" style="margin-top:6px"><input type="checkbox" id="gp-s1-callouts"><label for="gp-s1-callouts">Axis value callouts</label></div>
+            <div class="row2">
+              <div>
+                <label for="gp-s1-callout-style">Callout style</label>
+                <select id="gp-s1-callout-style">
+                  <option value="bold">Bold</option>
+                  <option value="normal">Normal</option>
+                  <option value="bold-lg">Bold + larger</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Series 2 -->
+        <div class="sub-group collapsible collapsed sub-group--s2">
+          <div class="sub-group-title" style="display:flex;align-items:center;gap:8px">
+            Series 2
+            <label style="margin:0;font-weight:400;font-size:.78rem;text-transform:none;letter-spacing:0;display:flex;align-items:center;gap:4px">
+              <input type="checkbox" id="gp-s2-enable"> Enable
+            </label>
+            <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true" style="margin-left:auto"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div id="gp-s2-body" class="sub-body">
+            <div class="row2">
+              <div><label>Color</label><input type="color" id="gp-s2-color" value="#CC3300"></div>
+              <div><label for="gp-s2-label">Legend label</label><input type="text" id="gp-s2-label" placeholder="Series 2"></div>
+            </div>
+            <label for="gp-s2-curve-preset">Curve preset</label>
+            <select id="gp-s2-curve-preset">
+              <option value="">— Custom —</option>
+              <option value="prop">Proportional line  y = x</option>
+              <option value="line-pos">Line, +y-intercept  y = x + 2</option>
+              <option value="line-neg">Line, −y-intercept  y = x − 2</option>
+              <option value="horiz">Horizontal line  y = 3</option>
+              <option value="vert">Vertical line  x = 3</option>
+              <option value="parab">Parabola  y = x²</option>
+              <option value="parab-up">Parabola shifted up  y = x² + 2</option>
+              <option value="parab-down">Parabola shifted down  y = x² − 2</option>
+              <option value="cubic">Cubic  y = x³</option>
+              <option value="step">Step function</option>
+              <option value="zigzag">Zigzag / piecewise</option>
+            </select>
+            <label for="gp-s2-type" style="margin-top:7px">Input type</label>
+            <select id="gp-s2-type">
+              <option value="equation">Equation y = f(x)</option>
+              <option value="points">Points (x,y)</option>
+              <option value="vertical">Vertical line x = const</option>
+            </select>
+            <div id="gp-s2-eq-row">
+              <label id="gp-s2-eq-lbl" for="gp-s2-eq">Equation y = f(x) <span class="hint" style="display:inline">(e.g. x^2, cos(x))</span></label>
+              <input type="text" id="gp-s2-eq" placeholder="e.g. x^2 - 2">
+              <div class="check-row"><input type="checkbox" id="gp-s2-dots"><label for="gp-s2-dots">Show dots at integer x values</label></div>
+            </div>
+            <div id="gp-s2-lpts-row" style="display:none">
+              <label for="gp-s2-line-pts">Plot points <span class="hint" style="display:inline">(x,y per line)</span></label>
+              <textarea id="gp-s2-line-pts" rows="3" placeholder="0,0&#10;1,2&#10;3,4"></textarea>
+            </div>
+            <div id="gp-s2-line-row">
+              <label for="gp-s2-line">Line style</label>
+              <select id="gp-s2-line">
+                <option value="solid">Solid</option>
+                <option value="dashed">Dashed</option>
+                <option value="dotted">Dotted</option>
+                <option value="step">Step function</option>
+                <option value="none">None (dots only)</option>
+              </select>
+              <label for="gp-s2-lw" style="margin-top:6px">Line width (px)</label>
+              <input type="number" id="gp-s2-lw" value="2.5" min="0.5" max="12" step="0.5">
+            </div>
+            <div class="check-row" style="margin-top:6px"><input type="checkbox" id="gp-s2-dashes"><label for="gp-s2-dashes">Projection lines to axes</label></div>
+            <div class="row2">
+              <div>
+                <label for="gp-s2-drop-style">Drop line style</label>
+                <select id="gp-s2-drop-style">
+                  <option value="dashed">Dashed</option>
+                  <option value="dotted">Dotted</option>
+                  <option value="solid">Solid</option>
+                </select>
+              </div>
+              <div><label for="gp-s2-drop-color">Drop line color</label><input type="color" id="gp-s2-drop-color" value="#999999"></div>
+            </div>
+            <label for="gp-s2-pts" style="margin-top:9px">Labeled points <span class="hint" style="display:inline">(x,y:Label per line)</span></label>
+            <textarea id="gp-s2-pts" rows="3" placeholder="1,3:A&#10;2,5:B"></textarea>
+            <div class="row2" style="margin-top:5px">
+              <div><label>Dot color</label><input type="color" id="gp-s2-dot-color" value="#CC3300"></div>
+              <div>
+                <label for="gp-s2-pt-style">Point style</label>
+                <select id="gp-s2-pt-style">
+                  <option value="filled">Filled dot</option>
+                  <option value="open">Open circle</option>
+                  <option value="cross">Cross ×</option>
+                </select>
+              </div>
+            </div>
+            <div class="row2" style="margin-top:5px">
+              <div>
+                <label for="gp-s2-pt-lbl-pos">Label position</label>
+                <select id="gp-s2-pt-lbl-pos">
+                  <option value="above">Above</option>
+                  <option value="below">Below</option>
+                  <option value="left">Left</option>
+                  <option value="right">Right</option>
+                </select>
+              </div>
+              <div><div class="check-row" style="margin-top:20px"><input type="checkbox" id="gp-s2-pt-labels" checked><label for="gp-s2-pt-labels">Show labels</label></div></div>
+            </div>
+            <div class="check-row" style="margin-top:6px"><input type="checkbox" id="gp-s2-callouts"><label for="gp-s2-callouts">Axis value callouts</label></div>
+            <div class="row2">
+              <div>
+                <label for="gp-s2-callout-style">Callout style</label>
+                <select id="gp-s2-callout-style">
+                  <option value="bold">Bold</option>
+                  <option value="normal">Normal</option>
+                  <option value="bold-lg">Bold + larger</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Series 3 -->
+        <div class="sub-group collapsible collapsed sub-group--s3">
+          <div class="sub-group-title" style="display:flex;align-items:center;gap:8px">
+            Series 3
+            <label style="margin:0;font-weight:400;font-size:.78rem;text-transform:none;letter-spacing:0;display:flex;align-items:center;gap:4px">
+              <input type="checkbox" id="gp-s3-enable"> Enable
+            </label>
+            <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true" style="margin-left:auto"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div id="gp-s3-body" class="sub-body">
+            <div class="row2">
+              <div><label>Color</label><input type="color" id="gp-s3-color" value="#009944"></div>
+              <div><label for="gp-s3-label">Legend label</label><input type="text" id="gp-s3-label" placeholder="Series 3"></div>
+            </div>
+            <label for="gp-s3-curve-preset">Curve preset</label>
+            <select id="gp-s3-curve-preset">
+              <option value="">— Custom —</option>
+              <option value="prop">Proportional line  y = x</option>
+              <option value="line-pos">Line, +y-intercept  y = x + 2</option>
+              <option value="line-neg">Line, −y-intercept  y = x − 2</option>
+              <option value="horiz">Horizontal line  y = 3</option>
+              <option value="vert">Vertical line  x = 3</option>
+              <option value="parab">Parabola  y = x²</option>
+              <option value="parab-up">Parabola shifted up  y = x² + 2</option>
+              <option value="parab-down">Parabola shifted down  y = x² − 2</option>
+              <option value="cubic">Cubic  y = x³</option>
+              <option value="step">Step function</option>
+              <option value="zigzag">Zigzag / piecewise</option>
+            </select>
+            <label for="gp-s3-type" style="margin-top:7px">Input type</label>
+            <select id="gp-s3-type">
+              <option value="equation">Equation y = f(x)</option>
+              <option value="points">Points (x,y)</option>
+              <option value="vertical">Vertical line x = const</option>
+            </select>
+            <div id="gp-s3-eq-row">
+              <label id="gp-s3-eq-lbl" for="gp-s3-eq">Equation y = f(x) <span class="hint" style="display:inline">(e.g. sin(x))</span></label>
+              <input type="text" id="gp-s3-eq" placeholder="e.g. sin(x)">
+              <div class="check-row"><input type="checkbox" id="gp-s3-dots"><label for="gp-s3-dots">Show dots at integer x values</label></div>
+            </div>
+            <div id="gp-s3-lpts-row" style="display:none">
+              <label for="gp-s3-line-pts">Plot points <span class="hint" style="display:inline">(x,y per line)</span></label>
+              <textarea id="gp-s3-line-pts" rows="3" placeholder="0,0&#10;1,2&#10;3,4"></textarea>
+            </div>
+            <div id="gp-s3-line-row">
+              <label for="gp-s3-line">Line style</label>
+              <select id="gp-s3-line">
+                <option value="solid">Solid</option>
+                <option value="dashed">Dashed</option>
+                <option value="dotted">Dotted</option>
+                <option value="step">Step function</option>
+                <option value="none">None (dots only)</option>
+              </select>
+              <label for="gp-s3-lw" style="margin-top:6px">Line width (px)</label>
+              <input type="number" id="gp-s3-lw" value="2.5" min="0.5" max="12" step="0.5">
+            </div>
+            <div class="check-row" style="margin-top:6px"><input type="checkbox" id="gp-s3-dashes"><label for="gp-s3-dashes">Projection lines to axes</label></div>
+            <div class="row2">
+              <div>
+                <label for="gp-s3-drop-style">Drop line style</label>
+                <select id="gp-s3-drop-style">
+                  <option value="dashed">Dashed</option>
+                  <option value="dotted">Dotted</option>
+                  <option value="solid">Solid</option>
+                </select>
+              </div>
+              <div><label for="gp-s3-drop-color">Drop line color</label><input type="color" id="gp-s3-drop-color" value="#999999"></div>
+            </div>
+            <label for="gp-s3-pts" style="margin-top:9px">Labeled points <span class="hint" style="display:inline">(x,y:Label per line)</span></label>
+            <textarea id="gp-s3-pts" rows="3" placeholder="0,0:O&#10;2,4:P"></textarea>
+            <div class="row2" style="margin-top:5px">
+              <div><label>Dot color</label><input type="color" id="gp-s3-dot-color" value="#009944"></div>
+              <div>
+                <label for="gp-s3-pt-style">Point style</label>
+                <select id="gp-s3-pt-style">
+                  <option value="filled">Filled dot</option>
+                  <option value="open">Open circle</option>
+                  <option value="cross">Cross ×</option>
+                </select>
+              </div>
+            </div>
+            <div class="row2" style="margin-top:5px">
+              <div>
+                <label for="gp-s3-pt-lbl-pos">Label position</label>
+                <select id="gp-s3-pt-lbl-pos">
+                  <option value="above">Above</option>
+                  <option value="below">Below</option>
+                  <option value="left">Left</option>
+                  <option value="right">Right</option>
+                </select>
+              </div>
+              <div><div class="check-row" style="margin-top:20px"><input type="checkbox" id="gp-s3-pt-labels" checked><label for="gp-s3-pt-labels">Show labels</label></div></div>
+            </div>
+            <div class="check-row" style="margin-top:6px"><input type="checkbox" id="gp-s3-callouts"><label for="gp-s3-callouts">Axis value callouts</label></div>
+            <div class="row2">
+              <div>
+                <label for="gp-s3-callout-style">Callout style</label>
+                <select id="gp-s3-callout-style">
+                  <option value="bold">Bold</option>
+                  <option value="normal">Normal</option>
+                  <option value="bold-lg">Bold + larger</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /Series -->
+
+    </div><!-- /controls--grapher -->
+  </div><!-- /#tab-grapher -->
+
+  <!-- ══════════ CHARACTER TAB ══════════ -->
+  <div id="tab-character" class="tab-content">
+    <div class="controls controls--character">
+
+      <!-- Character selector -->
+      <div class="card char-col1">
+        <div class="card-title">Character</div>
+        <div class="char-selector">
+          <button class="char-card active" data-char="jiggi">
+            <svg width="44" height="44" viewBox="200 240 680 680" aria-hidden="true">
+              <path d="M406 349C458 258 590 258 643 349L754 541C806 632 740 746 635 746H414C308 746 243 632 295 541Z" fill="#FFBA07" stroke="#995200" stroke-width="12"/>
+              <circle cx="474" cy="384" r="34" fill="white"/><circle cx="576" cy="384" r="34" fill="white"/>
+              <circle cx="482" cy="391" r="18" fill="#995200"/><circle cx="568" cy="391" r="18" fill="#995200"/>
+              <ellipse cx="472" cy="382" rx="54" ry="52" fill="none" stroke="#995200" stroke-width="10"/>
+              <ellipse cx="586" cy="382" rx="54" ry="52" fill="none" stroke="#995200" stroke-width="10"/>
+              <path d="M473 455H580C585 455 588 462 583 466C562 482 549 491 525 491C501 491 487 480 469 466C465 462 467 455 473 455Z" fill="#995200"/>
+            </svg>
+            <span>Jiggi</span>
+          </button>
+          <div class="char-card char-soon" title="More coming soon">
+            <svg width="44" height="44" viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="18" fill="currentColor" fill-opacity=".1" stroke="currentColor" stroke-width="2" stroke-dasharray="5 3"/><text x="22" y="27" font-size="16" text-anchor="middle" fill="currentColor">?</text></svg>
+            <span>Soon</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Emotion selector -->
+      <div class="card char-col2">
+        <div class="card-title">Emotion</div>
+        <input type="hidden" id="char-emotion" value="happy">
+        <div class="emotion-grid">
+          <button class="emotion-btn active" data-emotion="happy">😊 Happy</button>
+          <button class="emotion-btn" data-emotion="sad">😢 Sad</button>
+          <button class="emotion-btn" data-emotion="surprised">😮 Surprised</button>
+          <button class="emotion-btn" data-emotion="angry">😠 Angry</button>
+          <button class="emotion-btn" data-emotion="excited">🤩 Excited</button>
+          <button class="emotion-btn" data-emotion="thinking">🤔 Thinking</button>
+          <button class="emotion-btn" data-emotion="winking">😉 Winking</button>
+          <button class="emotion-btn" data-emotion="crying">😭 Crying</button>
+        </div>
+      </div>
+
+      <!-- Size + background -->
+      <div class="card char-col1">
+        <div class="card-title">Size</div>
+        <select id="char-size">
+          <option value="small">Small (280 px)</option>
+          <option value="medium" selected>Medium (360 px)</option>
+          <option value="large">Large (470 px)</option>
+          <option value="xlarge">X-Large (580 px)</option>
+        </select>
+        <div class="check-row" style="margin-top:8px">
+          <input type="checkbox" id="char-bg-enable">
+          <label for="char-bg-enable">Background color</label>
+        </div>
+        <input type="color" id="char-bg-color" value="#FFFFFF" disabled style="margin-top:4px">
+      </div>
+
+      <!-- Animation -->
+      <div class="card char-col1 collapsible collapsed">
+        <button class="card-title" aria-expanded="false">
+          Animation
+          <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="card-body">
+          <div class="check-row">
+            <input type="checkbox" id="char-animate">
+            <label for="char-animate">Enable animation</label>
+          </div>
+          <div id="char-anim-opts" style="display:none;margin-top:8px">
+            <div class="row2">
+              <div><label>Type</label>
+                <select id="char-anim-type">
+                  <option value="bounce">Bounce</option>
+                  <option value="float">Float</option>
+                  <option value="wave">Wave hand</option>
+                  <option value="shake">Shake</option>
+                </select></div>
+              <div><label>Speed</label>
+                <select id="char-anim-speed">
+                  <option value="slow">Slow</option>
+                  <option value="normal" selected>Normal</option>
+                  <option value="fast">Fast</option>
+                </select></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dialog & Bubble -->
+      <div class="card char-col2 collapsible collapsed">
+        <button class="card-title" aria-expanded="false">
+          Dialog &amp; Bubble
+          <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="card-body">
+          <div class="row2">
+            <div><label>Type</label>
+              <select id="char-bubble-type">
+                <option value="none">None</option>
+                <option value="speech">Speech bubble</option>
+                <option value="thought">Thought bubble</option>
+                <option value="shout">Shout burst</option>
+              </select></div>
+            <div><label>Position</label>
+              <select id="char-bubble-pos">
+                <option value="top-right">Top right</option>
+                <option value="top-left">Top left</option>
+                <option value="right">Right</option>
+                <option value="left">Left</option>
+              </select></div>
+          </div>
+          <div id="char-bubble-opts" style="margin-top:8px">
+            <label>Text</label>
+            <textarea id="char-bubble-text" rows="2" placeholder="Enter bubble text&#10;(new line = new line)"></textarea>
+            <div class="row2" style="margin-top:6px">
+              <div><label>Bubble fill</label><input type="color" id="char-bubble-bg" value="#FFFFFF"></div>
+              <div><label>Border</label><input type="color" id="char-bubble-border" value="#333333"></div>
+            </div>
+            <div class="row2">
+              <div><label>Text color</label><input type="color" id="char-bubble-tc" value="#333333"></div>
+              <div><label>Font size</label><input type="number" id="char-bubble-fs" value="16" min="8" max="40"></div>
+            </div>
+            <div class="row2">
+              <div><label>Weight</label>
+                <select id="char-bubble-fw">
+                  <option value="normal">Normal</option>
+                  <option value="bold">Bold</option>
+                </select></div>
+              <div><label>Style</label>
+                <select id="char-bubble-fstyle">
+                  <option value="normal">Normal</option>
+                  <option value="italic">Italic</option>
+                </select></div>
+            </div>
+            <label>Font family</label>
+            <select id="char-bubble-ff">
+              <option value="Arial,sans-serif">Arial</option>
+              <option value="Georgia,serif">Georgia</option>
+              <option value="'Comic Sans MS',cursive">Comic Sans</option>
+              <option value="'Trebuchet MS',sans-serif">Trebuchet MS</option>
+              <option value="'Courier New',monospace">Courier New</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /controls--character -->
+  </div><!-- /#tab-character -->
+
+  <!-- ── Export panel (always visible) ── -->
+  <div class="card export-panel">
+    <div class="card-title">Export</div>
+    <div class="action-group" id="stage-action-row">
+      <button class="btn btn-secondary" id="btn-add-to-stage">＋ Add to Stage</button>
+    </div>
+    <div class="action-divider" id="stage-action-divider"></div>
+    <div class="action-group">
+      <button class="btn btn-primary" id="btnCopy">Copy SVG</button>
+      <button class="btn btn-secondary" id="btnDownload">↓ SVG</button>
+    </div>
+    <div class="action-group" style="margin-top:4px">
+      <button class="btn btn-png" id="btnCopyPNG" title="Copy as PNG to clipboard">Copy PNG</button>
+      <button class="btn btn-png" id="btnDownloadPNG" title="Download as PNG file">↓ PNG</button>
+    </div>
+    <div class="copy-ok" id="copyFeedback">&nbsp;</div>
+  </div>
+
+</div><!-- /controls-col -->
+
+<!-- ════════════════ RIGHT PREVIEW ════════════════ -->
+<div class="preview-panel">
+
+  <!-- Canvas controls bar -->
+  <div class="canvas-bar">
+    <div class="canvas-ctrl">
+      <span class="canvas-ctrl-label">Padding</span>
+      <input type="range" id="canvas-pad" min="0" max="100" value="0">
+      <span class="canvas-ctrl-val"><span id="canvas-pad-val">0</span> px</span>
+    </div>
+    <div class="canvas-ctrl">
+      <span class="canvas-ctrl-label">Scale</span>
+      <input type="range" id="canvas-scale" min="25" max="400" value="100">
+      <span class="canvas-ctrl-val"><span id="canvas-scale-val">100</span> %</span>
+    </div>
+    <div class="canvas-ctrl">
+      <span class="canvas-ctrl-label">Rotate</span>
+      <input type="range" id="canvas-rotate" min="0" max="360" value="0">
+      <span class="canvas-ctrl-val"><span id="canvas-rotate-val">0</span> °</span>
+    </div>
+    <div class="canvas-ctrl canvas-ctrl-bg">
+      <span class="canvas-ctrl-label">BG</span>
+      <label class="bg-toggle" title="Enable background colour">
+        <input type="checkbox" id="bg-enable">
+        <span class="bg-toggle-track"></span>
+      </label>
+      <input type="color" id="bg-color" value="#ffffff" disabled title="Background colour">
+    </div>
+  </div>
+
+  <!-- SVG preview -->
+  <div class="preview-card">
+    <div class="preview-card-title">
+      Preview
+      <span class="hint" style="display:inline;text-transform:none;letter-spacing:0;font-weight:400">
+        — dashed border = canvas · click cells to shade · drag text &amp; images
+      </span>
+      <span class="svg-dims-badge" id="svg-dims"></span>
+    </div>
+    <div id="svgPreview"></div>
+  </div>
+
+  <!-- Code -->
+  <div class="code-card">
+    <div class="code-hdr">
+      <span>SVG Code</span>
+      <button id="btnCopy2">Copy</button>
+    </div>
+    <textarea id="svgCode" readonly spellcheck="false"></textarea>
+  </div>
+
+</div><!-- /preview-panel -->
+
+<!-- ══════════ SVG EDITOR PANEL ══════════ -->
+<div id="tab-editor" class="editor-panel">
+  <iframe src="../svg-analyser/svganalyser.html" title="SVG Editor" allowfullscreen></iframe>
+</div>
+
+<!-- ══════════ 3D BUILDER PANEL ══════════ -->
+<div id="tab-cube3d" class="editor-panel">
+  <iframe src="../cube-builder/index.html" title="3D Builder" allowfullscreen></iframe>
+</div>
+
+</div><!-- /app-wrapper -->
+
+<script src="js/utils.js"></script>
+<script src="js/state.js"></script>
+<script src="js/shading.js"></script>
+<script src="js/lines.js"></script>
+<script src="js/generators.js"></script>
+<script src="js/character.js"></script>
+<script src="js/graphPlot.js"></script>
+<script src="js/canvas.js"></script>
+<script src="js/overlays.js"></script>
+<script src="js/render.js"></script>
+<script src="js/stage.js"></script>
+<script src="js/events.js"></script>
+<script src="js/main.js"></script>
+
+<script>
+// ── Curve preset wiring ──────────────────────────────────────────
+(function() {
+  const PRESETS = {
+    'prop':       { type: 'equation', eq: 'x',        line: 'solid' },
+    'line-pos':   { type: 'equation', eq: 'x + 2',    line: 'solid' },
+    'line-neg':   { type: 'equation', eq: 'x - 2',    line: 'solid' },
+    'horiz':      { type: 'equation', eq: '3',         line: 'solid' },
+    'vert':       { type: 'vertical', eq: '3',         line: 'solid' },
+    'parab':      { type: 'equation', eq: 'x^2',       line: 'solid' },
+    'parab-up':   { type: 'equation', eq: 'x^2 + 2',  line: 'solid' },
+    'parab-down': { type: 'equation', eq: 'x^2 - 2',  line: 'solid' },
+    'cubic':      { type: 'equation', eq: 'x^3',       line: 'solid' },
+    'step':       { type: 'points',   eq: '',          line: 'step',  linePts: '0,0\n1,0\n2,1\n3,1\n4,2' },
+    'zigzag':     { type: 'points',   eq: '',          line: 'solid', linePts: '0,0\n1,2\n2,0\n3,2\n4,0' },
+  };
+  [1, 2, 3].forEach(n => {
+    const sel = document.getElementById(`gp-s${n}-curve-preset`);
+    if (!sel) return;
+    sel.addEventListener('change', () => {
+      const p = PRESETS[sel.value];
+      if (!p) return;
+      const typeEl   = document.getElementById(`gp-s${n}-type`);
+      const eqEl     = document.getElementById(`gp-s${n}-eq`);
+      const lineEl   = document.getElementById(`gp-s${n}-line`);
+      const lptsEl   = document.getElementById(`gp-s${n}-line-pts`);
+      if (typeEl) { typeEl.value = p.type; typeEl.dispatchEvent(new Event('change')); }
+      if (eqEl && p.eq !== undefined) eqEl.value = p.eq;
+      if (lineEl && p.line) lineEl.value = p.line;
+      if (lptsEl && p.linePts) lptsEl.value = p.linePts;
+      render();
+      sel.value = '';
+    });
+  });
+})();
+
+// ── Canvas size preset wiring ────────────────────────────────────
+(function() {
+  const SIZE_PRESETS = { small: 20, medium: 36, large: 48 };
+  const presetSel = document.getElementById('gp-width-preset');
+  if (presetSel) {
+    presetSel.addEventListener('change', () => {
+      const unit = SIZE_PRESETS[presetSel.value];
+      if (!unit) return;
+      const unitEl = document.getElementById('gp-unit');
+      if (unitEl) { unitEl.value = unit; render(); }
+      presetSel.value = '';
+    });
+  }
+})();
+
+// Wire line-preset buttons
+document.querySelectorAll('.shape-card[data-line-preset]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const preset = btn.dataset.linePreset;
+    const sel = document.getElementById('lshape-style');
+    if (sel) sel.value = preset;
+  });
+});
+
+// Show/hide "Clear all lines" button
+function syncClearBtn() {
+  const btn = document.getElementById('btn-clear-lines');
+  if (btn) btn.style.display = lineOverlays.length ? 'block' : 'none';
+}
+const _origRender = render;
+window.render = function () { _origRender(); syncClearBtn(); };
+</script>
+
+<script>
+// ── Updates marquee ──────────────────────────────────────────────
+(function () {
+  fetch('updates.json')
+    .then(r => r.json())
+    .then(data => {
+      const msgs = (data.updates || []).map(m => String(m).trim()).filter(Boolean);
+      if (!msgs.length) return;
+      const track   = document.getElementById('marquee-track');
+      const marquee = document.getElementById('home-marquee');
+      if (!track || !marquee) return;
+      // Build content; duplicate for seamless infinite loop
+      const inner = msgs.map(m => `<span>${m}</span>`).join('');
+      track.innerHTML = inner + inner;
+      // Scale speed to content length (min 12 s, ~0.13 s per char)
+      const dur = Math.max(12, msgs.join('').length * 0.13);
+      track.style.animationDuration = dur + 's';
+      marquee.style.display = 'flex';
+    })
+    .catch(() => { /* silently ignore missing / malformed file */ });
+})();
+</script>
+
+</body>
+</html>
