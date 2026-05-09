@@ -8,7 +8,9 @@ function injectTextOverlays(svg) {
     `${t.bold ? 'font-weight="bold" ' : ''}` +
     `style="cursor:move;user-select:none">${escXml(t.text)}</text>`
   ).join('\n');
-  return svg.replace('</svg>', els + '\n</svg>');
+  const last = svg.lastIndexOf('</svg>');
+  if (last === -1) return svg;
+  return svg.slice(0, last) + els + '\n</svg>';
 }
 
 function updateTextList() {
@@ -64,7 +66,9 @@ function injectImageOverlays(svg) {
     `opacity="${img.opacity}" preserveAspectRatio="xMidYMid meet" ` +
     `style="cursor:move;user-select:none"/>`
   ).join('\n');
-  return svg.replace('</svg>', els + '\n</svg>');
+  const last = svg.lastIndexOf('</svg>');
+  if (last === -1) return svg;
+  return svg.slice(0, last) + els + '\n</svg>';
 }
 
 function updateImageList() {

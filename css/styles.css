@@ -718,20 +718,38 @@ kbd {
 .sub-group--frac-el2 > .sub-group-title { color:#c05508; background:#fde8c8; }
 .sub-group--frac-el3 > .sub-group-title { color:#9f1239; background:#fdd5df; }
 
-/* ── Number line extra-line sub-group colors ── */
-.sub-group--nl-el1 { border:2px solid #0f766e; }
-.sub-group--nl-el2 { border:2px solid #6b21a8; }
-.sub-group--nl-el3 { border:2px solid #9b1c1c; }
-.sub-group--nl-el1 > .sub-group-title { color:#0f766e; background:#ccf0ec; }
-.sub-group--nl-el2 > .sub-group-title { color:#6b21a8; background:#ede0fc; }
-.sub-group--nl-el3 > .sub-group-title { color:#9b1c1c; background:#fee2e2; }
+/* ── Number line per-line outer containers ── */
+.sub-group--nl-line-0 { border:2px solid #1a5c8e; margin-top:8px; }
+.sub-group--nl-line-1 { border:2px solid #0f766e; margin-top:8px; }
+.sub-group--nl-line-2 { border:2px solid #6b21a8; margin-top:8px; }
+.sub-group--nl-line-3 { border:2px solid #9b1c1c; margin-top:8px; }
+.sub-group--nl-line-0 > .sub-group-title { color:#1a5c8e; background:#d6eaf8; font-size:13px; }
+.sub-group--nl-line-1 > .sub-group-title { color:#0f766e; background:#ccf0ec; font-size:13px; }
+.sub-group--nl-line-2 > .sub-group-title { color:#6b21a8; background:#ede0fc; font-size:13px; }
+.sub-group--nl-line-3 > .sub-group-title { color:#9b1c1c; background:#fee2e2; font-size:13px; }
 
-/* ── Fraction section color themes ── */
-.sub-group--frac-label { border: 2px solid #0369a1; }
-.sub-group--frac-cells { border: 2px solid #7c3aed; }
+/* Inner sub-groups within line containers — lighter borders, smaller titles */
+[class*="sub-group--nl-line-"] > .sub-body > .sub-group { border-width:1px; margin-top:4px; }
+[class*="sub-group--nl-line-"] > .sub-body > .sub-group > .sub-group-title { font-size:11.5px; padding:5px 8px; }
 
-.sub-group--frac-label > .sub-group-title { color: #0369a1; background: #e0f2fe; }
-.sub-group--frac-cells > .sub-group-title { color: #7c3aed; background: #ede9fe; }
+/* Line Label sub-group */
+.sub-group--nl-linelbl { border:1px solid #c4b5fd; }
+.sub-group--nl-linelbl > .sub-group-title { color:#5b21b6; background:#ede9fe; }
+
+/* ── Fraction per-element nested sub-sections ── */
+[class*="sub-group--frac-el"] > .sub-body > .sub-group { border-width:1px; margin-top:4px; }
+[class*="sub-group--frac-el"] > .sub-body > .sub-group > .sub-group-title { font-size:11.5px; padding:5px 8px; }
+
+.sub-group--frac-lbl    { border:1px solid #0369a1; }
+.sub-group--frac-lbl > .sub-group-title   { color:#0369a1; background:#e0f2fe; }
+.sub-group--frac-cnums  { border:1px solid #7c3aed; }
+.sub-group--frac-cnums > .sub-group-title { color:#7c3aed; background:#ede9fe; }
+.sub-group--frac-ellbl  { border:1px solid #0f766e; }
+.sub-group--frac-ellbl > .sub-group-title { color:#0f766e; background:#f0fdf9; }
+.sub-group--frac-cllbl  { border:1px solid #b45309; }
+.sub-group--frac-cllbl > .sub-group-title { color:#b45309; background:#fef3c7; }
+.sub-group--frac-dims   { border:1px solid #475569; }
+.sub-group--frac-dims > .sub-group-title  { color:#475569; background:#f1f5f9; }
 
 /* ── Grapher section color themes ── */
 .sub-group--axes   { border: 2px solid #0d7377; }

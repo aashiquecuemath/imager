@@ -341,20 +341,6 @@ function wireAll() {
     });
   });
 
-  /* ── Count buttons — number line ── */
-  document.querySelectorAll('#nl-count-btns .count-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('#nl-count-btns .count-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      const count = parseInt(btn.dataset.count);
-      const ci = $('nl-count'); if (ci) ci.value = count;
-      for (let i = 1; i < 4; i++) {
-        const p = $(`nl-el-${i}`); if (p) p.style.display = i < count ? '' : 'none';
-      }
-      render();
-    });
-  });
-
   /* ── Geometry shape type sync ── */
   function syncGeoType(n) {
     const type = val(`geo-type-${n}`) || 'rectangle';
@@ -449,4 +435,65 @@ function wireAll() {
   $('btnDownload')?.addEventListener('click',     download);
   $('btnDownloadPNG')?.addEventListener('click',  downloadPNG);
   $('btnCopyPNG')?.addEventListener('click',      copyPNG);
+
+  /* ── Fraction ── */
+  wireFraction();
+
+  /* ── Number line ── */
+  wireNumberLine();
+}
+
+/* ── Fraction helpers ── */
+
+function _buildFracCellLabels(ei) {
+  const denEl  = document.getElementById(`frac-den-${ei}`);
+  const section = document.getElementById(`frac-cl-section-${ei}`);
+  if (!denEl || !section) return;
+  const den = Math.max(1, Math.min(24, parseInt(denEl.value) || 4));
+  // save existing values
+  const vals = [];
+  for (let ci = 0; ci < 24; ci++) {
+    const inp = document.getElementById(`frac-cl-${ei}-${ci}`);
+    vals[ci] = inp ? inp.value : '';
+  }
+  // rebuild
+  let html = '';
+  for (let ci = 0; ci < den; ci++) {
+    const v = (vals[ci] || '').replace(/"/g, '&quot;');
+    html += `<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><label style="width:46px;font-size:11px;flex-shrink:0">Cell ${ci+1}</label><input type="text" id="frac-cl-${ei}-${ci}" value="${v}" placeholder="label" style="flex:1;min-width:0"></div>`;
+  }
+  section.innerHTML = html;
+  for (let ci = 0; ci < den; ci++) {
+    const inp = document.getElementById(`frac-cl-${ei}-${ci}`);
+    if (inp) inp.addEventListener('input', render);
+  }
+}
+
+function _updateFracDimRows(ei) {
+  const shapeEl = document.getElementById(`frac-shape-${ei}`);
+  if (!shapeEl) return;
+  const shape = shapeEl.value;
+  const shapeToKey = { rectangle: 'rect', circle: 'circ', grid: 'grid', triangle: 'poly', hexagon: 'poly', pentagon: 'poly', parallelogram: 'para' };
+  const active = shapeToKey[shape] || 'rect';
+  for (const k of ['rect', 'circ', 'grid', 'poly', 'para']) {
+    const el = document.getElementById(`frac-dims-${k}-${ei}`);
+    if (el) el.style.display = (k === active) ? '' : 'none';
+  }
+}
+
+function wireFraction() {
+  for (let i = 0; i < 4; i++) {
+    _buildFracCellLabels(i);
+    _updateFracDimRows(i);
+
+    const denEl   = document.getElementById(`frac-den-${i}`);
+    const shapeEl = document.getElementById(`frac-shape-${i}`);
+    const ei = i; // capture for closure
+    if (denEl) {
+      denEl.addEventListener('input', () => { _buildFracCellLabels(ei); render(); });
+    }
+    if (shapeEl) {
+      shapeEl.addEventListener('change', () => { _updateFracDimRows(ei); render(); });
+    }
+  }
 }

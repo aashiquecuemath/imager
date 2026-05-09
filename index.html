@@ -5,6 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Vector Space</title>
   <link rel="stylesheet" href="css/styles.css">
+  <script>
+    window.MathJax = {
+      tex: { packages: {'[+]': ['base', 'ams', 'newcommand']} },
+      startup: { typeset: false }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 </head>
 <body>
 
@@ -251,214 +258,8 @@
       <div class="card col2">
         <div class="card-title">Parameters</div>
 
-        <!-- Number Line -->
-        <div class="param-section visible" id="params-numberLine">
-
-          <!-- Multi-line count -->
-          <input type="hidden" id="nl-count" value="1">
-          <div class="count-row" style="margin-bottom:8px">
-            <label>Lines</label>
-            <div class="count-btns" id="nl-count-btns">
-              <button class="count-btn active" data-count="1">1</button>
-              <button class="count-btn" data-count="2">2</button>
-              <button class="count-btn" data-count="3">3</button>
-              <button class="count-btn" data-count="4">4</button>
-            </div>
-            <label for="nl-gap" style="margin-left:8px">Gap (px)</label>
-            <input type="number" id="nl-gap" value="30" min="0" max="200" style="width:60px">
-          </div>
-
-          <!-- Line Style -->
-          <div class="sub-group collapsible collapsed sub-group--nl-line">
-            <div class="sub-group-title">
-              Line Style
-              <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </div>
-            <div class="sub-body">
-              <div class="row2">
-                <div><label for="nl-start">Start</label><input type="number" id="nl-start" value="0" step="1"></div>
-                <div><label for="nl-end">End</label><input type="number" id="nl-end" value="10" step="1"></div>
-              </div>
-              <label for="nl-length">Total length (px)</label>
-              <input type="number" id="nl-length" value="700" min="200" max="1400" step="50">
-              <div class="row2" style="margin-top:6px">
-                <div><label for="nl-color">Line color</label><input type="color" id="nl-color" value="#000000"></div>
-                <div><label for="nl-line-width">Thickness (px)</label><input type="number" id="nl-line-width" value="3" min="0.5" max="10" step="0.5"></div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Integer Labels -->
-          <div class="sub-group collapsible collapsed sub-group--nl-labels">
-            <div class="sub-group-title">
-              Integer Labels
-              <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </div>
-            <div class="sub-body">
-              <div class="check-row"><input type="checkbox" id="nl-labels" checked><label for="nl-labels">Show integer labels</label></div>
-              <label for="nl-lbl-interval" style="margin-top:6px">Show every N integers</label>
-              <input type="number" id="nl-lbl-interval" value="1" min="1" max="20" step="1">
-              <label for="nl-lbl-specific">Specific values <span class="hint" style="display:inline">(comma-sep, e.g. 0,5,10)</span></label>
-              <input type="text" id="nl-lbl-specific" placeholder="blank = use interval above">
-              <div class="row3" style="margin-top:7px">
-                <div><label for="nl-int-lbl-size">Font size</label><input type="number" id="nl-int-lbl-size" value="14" min="8" max="36"></div>
-                <div><label for="nl-int-lbl-color">Color</label><input type="color" id="nl-int-lbl-color" value="#111111"></div>
-                <div><div class="check-row" style="margin-top:20px"><input type="checkbox" id="nl-int-lbl-bold" checked><label for="nl-int-lbl-bold">Bold</label></div></div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Subdivisions -->
-          <div class="sub-group collapsible collapsed sub-group--nl-subs">
-            <div class="sub-group-title">
-              Subdivisions
-              <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </div>
-            <div class="sub-body">
-              <label for="nl-subs">Subdivisions per unit <span class="hint" style="display:inline">(1 = none)</span></label>
-              <input type="number" id="nl-subs" value="1" min="1" max="20">
-              <div class="check-row" style="margin-top:7px"><input type="checkbox" id="nl-sub-labels"><label for="nl-sub-labels">Show subdivision labels</label></div>
-              <label for="nl-sub-lbl-interval" style="margin-top:6px">Show every Nth subdivision</label>
-              <input type="number" id="nl-sub-lbl-interval" value="1" min="1" max="20">
-              <label for="nl-sub-lbl-specific">Specific values <span class="hint" style="display:inline">(e.g. 0.5,1.5,2.5)</span></label>
-              <input type="text" id="nl-sub-lbl-specific" placeholder="blank = use interval above">
-              <div class="row2" style="margin-top:7px">
-                <div><label for="nl-sub-lbl-size">Font size</label><input type="number" id="nl-sub-lbl-size" value="11" min="7" max="24"></div>
-                <div><label for="nl-sub-lbl-color">Color</label><input type="color" id="nl-sub-lbl-color" value="#555555"></div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Point Markers -->
-          <div class="sub-group collapsible collapsed sub-group--nl-points">
-            <div class="sub-group-title">
-              Point Markers
-              <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </div>
-            <div class="sub-body">
-              <label for="nl-points">Points <span class="hint" style="display:inline">(value:label:color:pos — fractions ok)</span></label>
-              <textarea id="nl-points" rows="4" placeholder="3.5:A&#10;7:B:#0000FF:below&#10;3/4:C:#009900"></textarea>
-              <div class="row3" style="margin-top:7px">
-                <div><label for="nl-pt-color">Default color</label><input type="color" id="nl-pt-color" value="#FF0000"></div>
-                <div><label for="nl-pt-radius">Radius (px)</label><input type="number" id="nl-pt-radius" value="6" min="2" max="20"></div>
-                <div>
-                  <label for="nl-pt-pos">Default pos</label>
-                  <select id="nl-pt-pos">
-                    <option value="above">Above</option>
-                    <option value="below">Below</option>
-                  </select>
-                </div>
-              </div>
-              <div class="row2" style="margin-top:5px">
-                <div><label for="nl-pt-lbl-size">Label size</label><input type="number" id="nl-pt-lbl-size" value="16" min="8" max="36"></div>
-                <div><label for="nl-pt-lbl-color">Label color</label><input type="color" id="nl-pt-lbl-color" value="#000000"></div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Jump Arrows -->
-          <div class="sub-group collapsible collapsed sub-group--nl-jumps">
-            <div class="sub-group-title">
-              Jump Arrows
-              <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </div>
-            <div class="sub-body">
-              <div class="row2">
-                <div><label for="nl-jump-height">Arc height (px)</label><input type="number" id="nl-jump-height" value="35" min="10" max="120" step="5"></div>
-                <div><label for="nl-jump-color">Default color</label><input type="color" id="nl-jump-color" value="#0066CC"></div>
-              </div>
-              <label for="nl-jumps" style="margin-top:8px">Specific arrows <span class="hint" style="display:inline">(dir:from:to:label[:color])</span></label>
-              <textarea id="nl-jumps" rows="3" placeholder="right:2:4:y&#10;left:6:4:n&#10;right:0:3:+3:#CC0000"></textarea>
-              <p class="hint" style="margin-top:3px">label: <b>y</b> = auto (step / −step), <b>n</b> = none, or custom text. Append <b>:#hex</b> for per-arrow color.</p>
-
-              <div style="border-top:1px solid #dde3ec;margin-top:10px;padding-top:8px">
-                <div class="check-row"><input type="checkbox" id="nl-uniform-enable"><label for="nl-uniform-enable"><b>Uniform jump arrows</b></label></div>
-                <div class="row2" style="margin-top:6px">
-                  <div>
-                    <label for="nl-uniform-dir">Direction</label>
-                    <select id="nl-uniform-dir">
-                      <option value="right">→ Right</option>
-                      <option value="left">← Left</option>
-                    </select>
-                  </div>
-                  <div><label for="nl-uniform-step">Step size</label><input type="number" id="nl-uniform-step" value="1" min="0.1" max="20" step="0.1"></div>
-                </div>
-                <div class="row2">
-                  <div><label for="nl-uniform-from">From</label><input type="number" id="nl-uniform-from" value="0" step="0.5"></div>
-                  <div><label for="nl-uniform-to">To</label><input type="number" id="nl-uniform-to" value="10" step="0.5"></div>
-                </div>
-                <div class="row2" style="margin-top:5px">
-                  <div><label for="nl-uniform-color">Color</label><input type="color" id="nl-uniform-color" value="#CC6600"></div>
-                  <div><div class="check-row" style="margin-top:20px"><input type="checkbox" id="nl-uniform-labels" checked><label for="nl-uniform-labels">Show labels</label></div></div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Extra Line 2 -->
-          <div id="nl-el-1" class="sub-group collapsible collapsed sub-group--nl-el1" style="display:none;margin-top:8px">
-            <div class="sub-group-title">
-              Line 2
-              <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </div>
-            <div class="sub-body">
-              <div class="row2">
-                <div><label for="nl-start-1">Start</label><input type="number" id="nl-start-1" value="0" step="1"></div>
-                <div><label for="nl-end-1">End</label><input type="number" id="nl-end-1" value="10" step="1"></div>
-              </div>
-              <div class="check-row" style="margin-top:5px"><input type="checkbox" id="nl-labels-1" checked><label for="nl-labels-1">Show integer labels</label></div>
-              <label for="nl-subs-1" style="margin-top:6px">Subdivisions per unit</label>
-              <input type="number" id="nl-subs-1" value="1" min="1" max="20">
-              <label for="nl-points-1" style="margin-top:6px">Points <span class="hint" style="display:inline">(value:label:color:pos)</span></label>
-              <textarea id="nl-points-1" rows="2" placeholder="3.5:A&#10;7:B:#0000FF:below"></textarea>
-              <label for="nl-jumps-1" style="margin-top:6px">Jump arrows <span class="hint" style="display:inline">(dir:from:to:label)</span></label>
-              <textarea id="nl-jumps-1" rows="2" placeholder="right:2:4:y"></textarea>
-            </div>
-          </div>
-
-          <!-- Extra Line 3 -->
-          <div id="nl-el-2" class="sub-group collapsible collapsed sub-group--nl-el2" style="display:none;margin-top:8px">
-            <div class="sub-group-title">
-              Line 3
-              <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </div>
-            <div class="sub-body">
-              <div class="row2">
-                <div><label for="nl-start-2">Start</label><input type="number" id="nl-start-2" value="0" step="1"></div>
-                <div><label for="nl-end-2">End</label><input type="number" id="nl-end-2" value="10" step="1"></div>
-              </div>
-              <div class="check-row" style="margin-top:5px"><input type="checkbox" id="nl-labels-2" checked><label for="nl-labels-2">Show integer labels</label></div>
-              <label for="nl-subs-2" style="margin-top:6px">Subdivisions per unit</label>
-              <input type="number" id="nl-subs-2" value="1" min="1" max="20">
-              <label for="nl-points-2" style="margin-top:6px">Points <span class="hint" style="display:inline">(value:label:color:pos)</span></label>
-              <textarea id="nl-points-2" rows="2" placeholder="3.5:A&#10;7:B:#0000FF:below"></textarea>
-              <label for="nl-jumps-2" style="margin-top:6px">Jump arrows <span class="hint" style="display:inline">(dir:from:to:label)</span></label>
-              <textarea id="nl-jumps-2" rows="2" placeholder="right:2:4:y"></textarea>
-            </div>
-          </div>
-
-          <!-- Extra Line 4 -->
-          <div id="nl-el-3" class="sub-group collapsible collapsed sub-group--nl-el3" style="display:none;margin-top:8px">
-            <div class="sub-group-title">
-              Line 4
-              <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </div>
-            <div class="sub-body">
-              <div class="row2">
-                <div><label for="nl-start-3">Start</label><input type="number" id="nl-start-3" value="0" step="1"></div>
-                <div><label for="nl-end-3">End</label><input type="number" id="nl-end-3" value="10" step="1"></div>
-              </div>
-              <div class="check-row" style="margin-top:5px"><input type="checkbox" id="nl-labels-3" checked><label for="nl-labels-3">Show integer labels</label></div>
-              <label for="nl-subs-3" style="margin-top:6px">Subdivisions per unit</label>
-              <input type="number" id="nl-subs-3" value="1" min="1" max="20">
-              <label for="nl-points-3" style="margin-top:6px">Points <span class="hint" style="display:inline">(value:label:color:pos)</span></label>
-              <textarea id="nl-points-3" rows="2" placeholder="3.5:A&#10;7:B:#0000FF:below"></textarea>
-              <label for="nl-jumps-3" style="margin-top:6px">Jump arrows <span class="hint" style="display:inline">(dir:from:to:label)</span></label>
-              <textarea id="nl-jumps-3" rows="2" placeholder="right:2:4:y"></textarea>
-            </div>
-          </div>
-
-        </div>
+        <!-- Number Line — populated by buildNumberLineUI() in numberLine.js -->
+        <div class="param-section visible" id="params-numberLine"></div>
 
         <!-- Fraction (unified, multi-element) -->
         <div class="param-section" id="params-fraction">
@@ -486,7 +287,7 @@
           </div>
 
           <!-- Element 1 (always visible) -->
-          <div id="frac-el-0" class="sub-group collapsible sub-group--frac-el0">
+          <div id="frac-el-0" class="sub-group collapsible collapsed sub-group--frac-el0">
             <div class="sub-group-title">
               Element 1
               <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -508,6 +309,129 @@
               </div>
               <div class="check-row" style="margin-top:6px"><input type="checkbox" id="frac-label-0" checked><label for="frac-label-0">Show fraction label</label></div>
               <div class="check-row"><input type="checkbox" id="frac-cellnums-0"><label for="frac-cellnums-0">Number cells</label></div>
+
+              <!-- Fraction Label Style -->
+              <div class="sub-group collapsible collapsed sub-group--frac-lbl" style="margin-top:6px">
+                <div class="sub-group-title">Fraction Label Style <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                <div class="sub-body">
+                  <div class="row3">
+                    <div><label for="frac-lbl-size-0">Size</label><input type="number" id="frac-lbl-size-0" value="20" min="8" max="48"></div>
+                    <div><label for="frac-lbl-color-0">Color</label><input type="color" id="frac-lbl-color-0" value="#000000"></div>
+                    <div><div class="check-row" style="margin-top:20px"><input type="checkbox" id="frac-lbl-bold-0" checked><label for="frac-lbl-bold-0">Bold</label></div></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Cell Number Style -->
+              <div class="sub-group collapsible collapsed sub-group--frac-cnums" style="margin-top:4px">
+                <div class="sub-group-title">Cell Number Style <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                <div class="sub-body">
+                  <div class="row3">
+                    <div><label for="frac-cell-size-0">Size</label><input type="number" id="frac-cell-size-0" value="13" min="6" max="32"></div>
+                    <div><label for="frac-cell-color-0">Color</label><input type="color" id="frac-cell-color-0" value="#666666"></div>
+                    <div><div class="check-row" style="margin-top:20px"><input type="checkbox" id="frac-cell-bold-0"><label for="frac-cell-bold-0">Bold</label></div></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Element Label -->
+              <div class="sub-group collapsible collapsed sub-group--frac-ellbl" style="margin-top:4px">
+                <div class="sub-group-title">Element Label <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                <div class="sub-body">
+                  <label for="frac-ellbl-text-0">Text <span style="font-weight:400;color:#64748b">(use $…$ for math)</span></label>
+                  <input type="text" id="frac-ellbl-text-0" placeholder="e.g. $\frac{1}{4}$ or label">
+                  <div class="row2" style="margin-top:6px">
+                    <div>
+                      <label for="frac-ellbl-pos-0">Position</label>
+                      <select id="frac-ellbl-pos-0">
+                        <option value="below" selected>Below</option>
+                        <option value="above">Above</option>
+                        <option value="left">Left</option>
+                        <option value="right">Right</option>
+                      </select>
+                    </div>
+                    <div><label for="frac-ellbl-size-0">Font size</label><input type="number" id="frac-ellbl-size-0" value="14" min="8" max="48"></div>
+                  </div>
+                  <div class="row2" style="margin-top:6px">
+                    <div>
+                      <label for="frac-ellbl-font-0">Font</label>
+                      <select id="frac-ellbl-font-0">
+                        <option value="Arial, sans-serif" selected>Arial</option>
+                        <option value="'Helvetica Neue', sans-serif">Helvetica Neue</option>
+                        <option value="Verdana, sans-serif">Verdana</option>
+                        <option value="'Trebuchet MS', sans-serif">Trebuchet MS</option>
+                        <option value="Georgia, serif">Georgia</option>
+                        <option value="'Times New Roman', serif">Times New Roman</option>
+                        <option value="Palatino, serif">Palatino</option>
+                        <option value="'Courier New', monospace">Courier New</option>
+                      </select>
+                    </div>
+                    <div><label for="frac-ellbl-color-0">Color</label><input type="color" id="frac-ellbl-color-0" value="#000000"></div>
+                  </div>
+                  <div style="display:flex;gap:12px;margin-top:6px">
+                    <div class="check-row"><input type="checkbox" id="frac-ellbl-bold-0"><label for="frac-ellbl-bold-0">Bold</label></div>
+                    <div class="check-row"><input type="checkbox" id="frac-ellbl-italic-0"><label for="frac-ellbl-italic-0">Italic</label></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Cell Labels -->
+              <div class="sub-group collapsible collapsed sub-group--frac-cllbl" style="margin-top:4px">
+                <div class="sub-group-title">Cell Labels <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                <div class="sub-body">
+                  <div style="font-size:11px;font-weight:600;color:#666;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.04em">Shaded cells</div>
+                  <div class="row3" style="margin-bottom:10px">
+                    <div><label for="frac-cl-size-0">Size</label><input type="number" id="frac-cl-size-0" value="12" min="6" max="32"></div>
+                    <div><label for="frac-cl-color-0">Color</label><input type="color" id="frac-cl-color-0" value="#333333"></div>
+                    <div style="display:flex;gap:8px;align-items:flex-end;padding-bottom:2px">
+                      <div class="check-row"><input type="checkbox" id="frac-cl-bold-0"><label for="frac-cl-bold-0">Bold</label></div>
+                      <div class="check-row"><input type="checkbox" id="frac-cl-italic-0"><label for="frac-cl-italic-0">Italic</label></div>
+                    </div>
+                  </div>
+                  <div style="font-size:11px;font-weight:600;color:#666;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.04em">Unshaded cells</div>
+                  <div class="row3" style="margin-bottom:7px">
+                    <div><label for="frac-cl-uc-size-0">Size</label><input type="number" id="frac-cl-uc-size-0" value="12" min="6" max="32"></div>
+                    <div><label for="frac-cl-uc-color-0">Color</label><input type="color" id="frac-cl-uc-color-0" value="#cccccc"></div>
+                    <div style="display:flex;gap:8px;align-items:flex-end;padding-bottom:2px">
+                      <div class="check-row"><input type="checkbox" id="frac-cl-uc-bold-0"><label for="frac-cl-uc-bold-0">Bold</label></div>
+                      <div class="check-row"><input type="checkbox" id="frac-cl-uc-italic-0"><label for="frac-cl-uc-italic-0">Italic</label></div>
+                    </div>
+                  </div>
+                  <div id="frac-cl-section-0"></div>
+                </div>
+              </div>
+
+              <!-- Dimensions -->
+              <div class="sub-group collapsible collapsed sub-group--frac-dims" style="margin-top:4px">
+                <div class="sub-group-title">Dimensions <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                <div class="sub-body">
+                  <div id="frac-dims-rect-0">
+                    <div class="row2">
+                      <div><label for="frac-dim-rw-0">Width (px)</label><input type="number" id="frac-dim-rw-0" value="240" min="40" max="600"></div>
+                      <div><label for="frac-dim-rh-0">Height (px)</label><input type="number" id="frac-dim-rh-0" value="60" min="20" max="200"></div>
+                    </div>
+                  </div>
+                  <div id="frac-dims-circ-0" style="display:none">
+                    <label for="frac-dim-circ-r-0">Radius (px)</label><input type="number" id="frac-dim-circ-r-0" value="90" min="20" max="200">
+                  </div>
+                  <div id="frac-dims-grid-0" style="display:none">
+                    <div class="row2">
+                      <div><label for="frac-dim-gw-0">Width (px)</label><input type="number" id="frac-dim-gw-0" value="240" min="40" max="600"></div>
+                      <div><label for="frac-dim-gh-0">Height (px)</label><input type="number" id="frac-dim-gh-0" value="240" min="40" max="400"></div>
+                    </div>
+                  </div>
+                  <div id="frac-dims-poly-0" style="display:none">
+                    <label for="frac-dim-poly-r-0">Radius (px)</label><input type="number" id="frac-dim-poly-r-0" value="108" min="40" max="200">
+                  </div>
+                  <div id="frac-dims-para-0" style="display:none">
+                    <div class="row2">
+                      <div><label for="frac-dim-para-w-0">Width (px)</label><input type="number" id="frac-dim-para-w-0" value="240" min="60" max="400"></div>
+                      <div><label for="frac-dim-para-h-0">Height (px)</label><input type="number" id="frac-dim-para-h-0" value="80" min="20" max="200"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
             </div>
           </div>
 
@@ -534,6 +458,129 @@
               </div>
               <div class="check-row" style="margin-top:6px"><input type="checkbox" id="frac-label-1" checked><label for="frac-label-1">Show fraction label</label></div>
               <div class="check-row"><input type="checkbox" id="frac-cellnums-1"><label for="frac-cellnums-1">Number cells</label></div>
+
+              <!-- Fraction Label Style -->
+              <div class="sub-group collapsible collapsed sub-group--frac-lbl" style="margin-top:6px">
+                <div class="sub-group-title">Fraction Label Style <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                <div class="sub-body">
+                  <div class="row3">
+                    <div><label for="frac-lbl-size-1">Size</label><input type="number" id="frac-lbl-size-1" value="20" min="8" max="48"></div>
+                    <div><label for="frac-lbl-color-1">Color</label><input type="color" id="frac-lbl-color-1" value="#000000"></div>
+                    <div><div class="check-row" style="margin-top:20px"><input type="checkbox" id="frac-lbl-bold-1" checked><label for="frac-lbl-bold-1">Bold</label></div></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Cell Number Style -->
+              <div class="sub-group collapsible collapsed sub-group--frac-cnums" style="margin-top:4px">
+                <div class="sub-group-title">Cell Number Style <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                <div class="sub-body">
+                  <div class="row3">
+                    <div><label for="frac-cell-size-1">Size</label><input type="number" id="frac-cell-size-1" value="13" min="6" max="32"></div>
+                    <div><label for="frac-cell-color-1">Color</label><input type="color" id="frac-cell-color-1" value="#666666"></div>
+                    <div><div class="check-row" style="margin-top:20px"><input type="checkbox" id="frac-cell-bold-1"><label for="frac-cell-bold-1">Bold</label></div></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Element Label -->
+              <div class="sub-group collapsible collapsed sub-group--frac-ellbl" style="margin-top:4px">
+                <div class="sub-group-title">Element Label <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                <div class="sub-body">
+                  <label for="frac-ellbl-text-1">Text <span style="font-weight:400;color:#64748b">(use $…$ for math)</span></label>
+                  <input type="text" id="frac-ellbl-text-1" placeholder="e.g. $\frac{1}{4}$ or label">
+                  <div class="row2" style="margin-top:6px">
+                    <div>
+                      <label for="frac-ellbl-pos-1">Position</label>
+                      <select id="frac-ellbl-pos-1">
+                        <option value="below" selected>Below</option>
+                        <option value="above">Above</option>
+                        <option value="left">Left</option>
+                        <option value="right">Right</option>
+                      </select>
+                    </div>
+                    <div><label for="frac-ellbl-size-1">Font size</label><input type="number" id="frac-ellbl-size-1" value="14" min="8" max="48"></div>
+                  </div>
+                  <div class="row2" style="margin-top:6px">
+                    <div>
+                      <label for="frac-ellbl-font-1">Font</label>
+                      <select id="frac-ellbl-font-1">
+                        <option value="Arial, sans-serif" selected>Arial</option>
+                        <option value="'Helvetica Neue', sans-serif">Helvetica Neue</option>
+                        <option value="Verdana, sans-serif">Verdana</option>
+                        <option value="'Trebuchet MS', sans-serif">Trebuchet MS</option>
+                        <option value="Georgia, serif">Georgia</option>
+                        <option value="'Times New Roman', serif">Times New Roman</option>
+                        <option value="Palatino, serif">Palatino</option>
+                        <option value="'Courier New', monospace">Courier New</option>
+                      </select>
+                    </div>
+                    <div><label for="frac-ellbl-color-1">Color</label><input type="color" id="frac-ellbl-color-1" value="#000000"></div>
+                  </div>
+                  <div style="display:flex;gap:12px;margin-top:6px">
+                    <div class="check-row"><input type="checkbox" id="frac-ellbl-bold-1"><label for="frac-ellbl-bold-1">Bold</label></div>
+                    <div class="check-row"><input type="checkbox" id="frac-ellbl-italic-1"><label for="frac-ellbl-italic-1">Italic</label></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Cell Labels -->
+              <div class="sub-group collapsible collapsed sub-group--frac-cllbl" style="margin-top:4px">
+                <div class="sub-group-title">Cell Labels <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                <div class="sub-body">
+                  <div style="font-size:11px;font-weight:600;color:#666;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.04em">Shaded cells</div>
+                  <div class="row3" style="margin-bottom:10px">
+                    <div><label for="frac-cl-size-1">Size</label><input type="number" id="frac-cl-size-1" value="12" min="6" max="32"></div>
+                    <div><label for="frac-cl-color-1">Color</label><input type="color" id="frac-cl-color-1" value="#333333"></div>
+                    <div style="display:flex;gap:8px;align-items:flex-end;padding-bottom:2px">
+                      <div class="check-row"><input type="checkbox" id="frac-cl-bold-1"><label for="frac-cl-bold-1">Bold</label></div>
+                      <div class="check-row"><input type="checkbox" id="frac-cl-italic-1"><label for="frac-cl-italic-1">Italic</label></div>
+                    </div>
+                  </div>
+                  <div style="font-size:11px;font-weight:600;color:#666;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.04em">Unshaded cells</div>
+                  <div class="row3" style="margin-bottom:7px">
+                    <div><label for="frac-cl-uc-size-1">Size</label><input type="number" id="frac-cl-uc-size-1" value="12" min="6" max="32"></div>
+                    <div><label for="frac-cl-uc-color-1">Color</label><input type="color" id="frac-cl-uc-color-1" value="#cccccc"></div>
+                    <div style="display:flex;gap:8px;align-items:flex-end;padding-bottom:2px">
+                      <div class="check-row"><input type="checkbox" id="frac-cl-uc-bold-1"><label for="frac-cl-uc-bold-1">Bold</label></div>
+                      <div class="check-row"><input type="checkbox" id="frac-cl-uc-italic-1"><label for="frac-cl-uc-italic-1">Italic</label></div>
+                    </div>
+                  </div>
+                  <div id="frac-cl-section-1"></div>
+                </div>
+              </div>
+
+              <!-- Dimensions -->
+              <div class="sub-group collapsible collapsed sub-group--frac-dims" style="margin-top:4px">
+                <div class="sub-group-title">Dimensions <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                <div class="sub-body">
+                  <div id="frac-dims-rect-1">
+                    <div class="row2">
+                      <div><label for="frac-dim-rw-1">Width (px)</label><input type="number" id="frac-dim-rw-1" value="240" min="40" max="600"></div>
+                      <div><label for="frac-dim-rh-1">Height (px)</label><input type="number" id="frac-dim-rh-1" value="60" min="20" max="200"></div>
+                    </div>
+                  </div>
+                  <div id="frac-dims-circ-1" style="display:none">
+                    <label for="frac-dim-circ-r-1">Radius (px)</label><input type="number" id="frac-dim-circ-r-1" value="90" min="20" max="200">
+                  </div>
+                  <div id="frac-dims-grid-1" style="display:none">
+                    <div class="row2">
+                      <div><label for="frac-dim-gw-1">Width (px)</label><input type="number" id="frac-dim-gw-1" value="240" min="40" max="600"></div>
+                      <div><label for="frac-dim-gh-1">Height (px)</label><input type="number" id="frac-dim-gh-1" value="240" min="40" max="400"></div>
+                    </div>
+                  </div>
+                  <div id="frac-dims-poly-1" style="display:none">
+                    <label for="frac-dim-poly-r-1">Radius (px)</label><input type="number" id="frac-dim-poly-r-1" value="108" min="40" max="200">
+                  </div>
+                  <div id="frac-dims-para-1" style="display:none">
+                    <div class="row2">
+                      <div><label for="frac-dim-para-w-1">Width (px)</label><input type="number" id="frac-dim-para-w-1" value="240" min="60" max="400"></div>
+                      <div><label for="frac-dim-para-h-1">Height (px)</label><input type="number" id="frac-dim-para-h-1" value="80" min="20" max="200"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
             </div>
           </div>
 
@@ -560,6 +607,129 @@
               </div>
               <div class="check-row" style="margin-top:6px"><input type="checkbox" id="frac-label-2" checked><label for="frac-label-2">Show fraction label</label></div>
               <div class="check-row"><input type="checkbox" id="frac-cellnums-2"><label for="frac-cellnums-2">Number cells</label></div>
+
+              <!-- Fraction Label Style -->
+              <div class="sub-group collapsible collapsed sub-group--frac-lbl" style="margin-top:6px">
+                <div class="sub-group-title">Fraction Label Style <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                <div class="sub-body">
+                  <div class="row3">
+                    <div><label for="frac-lbl-size-2">Size</label><input type="number" id="frac-lbl-size-2" value="20" min="8" max="48"></div>
+                    <div><label for="frac-lbl-color-2">Color</label><input type="color" id="frac-lbl-color-2" value="#000000"></div>
+                    <div><div class="check-row" style="margin-top:20px"><input type="checkbox" id="frac-lbl-bold-2" checked><label for="frac-lbl-bold-2">Bold</label></div></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Cell Number Style -->
+              <div class="sub-group collapsible collapsed sub-group--frac-cnums" style="margin-top:4px">
+                <div class="sub-group-title">Cell Number Style <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                <div class="sub-body">
+                  <div class="row3">
+                    <div><label for="frac-cell-size-2">Size</label><input type="number" id="frac-cell-size-2" value="13" min="6" max="32"></div>
+                    <div><label for="frac-cell-color-2">Color</label><input type="color" id="frac-cell-color-2" value="#666666"></div>
+                    <div><div class="check-row" style="margin-top:20px"><input type="checkbox" id="frac-cell-bold-2"><label for="frac-cell-bold-2">Bold</label></div></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Element Label -->
+              <div class="sub-group collapsible collapsed sub-group--frac-ellbl" style="margin-top:4px">
+                <div class="sub-group-title">Element Label <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                <div class="sub-body">
+                  <label for="frac-ellbl-text-2">Text <span style="font-weight:400;color:#64748b">(use $…$ for math)</span></label>
+                  <input type="text" id="frac-ellbl-text-2" placeholder="e.g. $\frac{1}{4}$ or label">
+                  <div class="row2" style="margin-top:6px">
+                    <div>
+                      <label for="frac-ellbl-pos-2">Position</label>
+                      <select id="frac-ellbl-pos-2">
+                        <option value="below" selected>Below</option>
+                        <option value="above">Above</option>
+                        <option value="left">Left</option>
+                        <option value="right">Right</option>
+                      </select>
+                    </div>
+                    <div><label for="frac-ellbl-size-2">Font size</label><input type="number" id="frac-ellbl-size-2" value="14" min="8" max="48"></div>
+                  </div>
+                  <div class="row2" style="margin-top:6px">
+                    <div>
+                      <label for="frac-ellbl-font-2">Font</label>
+                      <select id="frac-ellbl-font-2">
+                        <option value="Arial, sans-serif" selected>Arial</option>
+                        <option value="'Helvetica Neue', sans-serif">Helvetica Neue</option>
+                        <option value="Verdana, sans-serif">Verdana</option>
+                        <option value="'Trebuchet MS', sans-serif">Trebuchet MS</option>
+                        <option value="Georgia, serif">Georgia</option>
+                        <option value="'Times New Roman', serif">Times New Roman</option>
+                        <option value="Palatino, serif">Palatino</option>
+                        <option value="'Courier New', monospace">Courier New</option>
+                      </select>
+                    </div>
+                    <div><label for="frac-ellbl-color-2">Color</label><input type="color" id="frac-ellbl-color-2" value="#000000"></div>
+                  </div>
+                  <div style="display:flex;gap:12px;margin-top:6px">
+                    <div class="check-row"><input type="checkbox" id="frac-ellbl-bold-2"><label for="frac-ellbl-bold-2">Bold</label></div>
+                    <div class="check-row"><input type="checkbox" id="frac-ellbl-italic-2"><label for="frac-ellbl-italic-2">Italic</label></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Cell Labels -->
+              <div class="sub-group collapsible collapsed sub-group--frac-cllbl" style="margin-top:4px">
+                <div class="sub-group-title">Cell Labels <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                <div class="sub-body">
+                  <div style="font-size:11px;font-weight:600;color:#666;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.04em">Shaded cells</div>
+                  <div class="row3" style="margin-bottom:10px">
+                    <div><label for="frac-cl-size-2">Size</label><input type="number" id="frac-cl-size-2" value="12" min="6" max="32"></div>
+                    <div><label for="frac-cl-color-2">Color</label><input type="color" id="frac-cl-color-2" value="#333333"></div>
+                    <div style="display:flex;gap:8px;align-items:flex-end;padding-bottom:2px">
+                      <div class="check-row"><input type="checkbox" id="frac-cl-bold-2"><label for="frac-cl-bold-2">Bold</label></div>
+                      <div class="check-row"><input type="checkbox" id="frac-cl-italic-2"><label for="frac-cl-italic-2">Italic</label></div>
+                    </div>
+                  </div>
+                  <div style="font-size:11px;font-weight:600;color:#666;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.04em">Unshaded cells</div>
+                  <div class="row3" style="margin-bottom:7px">
+                    <div><label for="frac-cl-uc-size-2">Size</label><input type="number" id="frac-cl-uc-size-2" value="12" min="6" max="32"></div>
+                    <div><label for="frac-cl-uc-color-2">Color</label><input type="color" id="frac-cl-uc-color-2" value="#cccccc"></div>
+                    <div style="display:flex;gap:8px;align-items:flex-end;padding-bottom:2px">
+                      <div class="check-row"><input type="checkbox" id="frac-cl-uc-bold-2"><label for="frac-cl-uc-bold-2">Bold</label></div>
+                      <div class="check-row"><input type="checkbox" id="frac-cl-uc-italic-2"><label for="frac-cl-uc-italic-2">Italic</label></div>
+                    </div>
+                  </div>
+                  <div id="frac-cl-section-2"></div>
+                </div>
+              </div>
+
+              <!-- Dimensions -->
+              <div class="sub-group collapsible collapsed sub-group--frac-dims" style="margin-top:4px">
+                <div class="sub-group-title">Dimensions <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                <div class="sub-body">
+                  <div id="frac-dims-rect-2">
+                    <div class="row2">
+                      <div><label for="frac-dim-rw-2">Width (px)</label><input type="number" id="frac-dim-rw-2" value="240" min="40" max="600"></div>
+                      <div><label for="frac-dim-rh-2">Height (px)</label><input type="number" id="frac-dim-rh-2" value="60" min="20" max="200"></div>
+                    </div>
+                  </div>
+                  <div id="frac-dims-circ-2" style="display:none">
+                    <label for="frac-dim-circ-r-2">Radius (px)</label><input type="number" id="frac-dim-circ-r-2" value="90" min="20" max="200">
+                  </div>
+                  <div id="frac-dims-grid-2" style="display:none">
+                    <div class="row2">
+                      <div><label for="frac-dim-gw-2">Width (px)</label><input type="number" id="frac-dim-gw-2" value="240" min="40" max="600"></div>
+                      <div><label for="frac-dim-gh-2">Height (px)</label><input type="number" id="frac-dim-gh-2" value="240" min="40" max="400"></div>
+                    </div>
+                  </div>
+                  <div id="frac-dims-poly-2" style="display:none">
+                    <label for="frac-dim-poly-r-2">Radius (px)</label><input type="number" id="frac-dim-poly-r-2" value="108" min="40" max="200">
+                  </div>
+                  <div id="frac-dims-para-2" style="display:none">
+                    <div class="row2">
+                      <div><label for="frac-dim-para-w-2">Width (px)</label><input type="number" id="frac-dim-para-w-2" value="240" min="60" max="400"></div>
+                      <div><label for="frac-dim-para-h-2">Height (px)</label><input type="number" id="frac-dim-para-h-2" value="80" min="20" max="200"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
             </div>
           </div>
 
@@ -586,36 +756,129 @@
               </div>
               <div class="check-row" style="margin-top:6px"><input type="checkbox" id="frac-label-3" checked><label for="frac-label-3">Show fraction label</label></div>
               <div class="check-row"><input type="checkbox" id="frac-cellnums-3"><label for="frac-cellnums-3">Number cells</label></div>
-            </div>
-          </div>
 
-          <!-- Shared Label Style sub-group -->
-          <div class="sub-group collapsible collapsed sub-group--frac-label" style="margin-top:8px">
-            <div class="sub-group-title">
-              Label Style
-              <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </div>
-            <div class="sub-body">
-              <div class="row3">
-                <div><label for="frac-lbl-size">Size</label><input type="number" id="frac-lbl-size" value="20" min="8" max="48"></div>
-                <div><label for="frac-lbl-color">Color</label><input type="color" id="frac-lbl-color" value="#000000"></div>
-                <div><div class="check-row" style="margin-top:20px"><input type="checkbox" id="frac-lbl-bold" checked><label for="frac-lbl-bold">Bold</label></div></div>
+              <!-- Fraction Label Style -->
+              <div class="sub-group collapsible collapsed sub-group--frac-lbl" style="margin-top:6px">
+                <div class="sub-group-title">Fraction Label Style <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                <div class="sub-body">
+                  <div class="row3">
+                    <div><label for="frac-lbl-size-3">Size</label><input type="number" id="frac-lbl-size-3" value="20" min="8" max="48"></div>
+                    <div><label for="frac-lbl-color-3">Color</label><input type="color" id="frac-lbl-color-3" value="#000000"></div>
+                    <div><div class="check-row" style="margin-top:20px"><input type="checkbox" id="frac-lbl-bold-3" checked><label for="frac-lbl-bold-3">Bold</label></div></div>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
 
-          <!-- Shared Cell Number Style sub-group -->
-          <div class="sub-group collapsible collapsed sub-group--frac-cells" style="margin-top:4px">
-            <div class="sub-group-title">
-              Cell Number Style
-              <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </div>
-            <div class="sub-body">
-              <div class="row3">
-                <div><label for="frac-cell-size">Size</label><input type="number" id="frac-cell-size" value="13" min="6" max="32"></div>
-                <div><label for="frac-cell-color">Color</label><input type="color" id="frac-cell-color" value="#666666"></div>
-                <div><div class="check-row" style="margin-top:20px"><input type="checkbox" id="frac-cell-bold"><label for="frac-cell-bold">Bold</label></div></div>
+              <!-- Cell Number Style -->
+              <div class="sub-group collapsible collapsed sub-group--frac-cnums" style="margin-top:4px">
+                <div class="sub-group-title">Cell Number Style <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                <div class="sub-body">
+                  <div class="row3">
+                    <div><label for="frac-cell-size-3">Size</label><input type="number" id="frac-cell-size-3" value="13" min="6" max="32"></div>
+                    <div><label for="frac-cell-color-3">Color</label><input type="color" id="frac-cell-color-3" value="#666666"></div>
+                    <div><div class="check-row" style="margin-top:20px"><input type="checkbox" id="frac-cell-bold-3"><label for="frac-cell-bold-3">Bold</label></div></div>
+                  </div>
+                </div>
               </div>
+
+              <!-- Element Label -->
+              <div class="sub-group collapsible collapsed sub-group--frac-ellbl" style="margin-top:4px">
+                <div class="sub-group-title">Element Label <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                <div class="sub-body">
+                  <label for="frac-ellbl-text-3">Text <span style="font-weight:400;color:#64748b">(use $…$ for math)</span></label>
+                  <input type="text" id="frac-ellbl-text-3" placeholder="e.g. $\frac{1}{4}$ or label">
+                  <div class="row2" style="margin-top:6px">
+                    <div>
+                      <label for="frac-ellbl-pos-3">Position</label>
+                      <select id="frac-ellbl-pos-3">
+                        <option value="below" selected>Below</option>
+                        <option value="above">Above</option>
+                        <option value="left">Left</option>
+                        <option value="right">Right</option>
+                      </select>
+                    </div>
+                    <div><label for="frac-ellbl-size-3">Font size</label><input type="number" id="frac-ellbl-size-3" value="14" min="8" max="48"></div>
+                  </div>
+                  <div class="row2" style="margin-top:6px">
+                    <div>
+                      <label for="frac-ellbl-font-3">Font</label>
+                      <select id="frac-ellbl-font-3">
+                        <option value="Arial, sans-serif" selected>Arial</option>
+                        <option value="'Helvetica Neue', sans-serif">Helvetica Neue</option>
+                        <option value="Verdana, sans-serif">Verdana</option>
+                        <option value="'Trebuchet MS', sans-serif">Trebuchet MS</option>
+                        <option value="Georgia, serif">Georgia</option>
+                        <option value="'Times New Roman', serif">Times New Roman</option>
+                        <option value="Palatino, serif">Palatino</option>
+                        <option value="'Courier New', monospace">Courier New</option>
+                      </select>
+                    </div>
+                    <div><label for="frac-ellbl-color-3">Color</label><input type="color" id="frac-ellbl-color-3" value="#000000"></div>
+                  </div>
+                  <div style="display:flex;gap:12px;margin-top:6px">
+                    <div class="check-row"><input type="checkbox" id="frac-ellbl-bold-3"><label for="frac-ellbl-bold-3">Bold</label></div>
+                    <div class="check-row"><input type="checkbox" id="frac-ellbl-italic-3"><label for="frac-ellbl-italic-3">Italic</label></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Cell Labels -->
+              <div class="sub-group collapsible collapsed sub-group--frac-cllbl" style="margin-top:4px">
+                <div class="sub-group-title">Cell Labels <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                <div class="sub-body">
+                  <div style="font-size:11px;font-weight:600;color:#666;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.04em">Shaded cells</div>
+                  <div class="row3" style="margin-bottom:10px">
+                    <div><label for="frac-cl-size-3">Size</label><input type="number" id="frac-cl-size-3" value="12" min="6" max="32"></div>
+                    <div><label for="frac-cl-color-3">Color</label><input type="color" id="frac-cl-color-3" value="#333333"></div>
+                    <div style="display:flex;gap:8px;align-items:flex-end;padding-bottom:2px">
+                      <div class="check-row"><input type="checkbox" id="frac-cl-bold-3"><label for="frac-cl-bold-3">Bold</label></div>
+                      <div class="check-row"><input type="checkbox" id="frac-cl-italic-3"><label for="frac-cl-italic-3">Italic</label></div>
+                    </div>
+                  </div>
+                  <div style="font-size:11px;font-weight:600;color:#666;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.04em">Unshaded cells</div>
+                  <div class="row3" style="margin-bottom:7px">
+                    <div><label for="frac-cl-uc-size-3">Size</label><input type="number" id="frac-cl-uc-size-3" value="12" min="6" max="32"></div>
+                    <div><label for="frac-cl-uc-color-3">Color</label><input type="color" id="frac-cl-uc-color-3" value="#cccccc"></div>
+                    <div style="display:flex;gap:8px;align-items:flex-end;padding-bottom:2px">
+                      <div class="check-row"><input type="checkbox" id="frac-cl-uc-bold-3"><label for="frac-cl-uc-bold-3">Bold</label></div>
+                      <div class="check-row"><input type="checkbox" id="frac-cl-uc-italic-3"><label for="frac-cl-uc-italic-3">Italic</label></div>
+                    </div>
+                  </div>
+                  <div id="frac-cl-section-3"></div>
+                </div>
+              </div>
+
+              <!-- Dimensions -->
+              <div class="sub-group collapsible collapsed sub-group--frac-dims" style="margin-top:4px">
+                <div class="sub-group-title">Dimensions <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                <div class="sub-body">
+                  <div id="frac-dims-rect-3">
+                    <div class="row2">
+                      <div><label for="frac-dim-rw-3">Width (px)</label><input type="number" id="frac-dim-rw-3" value="240" min="40" max="600"></div>
+                      <div><label for="frac-dim-rh-3">Height (px)</label><input type="number" id="frac-dim-rh-3" value="60" min="20" max="200"></div>
+                    </div>
+                  </div>
+                  <div id="frac-dims-circ-3" style="display:none">
+                    <label for="frac-dim-circ-r-3">Radius (px)</label><input type="number" id="frac-dim-circ-r-3" value="90" min="20" max="200">
+                  </div>
+                  <div id="frac-dims-grid-3" style="display:none">
+                    <div class="row2">
+                      <div><label for="frac-dim-gw-3">Width (px)</label><input type="number" id="frac-dim-gw-3" value="240" min="40" max="600"></div>
+                      <div><label for="frac-dim-gh-3">Height (px)</label><input type="number" id="frac-dim-gh-3" value="240" min="40" max="400"></div>
+                    </div>
+                  </div>
+                  <div id="frac-dims-poly-3" style="display:none">
+                    <label for="frac-dim-poly-r-3">Radius (px)</label><input type="number" id="frac-dim-poly-r-3" value="108" min="40" max="200">
+                  </div>
+                  <div id="frac-dims-para-3" style="display:none">
+                    <div class="row2">
+                      <div><label for="frac-dim-para-w-3">Width (px)</label><input type="number" id="frac-dim-para-w-3" value="240" min="60" max="400"></div>
+                      <div><label for="frac-dim-para-h-3">Height (px)</label><input type="number" id="frac-dim-para-h-3" value="80" min="20" max="200"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
             </div>
           </div>
 
@@ -1748,6 +2011,7 @@
 <script src="js/state.js"></script>
 <script src="js/shading.js"></script>
 <script src="js/lines.js"></script>
+<script src="js/numberLine.js"></script>
 <script src="js/generators.js"></script>
 <script src="js/character.js"></script>
 <script src="js/graphPlot.js"></script>

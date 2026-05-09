@@ -1,443 +1,111 @@
 'use strict';
 
-/* ─── Number Line ─── */
-
-function _nlStepStr(step) {
-  return step % 1 === 0 ? String(Math.round(step)) : String(parseFloat(step.toFixed(6)));
-}
-
-function generateNumberLine() {
-  const count = Math.max(1, Math.min(4, int('nl-count') || 1));
-  const gap   = Math.max(0, num('nl-gap') || 30);
-  if (count === 1) return (_genNL0() || {svgStr: errorSVG('Error')}).svgStr;
-  const withPos = (s, x, y) => s.replace('<svg ', `<svg x="${x}" y="${y}" `);
-  const lines = [_genNL0()];
-  for (let i = 1; i < count; i++) lines.push(_genNLi(i));
-  const validLines = lines.filter(Boolean);
-  const W = Math.max(...validLines.map(l => l.width));
-  const H = validLines.reduce((s, l) => s + l.height, 0) + gap * (validLines.length - 1);
-  let s = svgOpen(W, H);
-  let y = 0;
-  for (const l of validLines) {
-    s += '\n' + withPos(l.svgStr, Math.round((W - l.width) / 2), y);
-    y += l.height + gap;
-  }
-  return s + '\n</svg>';
-}
-
-function _genNL0() {
-  const start = parseFloat(val('nl-start')) || 0;
-  const end   = parseFloat(val('nl-end'))   || 10;
-  if (end <= start) return { svgStr: errorSVG('End must be greater than Start'), width: 340, height: 40 };
-
-  // ── Line style ──────────────────────────────────────────────
-  const lineColor = val('nl-color')      || '#000000';
-  const lineWidth = Math.max(0.5, num('nl-line-width') || 3);
-  const totalW    = Math.max(200, num('nl-length') || 700);
-
-  const PAD   = 18;
-  const EXT   = Math.max(30, Math.round(totalW * 0.092));
-  const SCALE = (totalW - 2 * PAD - 2 * EXT) / (end - start);
-  const tx    = n => PAD + EXT + (n - start) * SCALE;
-
-  // ── Integer labels ──────────────────────────────────────────
-  const showIntLbl  = chk('nl-labels');
-  const lblInterval = Math.max(1, int('nl-lbl-interval') || 1);
-  const lblSpecRaw  = val('nl-lbl-specific').trim();
-  const lblSpecific = lblSpecRaw
-    ? lblSpecRaw.split(',').map(v => parseFloat(v.trim())).filter(v => !isNaN(v))
-    : null;
-  const intLblSz    = Math.max(8, num('nl-int-lbl-size')   || 14);
-  const intLblColor = val('nl-int-lbl-color') || '#111111';
-  const intLblBold  = chk('nl-int-lbl-bold') ? 'bold' : 'normal';
-
-  // ── Subdivisions ────────────────────────────────────────────
-  const subs         = Math.max(1, int('nl-subs'));
-  const showSubLbl   = chk('nl-sub-labels');
-  const subLblInterv = Math.max(1, int('nl-sub-lbl-interval') || 1);
-  const subLblSpecRaw = val('nl-sub-lbl-specific').trim();
-  const subLblSpec   = subLblSpecRaw
-    ? subLblSpecRaw.split(',').map(v => parseFloat(v.trim())).filter(v => !isNaN(v))
-    : null;
-  const subLblSz     = Math.max(7, num('nl-sub-lbl-size')   || 11);
-  const subLblColor  = val('nl-sub-lbl-color') || '#555555';
-
-  // ── Point markers ───────────────────────────────────────────
-  const ptDefColor = val('nl-pt-color')    || '#FF0000';
-  const ptR        = Math.max(2, num('nl-pt-radius') || 6);
-  const ptDefPos   = val('nl-pt-pos')      || 'above';
-  const ptLblSz    = Math.max(8, num('nl-pt-lbl-size')  || 16);
-  const ptLblColor = val('nl-pt-lbl-color') || '#000000';
-
-  const points = [];
-  (val('nl-points') || '').trim().split('\n').forEach(line => {
-    line = line.trim(); if (!line) return;
-    const parts = line.split(':');
-    const vs    = parts[0].trim();
-    const lbl   = parts[1]?.trim() ?? '';
-    const rawC  = parts[2]?.trim() ?? '';
-    const color = /^#[0-9a-fA-F]{3,6}$/.test(rawC) ? rawC : ptDefColor;
-    const pos   = parts[3]?.trim() || ptDefPos;
-    let v;
-    if (vs.includes('/')) { const [a, b] = vs.split('/'); v = parseFloat(a) / parseFloat(b); }
-    else v = parseFloat(vs);
-    if (isNaN(v)) return;
-    points.push({ v, lbl, color, pos });
-  });
-
-  // ── Jump arrows ─────────────────────────────────────────────
-  const jumpHeight   = Math.max(10, num('nl-jump-height') || 35);
-  const jumpColor    = val('nl-jump-color')    || '#0066CC';
-  const showUniform  = chk('nl-uniform-enable');
-  const uniformDir   = val('nl-uniform-dir')   || 'right';
-  const uniformFrom  = parseFloat(val('nl-uniform-from'));
-  const uniformTo    = parseFloat(val('nl-uniform-to'));
-  const uniformStep  = Math.max(0.01, num('nl-uniform-step') || 1);
-  const uniformLbls  = chk('nl-uniform-labels');
-  const uniformColor = val('nl-uniform-color') || '#CC6600';
-
-  // Parse specific jumps: dir:from:to:label[:color]
-  const specificJumps = [];
-  (val('nl-jumps') || '').trim().split('\n').forEach(line => {
-    line = line.trim(); if (!line) return;
-    const parts = line.split(':');
-    if (parts.length < 3) return;
-    const dir   = parts[0].toLowerCase().trim();
-    const from  = parseFloat(parts[1]);
-    const to    = parseFloat(parts[2]);
-    const lblRaw = parts[3]?.trim() ?? 'y';
-    const rawC   = parts[4]?.trim() ?? '';
-    const color  = /^#[0-9a-fA-F]{3,6}$/.test(rawC) ? rawC : jumpColor;
-    if (isNaN(from) || isNaN(to) || (dir !== 'right' && dir !== 'left')) return;
-    const mag = _nlStepStr(Math.abs(to - from));
-    const lbl = lblRaw === 'n' ? '' : lblRaw === 'y' ? (dir === 'left' ? `-${mag}` : mag) : lblRaw;
-    specificJumps.push({ from, to, lbl, color });
-  });
-
-  // Generate uniform jump sequence
-  const uniformJumps = [];
-  if (showUniform && !isNaN(uniformFrom) && !isNaN(uniformTo) && uniformStep > 0) {
-    const stepStr = _nlStepStr(uniformStep);
-    const autoLbl = uniformLbls ? (uniformDir === 'left' ? `-${stepStr}` : stepStr) : '';
-    if (uniformDir === 'right' && uniformFrom < uniformTo) {
-      for (let cur = uniformFrom; cur + uniformStep <= uniformTo + 1e-9; cur = parseFloat((cur + uniformStep).toFixed(10))) {
-        uniformJumps.push({ from: cur, to: parseFloat((cur + uniformStep).toFixed(10)), lbl: autoLbl, color: uniformColor });
-      }
-    } else if (uniformDir === 'left' && uniformFrom > uniformTo) {
-      for (let cur = uniformFrom; cur - uniformStep >= uniformTo - 1e-9; cur = parseFloat((cur - uniformStep).toFixed(10))) {
-        uniformJumps.push({ from: cur, to: parseFloat((cur - uniformStep).toFixed(10)), lbl: autoLbl, color: uniformColor });
-      }
-    }
-  }
-
-  const allJumps = [...uniformJumps, ...specificJumps];
-
-  // ── SVG dimensions ───────────────────────────────────────────
-  const hasJumps   = allJumps.length > 0;
-  const hasJumpLbl = allJumps.some(j => j.lbl);
-  const hasPtAbove = points.some(p => p.pos !== 'below' && p.lbl);
-  const hasPtBelow = points.some(p => p.pos === 'below' && p.lbl);
-
-  const LIFT = 5; // px gap between arc base and the number line
-  const topSpace = hasJumps
-    ? LIFT + jumpHeight + (hasJumpLbl ? 22 : 10) + 8
-    : hasPtAbove ? ptLblSz + ptR + 14 : 20;
-  const LINE_Y = topSpace;
-
-  const subLblH = (showSubLbl && subs > 1) ? subLblSz + 8 : 0;
-  const intLblH = showIntLbl ? intLblSz + 8 : 0;
-  const ptBotH  = hasPtBelow ? ptLblSz + ptR + 8 : 0;
-  const botSpace = Math.max(8, subLblH, intLblH, ptBotH) + 10;
-  const H = LINE_Y + botSpace;
-
-  // ── Arrowhead markers ────────────────────────────────────────
-  // Main axis arrows (standard refX for clean flush tips)
-  const lcId = 'nl' + lineColor.replace(/[^a-zA-Z0-9]/g, '');
-  // Jump arrow markers use refX="0" so the arrowhead tip extends exactly
-  // LIFT px past the arc endpoint, landing precisely on the number line.
-  const jumpMarkerColors = new Set(allJumps.map(j => j.color));
-
-  let s = svgOpen(totalW, H);
-  s += '\n<defs>';
-  s += `\n  <marker id="${lcId}f" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto">
-    <path d="M0,0 L10,5 L0,10 Z" fill="${lineColor}"/>
-  </marker>
-  <marker id="${lcId}r" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
-    <path d="M0,0 L10,5 L0,10 Z" fill="${lineColor}"/>
-  </marker>`;
-  for (const c of jumpMarkerColors) {
-    const jid = 'nlj' + c.replace(/[^a-zA-Z0-9]/g, '');
-    s += `\n  <marker id="${jid}" viewBox="0 0 10 10" refX="0" refY="5" markerWidth="5" markerHeight="5" orient="auto">
-    <path d="M0,0 L10,5 L0,10 Z" fill="${c}"/>
-  </marker>`;
-  }
-  s += '\n</defs>';
-
-  // Main axis line
-  s += `\n<line x1="${PAD}" y1="${LINE_Y}" x2="${totalW - PAD}" y2="${LINE_Y}" stroke="${lineColor}" stroke-width="${lineWidth}" marker-start="url(#${lcId}r)" marker-end="url(#${lcId}f)"/>`;
-
-  // Major ticks + integer labels
-  for (let n = start; n <= end; n++) {
-    const x = fmt(tx(n));
-    s += `\n<line x1="${x}" y1="${fmt(LINE_Y - 8)}" x2="${x}" y2="${fmt(LINE_Y + 8)}" stroke="${lineColor}" stroke-width="2"/>`;
-    let show = false;
-    if (showIntLbl) {
-      if (lblSpecific) show = lblSpecific.some(v => Math.abs(v - n) < 1e-9);
-      else show = ((n - start) % lblInterval === 0);
-    }
-    if (show) {
-      s += `\n<text x="${x}" y="${fmt(LINE_Y + 8 + 4 + intLblSz)}" font-family="Arial,sans-serif" font-size="${intLblSz}" font-weight="${intLblBold}" fill="${intLblColor}" text-anchor="middle">${n}</text>`;
-    }
-  }
-
-  // Subdivision ticks + labels
-  if (subs > 1) {
-    let subIdx = 0;
-    for (let n = start; n < end; n++) {
-      for (let i = 1; i < subs; i++) {
-        subIdx++;
-        const sv = parseFloat((n + i / subs).toFixed(10));
-        const x  = fmt(tx(sv));
-        s += `\n<line x1="${x}" y1="${fmt(LINE_Y - 5)}" x2="${x}" y2="${fmt(LINE_Y + 5)}" stroke="${lineColor}" stroke-width="1.5"/>`;
-        let showS = false;
-        if (showSubLbl) {
-          if (subLblSpec) showS = subLblSpec.some(v => Math.abs(v - sv) < 1e-9);
-          else showS = (subIdx % subLblInterv === 0);
-        }
-        if (showS) {
-          const svLbl = sv % 1 === 0 ? Math.round(sv) : parseFloat(sv.toFixed(4));
-          s += `\n<text x="${x}" y="${fmt(LINE_Y + 5 + 3 + subLblSz)}" font-family="Arial,sans-serif" font-size="${subLblSz}" fill="${subLblColor}" text-anchor="middle">${svLbl}</text>`;
-        }
-      }
-    }
-  }
-
-  // Jump arcs — elliptical bezier (κ ≈ 0.5523) for circular shape.
-  // Arc endpoints sit LIFT px above the line; arrowhead marker (refX=0)
-  // extends exactly LIFT px forward so its tip lands on the number line.
-  const K = 0.5523;
-  for (const j of allJumps) {
-    const x1  = tx(j.from);
-    const x2  = tx(j.to);
-    const mid = (x1 + x2) / 2;
-    const a   = Math.abs(x2 - x1) / 2; // horizontal semi-axis
-    const b   = jumpHeight;             // vertical semi-axis
-    const baseY = LINE_Y - LIFT;        // arc endpoints, lifted above line
-
-    // Two-segment ellipse approximation. The inner control point offset flips
-    // sign with direction so the dome stays convex upward for both left and right arrows.
-    const dir = x2 > x1 ? 1 : -1;
-    const d = `M${fmt(x1)} ${fmt(baseY)} ` +
-      `C${fmt(x1)} ${fmt(baseY - b * K)} ${fmt(mid - dir * a * K)} ${fmt(baseY - b)} ${fmt(mid)} ${fmt(baseY - b)} ` +
-      `S${fmt(x2)} ${fmt(baseY - b * K)} ${fmt(x2)} ${fmt(baseY)}`;
-
-    const jid = 'nlj' + j.color.replace(/[^a-zA-Z0-9]/g, '');
-    s += `\n<path d="${d}" fill="none" stroke="${j.color}" stroke-width="2" marker-end="url(#${jid})"/>`;
-
-    if (j.lbl) {
-      const lblX = fmt(mid);
-      const lblY = fmt(baseY - b - 7); // just above the arc peak
-      s += `\n<text x="${lblX}" y="${lblY}" font-family="Arial,sans-serif" font-size="12" font-weight="bold" fill="${j.color}" text-anchor="middle">${escXml(j.lbl)}</text>`;
-    }
-  }
-
-  // Point markers
-  for (const pt of points) {
-    const x = fmt(tx(pt.v));
-    s += `\n<circle cx="${x}" cy="${LINE_Y}" r="${ptR}" fill="${pt.color}"/>`;
-    if (pt.lbl) {
-      const ly = pt.pos === 'below'
-        ? fmt(LINE_Y + ptR + 4 + ptLblSz)
-        : fmt(LINE_Y - ptR - 6);
-      s += `\n<text x="${x}" y="${ly}" font-family="Arial,sans-serif" font-size="${ptLblSz}" font-weight="bold" fill="${ptLblColor}" text-anchor="middle">${escXml(pt.lbl)}</text>`;
-    }
-  }
-
-  return { svgStr: s + '\n</svg>', width: totalW, height: H };
-}
-
-function _genNLi(i) {
-  const start = parseFloat(val(`nl-start-${i}`));
-  const end   = parseFloat(val(`nl-end-${i}`));
-  if (isNaN(start) || isNaN(end) || end <= start) return null;
-
-  // Inherit styling from Line 1 controls
-  const lineColor = val('nl-color')      || '#000000';
-  const lineWidth = Math.max(0.5, num('nl-line-width') || 3);
-  const totalW    = Math.max(200, num('nl-length') || 700);
-  const PAD   = 18;
-  const EXT   = Math.max(30, Math.round(totalW * 0.092));
-  const SCALE = (totalW - 2 * PAD - 2 * EXT) / (end - start);
-  const tx    = n => PAD + EXT + (n - start) * SCALE;
-
-  const showIntLbl  = chk(`nl-labels-${i}`);
-  const intLblSz    = Math.max(8, num('nl-int-lbl-size')  || 14);
-  const intLblColor = val('nl-int-lbl-color') || '#111111';
-  const intLblBold  = chk('nl-int-lbl-bold') ? 'bold' : 'normal';
-
-  const subs        = Math.max(1, parseInt(val(`nl-subs-${i}`)) || 1);
-  const subLblSz    = Math.max(7, num('nl-sub-lbl-size')  || 11);
-  const subLblColor = val('nl-sub-lbl-color') || '#555555';
-
-  const ptDefColor = val('nl-pt-color')    || '#FF0000';
-  const ptR        = Math.max(2, num('nl-pt-radius') || 6);
-  const ptDefPos   = val('nl-pt-pos')      || 'above';
-  const ptLblSz    = Math.max(8, num('nl-pt-lbl-size')  || 16);
-  const ptLblColor = val('nl-pt-lbl-color') || '#000000';
-
-  const points = [];
-  (val(`nl-points-${i}`) || '').trim().split('\n').forEach(line => {
-    line = line.trim(); if (!line) return;
-    const parts = line.split(':');
-    const vs = parts[0].trim(), lbl = parts[1]?.trim() ?? '';
-    const rawC = parts[2]?.trim() ?? '';
-    const color = /^#[0-9a-fA-F]{3,6}$/.test(rawC) ? rawC : ptDefColor;
-    const pos = parts[3]?.trim() || ptDefPos;
-    let v;
-    if (vs.includes('/')) { const [a, b] = vs.split('/'); v = parseFloat(a) / parseFloat(b); }
-    else v = parseFloat(vs);
-    if (isNaN(v)) return;
-    points.push({ v, lbl, color, pos });
-  });
-
-  const jumpHeight = Math.max(10, num('nl-jump-height') || 35);
-  const jumpColor  = val('nl-jump-color') || '#0066CC';
-  const jumps = [];
-  (val(`nl-jumps-${i}`) || '').trim().split('\n').forEach(line => {
-    line = line.trim(); if (!line) return;
-    const parts = line.split(':');
-    if (parts.length < 3) return;
-    const dir = parts[0].toLowerCase().trim();
-    const from = parseFloat(parts[1]), to = parseFloat(parts[2]);
-    const lblRaw = parts[3]?.trim() ?? 'y';
-    const rawC = parts[4]?.trim() ?? '';
-    const color = /^#[0-9a-fA-F]{3,6}$/.test(rawC) ? rawC : jumpColor;
-    if (isNaN(from) || isNaN(to) || (dir !== 'right' && dir !== 'left')) return;
-    const mag = _nlStepStr(Math.abs(to - from));
-    const lbl = lblRaw === 'n' ? '' : lblRaw === 'y' ? (dir === 'left' ? `-${mag}` : mag) : lblRaw;
-    jumps.push({ from, to, lbl, color });
-  });
-
-  const hasJumps   = jumps.length > 0;
-  const hasJumpLbl = jumps.some(j => j.lbl);
-  const hasPtAbove = points.some(p => p.pos !== 'below' && p.lbl);
-  const hasPtBelow = points.some(p => p.pos === 'below' && p.lbl);
-  const LIFT = 5;
-  const topSpace = hasJumps
-    ? LIFT + jumpHeight + (hasJumpLbl ? 22 : 10) + 8
-    : hasPtAbove ? ptLblSz + ptR + 14 : 20;
-  const LINE_Y = topSpace;
-  const intLblH  = showIntLbl ? intLblSz + 8 : 0;
-  const ptBotH   = hasPtBelow ? ptLblSz + ptR + 8 : 0;
-  const H = LINE_Y + Math.max(8, intLblH, ptBotH) + 10;
-
-  const lcId = 'nl' + i + lineColor.replace(/[^a-zA-Z0-9]/g, '');
-  const jumpMarkerColors = new Set(jumps.map(j => j.color));
-  let s = svgOpen(totalW, H);
-  s += '\n<defs>';
-  s += `\n  <marker id="${lcId}f" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="${lineColor}"/></marker>`;
-  s += `\n  <marker id="${lcId}r" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 Z" fill="${lineColor}"/></marker>`;
-  for (const c of jumpMarkerColors) {
-    const jid = 'nlj' + i + c.replace(/[^a-zA-Z0-9]/g, '');
-    s += `\n  <marker id="${jid}" viewBox="0 0 10 10" refX="0" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="${c}"/></marker>`;
-  }
-  s += '\n</defs>';
-  s += `\n<line x1="${PAD}" y1="${LINE_Y}" x2="${totalW - PAD}" y2="${LINE_Y}" stroke="${lineColor}" stroke-width="${lineWidth}" marker-start="url(#${lcId}r)" marker-end="url(#${lcId}f)"/>`;
-
-  for (let n = Math.ceil(start); n <= Math.floor(end); n++) {
-    const x = fmt(tx(n));
-    s += `\n<line x1="${x}" y1="${fmt(LINE_Y-8)}" x2="${x}" y2="${fmt(LINE_Y+8)}" stroke="${lineColor}" stroke-width="2"/>`;
-    if (showIntLbl) s += `\n<text x="${x}" y="${fmt(LINE_Y+8+4+intLblSz)}" font-family="Arial,sans-serif" font-size="${intLblSz}" font-weight="${intLblBold}" fill="${intLblColor}" text-anchor="middle">${n}</text>`;
-  }
-
-  if (subs > 1) {
-    for (let n = Math.floor(start); n < Math.ceil(end); n++) {
-      for (let k = 1; k < subs; k++) {
-        const sv = parseFloat((n + k / subs).toFixed(10));
-        if (sv <= start || sv >= end) continue;
-        const x = fmt(tx(sv));
-        s += `\n<line x1="${x}" y1="${fmt(LINE_Y-5)}" x2="${x}" y2="${fmt(LINE_Y+5)}" stroke="${lineColor}" stroke-width="1.5"/>`;
-        const svLbl = sv % 1 === 0 ? Math.round(sv) : parseFloat(sv.toFixed(4));
-        s += `\n<text x="${x}" y="${fmt(LINE_Y+5+3+subLblSz)}" font-family="Arial,sans-serif" font-size="${subLblSz}" fill="${subLblColor}" text-anchor="middle">${svLbl}</text>`;
-      }
-    }
-  }
-
-  const K = 0.5523;
-  for (const j of jumps) {
-    const x1 = tx(j.from), x2 = tx(j.to), mid = (x1+x2)/2;
-    const a = Math.abs(x2-x1)/2, b = jumpHeight, baseY = LINE_Y - LIFT;
-    const dir = x2 > x1 ? 1 : -1;
-    const d = `M${fmt(x1)} ${fmt(baseY)} C${fmt(x1)} ${fmt(baseY-b*K)} ${fmt(mid-dir*a*K)} ${fmt(baseY-b)} ${fmt(mid)} ${fmt(baseY-b)} S${fmt(x2)} ${fmt(baseY-b*K)} ${fmt(x2)} ${fmt(baseY)}`;
-    const jid = 'nlj' + i + j.color.replace(/[^a-zA-Z0-9]/g, '');
-    s += `\n<path d="${d}" fill="none" stroke="${j.color}" stroke-width="2" marker-end="url(#${jid})"/>`;
-    if (j.lbl) s += `\n<text x="${fmt(mid)}" y="${fmt(baseY-b-7)}" font-family="Arial,sans-serif" font-size="12" font-weight="bold" fill="${j.color}" text-anchor="middle">${escXml(j.lbl)}</text>`;
-  }
-  for (const pt of points) {
-    const x = fmt(tx(pt.v));
-    s += `\n<circle cx="${x}" cy="${LINE_Y}" r="${ptR}" fill="${pt.color}"/>`;
-    if (pt.lbl) {
-      const ly = pt.pos === 'below' ? fmt(LINE_Y+ptR+4+ptLblSz) : fmt(LINE_Y-ptR-6);
-      s += `\n<text x="${x}" y="${ly}" font-family="Arial,sans-serif" font-size="${ptLblSz}" font-weight="bold" fill="${ptLblColor}" text-anchor="middle">${escXml(pt.lbl)}</text>`;
-    }
-  }
-  return { svgStr: s + '\n</svg>', width: totalW, height: H };
-}
+/* ─── Number Line ─── moved to numberLine.js (generateNumberLine, _genNLLine) ─ */
 
 /* ─── Fraction (unified: rectangle, circle, grid, triangle, hexagon, pentagon, parallelogram) ─── */
 function generateFraction() {
-  const c       = SCHEMES[currentScheme];
-  const count   = Math.max(1, Math.min(4, int('frac-count') || 1));
-  const layout  = val('frac-layout') || 'row';
-  const gap     = Math.max(0, num('frac-gap') || 20);
-  const lblSize = Math.max(8, num('frac-lbl-size') || 20);
-  const lblColor= val('frac-lbl-color') || '#000000';
-  const lblWt   = chk('frac-lbl-bold') ? 'bold' : 'normal';
-  const cellSize= Math.max(6, num('frac-cell-size') || 13);
-  const cellClr = val('frac-cell-color') || '#666666';
-  const cellWt  = chk('frac-cell-bold') ? 'bold' : 'normal';
+  const c      = SCHEMES[currentScheme];
+  const count  = Math.max(1, Math.min(4, int('frac-count') || 1));
+  const layout = val('frac-layout') || 'row';
+  const gap    = Math.max(0, num('frac-gap') || 20);
 
   const elems = [];
   for (let ei = 0; ei < count; ei++)
-    elems.push(_genFracEl(ei, c, lblSize, lblColor, lblWt, cellSize, cellClr, cellWt));
+    elems.push(_genFracEl(ei, c));
 
   if (count === 1) return elems[0].svgStr;
 
   const withPos = (s, x, y) => s.replace('<svg ', `<svg x="${x}" y="${y}" `);
   if (layout === 'row') {
-    const W = elems.reduce((s, e) => s + e.width, 0) + gap * (count - 1);
+    // Collapse inner padding so `gap` separates shape contents, but never overlap SVG boxes
+    const xpos = [0];
+    for (let i = 1; i < elems.length; i++) {
+      const collapsed = elems[i-1].width - elems[i-1].shapeRp + gap - elems[i].shapeLp;
+      xpos[i] = xpos[i-1] + Math.max(elems[i-1].width, collapsed);
+    }
+    const W = xpos[elems.length-1] + elems[elems.length-1].width;
     const H = Math.max(...elems.map(e => e.height));
     let s = svgOpen(W, H);
-    let x = 0;
-    for (const e of elems) {
-      s += '\n' + withPos(e.svgStr, x, Math.round((H - e.height) / 2));
-      x += e.width + gap;
-    }
+    for (let i = 0; i < elems.length; i++)
+      s += '\n' + withPos(elems[i].svgStr, xpos[i], Math.round((H - elems[i].height) / 2));
     return s + '\n</svg>';
   } else {
     const W = Math.max(...elems.map(e => e.width));
-    const H = elems.reduce((s, e) => s + e.height, 0) + gap * (count - 1);
-    let s = svgOpen(W, H);
-    let y = 0;
-    for (const e of elems) {
-      s += '\n' + withPos(e.svgStr, Math.round((W - e.width) / 2), y);
-      y += e.height + gap;
+    // Collapse inner padding so `gap` separates shape contents, but never overlap SVG boxes
+    const ypos = [0];
+    for (let i = 1; i < elems.length; i++) {
+      const collapsed = elems[i-1].height - elems[i-1].shapeBp + gap - elems[i].shapeTp;
+      ypos[i] = ypos[i-1] + Math.max(elems[i-1].height, collapsed);
     }
+    const H = ypos[elems.length-1] + elems[elems.length-1].height;
+    let s = svgOpen(W, H);
+    for (let i = 0; i < elems.length; i++)
+      s += '\n' + withPos(elems[i].svgStr, 0, ypos[i]);
     return s + '\n</svg>';
   }
 }
 
-function _genFracEl(elIdx, c, lblSize, lblColor, lblWt, cellSize, cellClr, cellWt) {
-  const sfx     = `-${elIdx}`;
-  const shape   = val('frac-shape' + sfx) || 'rectangle';
-  const den     = Math.max(1, Math.min(24, int('frac-den' + sfx)));
-  const numN    = Math.max(0, Math.min(den, int('frac-num' + sfx)));
-  const showLbl = chk('frac-label' + sfx);
-  const cellNums= chk('frac-cellnums' + sfx);
+function _genFracEl(elIdx, c) {
+  const E = s => `${s}-${elIdx}`;
+  const shape    = val(E('frac-shape'))   || 'rectangle';
+  const den      = Math.max(1, Math.min(24, int(E('frac-den'))));
+  const numN     = Math.max(0, Math.min(den, int(E('frac-num'))));
+  const showLbl  = chk(E('frac-label'));
+  const cellNums = chk(E('frac-cellnums'));
+
+  // Per-element label style
+  const lblSize  = Math.max(8, num(E('frac-lbl-size'))  || 20);
+  const lblColor = val(E('frac-lbl-color'))              || '#000000';
+  const lblWt    = chk(E('frac-lbl-bold')) ? 'bold' : 'normal';
+
+  // Per-element cell number style
+  const cellSize = Math.max(6, num(E('frac-cell-size')) || 13);
+  const cellClr  = val(E('frac-cell-color'))             || '#666666';
+  const cellWt   = chk(E('frac-cell-bold')) ? 'bold' : 'normal';
+
+  // Element label
+  const elLblText   = val(E('frac-ellbl-text'))  || '';
+  const elLblPos    = val(E('frac-ellbl-pos'))   || 'below';
+  const elLblSz     = Math.max(8, num(E('frac-ellbl-size')) || 14);
+  const elLblFont   = val(E('frac-ellbl-font'))  || 'Arial, sans-serif';
+  const elLblBold   = chk(E('frac-ellbl-bold'));
+  const elLblItalic = chk(E('frac-ellbl-italic'));
+  const elLblColor  = val(E('frac-ellbl-color')) || '#000000';
+
+  // Cell labels + style (shaded)
+  const cellLabels = [];
+  for (let ci = 0; ci < den; ci++)
+    cellLabels.push(val(`frac-cl-${elIdx}-${ci}`) || '');
+  const clSize   = Math.max(6, num(E('frac-cl-size'))  || 12);
+  const clColor  = val(E('frac-cl-color'))              || '#333333';
+  const clWt     = chk(E('frac-cl-bold'))   ? 'bold'   : 'normal';
+  const clFs     = chk(E('frac-cl-italic')) ? 'italic' : 'normal';
+  // Cell label style (unshaded)
+  const clUcSize  = Math.max(6, num(E('frac-cl-uc-size'))  || 12);
+  const clUcColor = val(E('frac-cl-uc-color'))              || '#cccccc';
+  const clUcWt    = chk(E('frac-cl-uc-bold'))   ? 'bold'   : 'normal';
+  const clUcFs    = chk(E('frac-cl-uc-italic')) ? 'italic' : 'normal';
 
   const cells  = getShading('fraction-' + elIdx, den, i => i < numN);
   const shaded = countShaded('fraction-' + elIdx);
   const lblH   = showLbl ? lblSize * 2 + 14 : 0;
+
+  // Element label space estimation
+  let topPad = 0, botPad = 0, leftPad = 0, rightPad = 0;
+  if (elLblText) {
+    const EL_H = elLblSz + 14;
+    let EL_W = 60;
+    if (elLblText.includes('$')) {
+      const info = _getMathInfo(_textToLatex(elLblText));
+      EL_W = info ? Math.ceil(info.wEx * elLblSz) + 16 : Math.max(60, elLblText.replace(/\$[^$]+\$/g, '###').length * elLblSz * 0.55 + 16);
+    } else {
+      EL_W = Math.max(60, elLblText.length * elLblSz * 0.6 + 16);
+    }
+    if (elLblPos === 'above')      topPad   = EL_H;
+    else if (elLblPos === 'below') botPad   = EL_H;
+    else if (elLblPos === 'left')  leftPad  = EL_W;
+    else                           rightPad = EL_W;
+  }
 
   // Stacked a/b fraction label centred at (cx, topY)
   function lblSVG(cx, topY) {
@@ -451,22 +119,52 @@ function _genFracEl(elIdx, c, lblSize, lblColor, lblWt, cellSize, cellClr, cellW
            `\n<text x="${fmt(cx)}" y="${fmt(denY)}" font-family="Arial,sans-serif" font-size="${lblSize}" font-weight="${lblWt}" fill="${lblColor}" text-anchor="middle">${den}</text>`;
   }
 
-  const de = `data-el="${elIdx}"`;  // shorthand for hit area attribute
+  // Cell text (ordinal number + optional user cell label)
+  function cellTextSVG(cx, cy, ci, isShaded) {
+    let s = '';
+    const hasCN = cellNums;
+    const hasCL = cellLabels[ci] !== '';
+    if (!hasCN && !hasCL) return '';
+    const cnFill   = isShaded ? cellClr   : '#ccc';
+    const effClSz  = isShaded ? clSize    : clUcSize;
+    const effClClr = isShaded ? clColor   : clUcColor;
+    const effClWt  = isShaded ? clWt      : clUcWt;
+    const effClFs  = isShaded ? clFs      : clUcFs;
+    const clSt = `font-family:Arial,sans-serif;font-size:${effClSz}px;font-weight:${effClWt};font-style:${effClFs};fill:${effClClr}`;
+    if (hasCN && hasCL) {
+      s += `\n<text x="${fmt(cx)}" y="${fmt(cy - cellSize * 0.35)}" font-family="Arial,sans-serif" font-size="${cellSize}" font-weight="${cellWt}" fill="${cnFill}" text-anchor="middle" dominant-baseline="central">${ci+1}</text>`;
+      s += `\n<text x="${fmt(cx)}" y="${fmt(cy + effClSz * 0.7)}" style="${clSt}" text-anchor="middle" dominant-baseline="central">${escXml(cellLabels[ci])}</text>`;
+    } else if (hasCN) {
+      s += `\n<text x="${fmt(cx)}" y="${fmt(cy)}" font-family="Arial,sans-serif" font-size="${cellSize}" font-weight="${cellWt}" fill="${cnFill}" text-anchor="middle" dominant-baseline="central">${ci+1}</text>`;
+    } else {
+      s += `\n<text x="${fmt(cx)}" y="${fmt(cy)}" style="${clSt}" text-anchor="middle" dominant-baseline="central">${escXml(cellLabels[ci])}</text>`;
+    }
+    return s;
+  }
+
+  const de = `data-el="${elIdx}"`;
   let s = '', _W = 0, _H = 0;
+  let shpCx = 0, shpCy = 0;
+  let shapeLp = 10, shapeRp = 10, shapeTp = 10, shapeBp = 12;
 
   // ── Rectangle ──────────────────────────────────────────────────────────────
   if (shape === 'rectangle') {
-    const cW = 60, cH = 60, x0 = 10, y0 = 10;
-    _W = den * cW + 20;
-    _H = y0 + cH + (showLbl ? 16 + lblH : 12);
-    const shpCx = x0 + (den * cW) / 2;
+    const rW = Math.max(40, int(E('frac-dim-rw')) || 240);
+    const rH = Math.max(20, int(E('frac-dim-rh')) || 60);
+    const cW = rW / den;
+    const cH = rH;
+    const x0 = 10 + leftPad, y0 = 10 + topPad;
+    _W = x0 + den * cW + 10 + rightPad;
+    _H = y0 + cH + (showLbl ? 16 + lblH : 12) + botPad;
+    shpCx = x0 + (den * cW) / 2;
+    shpCy = y0 + cH / 2;
     s = svgOpen(_W, _H);
     for (let i = 0; i < den; i++)
       if (cells[i]) s += `\n<rect x="${x0 + i*cW}" y="${y0}" width="${cW}" height="${cH}" fill="${c.light}" fill-opacity="0.6" stroke="none"/>`;
     for (let i = 1; i < den; i++)
       s += `\n<line x1="${x0 + i*cW}" y1="${y0}" x2="${x0 + i*cW}" y2="${y0 + cH}" stroke="${c.dark}" stroke-width="1.2"/>`;
-    if (cellNums) for (let i = 0; i < den; i++)
-      s += `\n<text x="${x0 + i*cW + cW/2}" y="${y0 + cH/2}" font-family="Arial,sans-serif" font-size="${cellSize}" font-weight="${cellWt}" fill="${cells[i] ? cellClr : '#ccc'}" text-anchor="middle" dominant-baseline="central">${i+1}</text>`;
+    for (let i = 0; i < den; i++)
+      s += cellTextSVG(x0 + i*cW + cW/2, y0 + cH/2, i, cells[i]);
     for (let i = 0; i < den; i++)
       s += `\n<rect ${de} data-cell="${i}" x="${x0 + i*cW}" y="${y0}" width="${cW}" height="${cH}" fill="transparent" stroke="none" pointer-events="fill" style="cursor:pointer"/>`;
     s += `\n<rect x="${x0}" y="${y0}" width="${den * cW}" height="${cH}" fill="none" stroke="${c.dark}" stroke-width="2.5"/>`;
@@ -474,15 +172,19 @@ function _genFracEl(elIdx, c, lblSize, lblColor, lblWt, cellSize, cellClr, cellW
 
   // ── Circle ─────────────────────────────────────────────────────────────────
   } else if (shape === 'circle') {
-    const cx = 110, cy = 110, r = 90;
-    _W = 220; _H = _W + (showLbl ? 14 + lblH : 6);
+    const r  = Math.max(20, int(E('frac-dim-circ-r')) || 90);
+    const cx = r + 20 + leftPad;
+    const cy = r + 20 + topPad;
+    _W = (r + 20) * 2 + leftPad + rightPad;
+    _H = (r + 20) * 2 + topPad + (showLbl ? 14 + lblH : 6) + botPad;
+    shpCx = cx; shpCy = cy;
     s = svgOpen(_W, _H);
     const pt = deg => { const rad = (90 - deg) * Math.PI / 180; return [fmt(cx + r * Math.cos(rad)), fmt(cy - r * Math.sin(rad))]; };
     if (den === 1) {
       if (cells[0]) s += `\n<circle cx="${cx}" cy="${cy}" r="${r}" fill="${c.light}" fill-opacity="0.6" stroke="none"/>`;
       s += `\n<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${c.dark}" stroke-width="2.5"/>`;
       s += `\n<circle ${de} data-cell="0" cx="${cx}" cy="${cy}" r="${r}" fill="transparent" stroke="none" pointer-events="fill" style="cursor:pointer"/>`;
-      if (cellNums) s += `\n<text x="${cx}" y="${cy}" font-family="Arial,sans-serif" font-size="${cellSize}" font-weight="${cellWt}" fill="${cells[0] ? cellClr : '#ccc'}" text-anchor="middle" dominant-baseline="central">1</text>`;
+      s += cellTextSVG(cx, cy, 0, cells[0]);
     } else {
       const step = 360 / den;
       const arc = i => { const [x1,y1] = pt(i*step), [x2,y2] = pt((i+1)*step); return `M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${step>180?1:0} 1 ${x2} ${y2} Z`; };
@@ -490,37 +192,55 @@ function _genFracEl(elIdx, c, lblSize, lblColor, lblWt, cellSize, cellClr, cellW
       for (let i = 0; i < den; i++) s += `\n<path d="${arc(i)}" fill="none" stroke="${c.dark}" stroke-width="1.2"/>`;
       s += `\n<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${c.dark}" stroke-width="2.5"/>`;
       for (let i = 0; i < den; i++) s += `\n<path ${de} data-cell="${i}" d="${arc(i)}" fill="transparent" stroke="none" pointer-events="fill" style="cursor:pointer"/>`;
-      if (cellNums) for (let i = 0; i < den; i++) {
+      for (let i = 0; i < den; i++) {
         const mid = (90 - (i + 0.5) * step) * Math.PI / 180;
-        s += `\n<text x="${fmt(cx + r*0.6*Math.cos(mid))}" y="${fmt(cy - r*0.6*Math.sin(mid))}" font-family="Arial,sans-serif" font-size="${cellSize}" font-weight="${cellWt}" fill="${cells[i] ? cellClr : '#ccc'}" text-anchor="middle" dominant-baseline="central">${i+1}</text>`;
+        s += cellTextSVG(cx + r*0.6*Math.cos(mid), cy - r*0.6*Math.sin(mid), i, cells[i]);
       }
     }
-    s += lblSVG(cx, _W + 10);
+    s += lblSVG(cx, cy + r + 10);
 
   // ── Grid ───────────────────────────────────────────────────────────────────
   } else if (shape === 'grid') {
     let rows = Math.floor(Math.sqrt(den));
     while (rows > 1 && den % rows !== 0) rows--;
     const cols = den / rows;
-    const cell = 60, x0 = 10, y0 = 10;
-    _W = cols * cell + 20;
-    _H = y0 + rows * cell + (showLbl ? 16 + lblH : 12);
-    const shpCx = x0 + (cols * cell) / 2;
+    const gW = Math.max(40, int(E('frac-dim-gw')) || 240);
+    const gH = Math.max(40, int(E('frac-dim-gh')) || 240);
+    const cellW = gW / cols;
+    const cellH = gH / rows;
+    const x0 = 10 + leftPad, y0 = 10 + topPad;
+    _W = x0 + gW + 10 + rightPad;
+    _H = y0 + gH + (showLbl ? 16 + lblH : 12) + botPad;
+    shpCx = x0 + gW / 2;
+    shpCy = y0 + gH / 2;
     s = svgOpen(_W, _H);
     let idx = 0;
     for (let r = 0; r < rows; r++) for (let cj = 0; cj < cols; cj++) {
-      if (cells[idx]) s += `\n<rect x="${x0+cj*cell}" y="${y0+r*cell}" width="${cell}" height="${cell}" fill="${c.light}" fill-opacity="0.6" stroke="none"/>`;
+      if (cells[idx]) s += `\n<rect x="${fmt(x0+cj*cellW)}" y="${fmt(y0+r*cellH)}" width="${fmt(cellW)}" height="${fmt(cellH)}" fill="${c.light}" fill-opacity="0.6" stroke="none"/>`;
       idx++;
     }
-    for (let r = 0; r <= rows; r++) s += `\n<line x1="${x0}" y1="${y0+r*cell}" x2="${x0+cols*cell}" y2="${y0+r*cell}" stroke="${c.dark}" stroke-width="${(r===0||r===rows)?2.5:1.2}"/>`;
-    for (let cj = 0; cj <= cols; cj++) s += `\n<line x1="${x0+cj*cell}" y1="${y0}" x2="${x0+cj*cell}" y2="${y0+rows*cell}" stroke="${c.dark}" stroke-width="${(cj===0||cj===cols)?2.5:1.2}"/>`;
-    if (cellNums) { idx=0; for (let r=0;r<rows;r++) for (let cj=0;cj<cols;cj++) { s+=`\n<text x="${x0+cj*cell+cell/2}" y="${y0+r*cell+cell/2}" font-family="Arial,sans-serif" font-size="${cellSize}" font-weight="${cellWt}" fill="${cells[idx]?cellClr:'#ccc'}" text-anchor="middle" dominant-baseline="central">${idx+1}</text>`; idx++; } }
-    idx=0; for (let r=0;r<rows;r++) for (let cj=0;cj<cols;cj++) { s+=`\n<rect ${de} data-cell="${idx}" x="${x0+cj*cell}" y="${y0+r*cell}" width="${cell}" height="${cell}" fill="transparent" stroke="none" pointer-events="fill" style="cursor:pointer"/>`; idx++; }
-    s += lblSVG(shpCx, y0 + rows * cell + 14);
+    for (let r = 0; r <= rows; r++) s += `\n<line x1="${x0}" y1="${fmt(y0+r*cellH)}" x2="${fmt(x0+gW)}" y2="${fmt(y0+r*cellH)}" stroke="${c.dark}" stroke-width="${(r===0||r===rows)?2.5:1.2}"/>`;
+    for (let cj = 0; cj <= cols; cj++) s += `\n<line x1="${fmt(x0+cj*cellW)}" y1="${y0}" x2="${fmt(x0+cj*cellW)}" y2="${fmt(y0+gH)}" stroke="${c.dark}" stroke-width="${(cj===0||cj===cols)?2.5:1.2}"/>`;
+    idx = 0;
+    for (let r = 0; r < rows; r++) for (let cj = 0; cj < cols; cj++) {
+      s += cellTextSVG(x0+cj*cellW+cellW/2, y0+r*cellH+cellH/2, idx, cells[idx]);
+      idx++;
+    }
+    idx = 0;
+    for (let r = 0; r < rows; r++) for (let cj = 0; cj < cols; cj++) {
+      s += `\n<rect ${de} data-cell="${idx}" x="${fmt(x0+cj*cellW)}" y="${fmt(y0+r*cellH)}" width="${fmt(cellW)}" height="${fmt(cellH)}" fill="transparent" stroke="none" pointer-events="fill" style="cursor:pointer"/>`;
+      idx++;
+    }
+    s += lblSVG(shpCx, y0 + gH + 14);
 
   // ── Triangle / Hexagon / Pentagon (radial sectors, clipped to polygon) ─────
   } else if (shape === 'triangle' || shape === 'hexagon' || shape === 'pentagon') {
-    const pCx = 130, pCy = 120, pR = 108;
+    const pR  = Math.max(40, int(E('frac-dim-poly-r')) || 108);
+    const pCx = pR + 22 + leftPad;
+    const pCy = pR + 12 + topPad;
+    _W = pR * 2 + 44 + leftPad + rightPad;
+    _H = pR * 2 + 24 + topPad + (showLbl ? 14 + lblH : 6) + botPad;
+    shpCx = pCx; shpCy = pCy;
     const nSides = shape === 'triangle' ? 3 : shape === 'pentagon' ? 5 : 6;
     const polyPts = [];
     for (let i = 0; i < nSides; i++) {
@@ -528,7 +248,6 @@ function _genFracEl(elIdx, c, lblSize, lblColor, lblWt, cellSize, cellClr, cellW
       polyPts.push([fmt(pCx + pR*Math.cos(a)), fmt(pCy + pR*Math.sin(a))]);
     }
     const ptStr = polyPts.map(p => p.join(',')).join(' ');
-    _W = 260; _H = 240 + (showLbl ? 14 + lblH : 6);
     const clipId = `fpc_${shape}_${elIdx}`;
     s = svgOpen(_W, _H);
     s += `\n<defs><clipPath id="${clipId}"><polygon points="${ptStr}"/></clipPath></defs>`;
@@ -547,15 +266,16 @@ function _genFracEl(elIdx, c, lblSize, lblColor, lblWt, cellSize, cellClr, cellW
         if (cells[i]) s += `\n<path d="${d}" fill="${c.light}" fill-opacity="0.6" stroke="none" ${clip}/>`;
         s += `\n<line x1="${pCx}" y1="${pCy}" x2="${x1}" y2="${y1}" stroke="${c.dark}" stroke-width="1.2" ${clip}/>`;
       }
-      if (cellNums) for (let i = 0; i < den; i++) {
-        const mid = (-90 + (i+0.5) * step) * Math.PI/180;
-        s += `\n<text x="${fmt(pCx + pR*0.57*Math.cos(mid))}" y="${fmt(pCy + pR*0.57*Math.sin(mid))}" font-family="Arial,sans-serif" font-size="${cellSize}" font-weight="${cellWt}" fill="${cells[i]?cellClr:'#ccc'}" text-anchor="middle" dominant-baseline="central">${i+1}</text>`;
+      for (let i = 0; i < den; i++) {
+        const step2 = 360 / den;
+        const mid = (-90 + (i+0.5) * step2) * Math.PI/180;
+        s += cellTextSVG(pCx + pR*0.57*Math.cos(mid), pCy + pR*0.57*Math.sin(mid), i, cells[i]);
       }
     }
     s += `\n<polygon points="${ptStr}" fill="none" stroke="${c.dark}" stroke-width="2.5"/>`;
     if (den === 1) {
       s += `\n<polygon ${de} data-cell="0" points="${ptStr}" fill="transparent" stroke="none" pointer-events="fill" style="cursor:pointer"/>`;
-      if (cellNums) s += `\n<text x="${pCx}" y="${pCy}" font-family="Arial,sans-serif" font-size="${cellSize}" font-weight="${cellWt}" fill="${cells[0]?cellClr:'#ccc'}" text-anchor="middle" dominant-baseline="central">1</text>`;
+      s += cellTextSVG(pCx, pCy, 0, cells[0]);
     } else {
       const step = 360 / den;
       const bigR = pR * 1.7;
@@ -568,14 +288,18 @@ function _genFracEl(elIdx, c, lblSize, lblColor, lblWt, cellSize, cellClr, cellW
         s += `\n<path ${de} data-cell="${i}" d="${d}" fill="transparent" stroke="none" pointer-events="fill" style="cursor:pointer" ${clip}/>`;
       }
     }
-    s += lblSVG(pCx, 240 + 10);
+    s += lblSVG(pCx, pCy + pR + 10);
 
   // ── Parallelogram (vertical strips) ────────────────────────────────────────
   } else if (shape === 'parallelogram') {
-    const skew = 36, pW = 240, pH = 80, x0 = 20, y0 = 20;
-    _W = x0 + pW + skew + x0;
-    _H = y0 + pH + (showLbl ? 16 + lblH : 12);
-    const shpCx = x0 + skew/2 + pW/2;
+    const skew = 36;
+    const pW = Math.max(60, int(E('frac-dim-para-w')) || 240);
+    const pH = Math.max(20, int(E('frac-dim-para-h')) || 80);
+    const x0 = 20 + leftPad, y0 = 20 + topPad;
+    _W = x0 + pW + skew + 20 + rightPad;
+    _H = y0 + pH + (showLbl ? 16 + lblH : 12) + botPad;
+    shpCx = x0 + skew/2 + pW/2;
+    shpCy = y0 + pH / 2;
     const paraStr = `${x0+skew},${y0} ${x0+skew+pW},${y0} ${x0+pW},${y0+pH} ${x0},${y0+pH}`;
     s = svgOpen(_W, _H);
     const stripW = pW / den;
@@ -587,9 +311,9 @@ function _genFracEl(elIdx, c, lblSize, lblColor, lblWt, cellSize, cellClr, cellW
       const bx = x0 + i*stripW;
       s += `\n<line x1="${fmt(bx+skew)}" y1="${y0}" x2="${fmt(bx)}" y2="${y0+pH}" stroke="${c.dark}" stroke-width="1.2"/>`;
     }
-    if (cellNums) for (let i = 0; i < den; i++) {
+    for (let i = 0; i < den; i++) {
       const bx1 = x0 + i*stripW, bx2 = x0 + (i+1)*stripW;
-      s += `\n<text x="${fmt((bx1+bx2)/2 + skew/2)}" y="${fmt(y0+pH/2)}" font-family="Arial,sans-serif" font-size="${cellSize}" font-weight="${cellWt}" fill="${cells[i]?cellClr:'#ccc'}" text-anchor="middle" dominant-baseline="central">${i+1}</text>`;
+      s += cellTextSVG((bx1+bx2)/2 + skew/2, y0+pH/2, i, cells[i]);
     }
     for (let i = 0; i < den; i++) {
       const bx1 = x0 + i*stripW, bx2 = x0 + (i+1)*stripW;
@@ -599,7 +323,38 @@ function _genFracEl(elIdx, c, lblSize, lblColor, lblWt, cellSize, cellClr, cellW
     s += lblSVG(shpCx, y0 + pH + 14);
   }
 
-  return { svgStr: s + '\n</svg>', width: _W, height: _H };
+  // ── Shape margins (for multi-element gap calculation) ─────────────────────
+  const _shapeMargins = {
+    rectangle:     { lp:10, rp:10, tp:10, bp: showLbl ? 16+lblH+12 : 12 },
+    circle:        { lp:20, rp:20, tp:20, bp: showLbl ? 14+lblH+6  :  6 },
+    grid:          { lp:10, rp:10, tp:10, bp: showLbl ? 16+lblH+12 : 12 },
+    triangle:      { lp:22, rp:22, tp:12, bp: showLbl ? 14+lblH+6  :  6 },
+    hexagon:       { lp:22, rp:22, tp:12, bp: showLbl ? 14+lblH+6  :  6 },
+    pentagon:      { lp:22, rp:22, tp:12, bp: showLbl ? 14+lblH+6  :  6 },
+    parallelogram: { lp:20, rp:20, tp:20, bp: showLbl ? 16+lblH+12 : 12 },
+  }[shape] || { lp:10, rp:10, tp:10, bp:12 };
+  shapeLp = leftPad  > 0 ? 5 : _shapeMargins.lp;
+  shapeRp = rightPad > 0 ? 5 : _shapeMargins.rp;
+  shapeTp = topPad   > 0 ? 5 : _shapeMargins.tp;
+  shapeBp = botPad   > 0 ? 5 : _shapeMargins.bp;
+
+  // ── Element label ──────────────────────────────────────────────────────────
+  if (elLblText) {
+    let lx, ly, anchor;
+    if (elLblPos === 'above') {
+      lx = shpCx; ly = topPad - 4; anchor = 'middle';
+    } else if (elLblPos === 'below') {
+      lx = shpCx; ly = _H - botPad + elLblSz + 2; anchor = 'middle';
+    } else if (elLblPos === 'left') {
+      lx = leftPad - 6; ly = shpCy; anchor = 'end';
+    } else {
+      lx = _W - rightPad + 6; ly = shpCy; anchor = 'start';
+    }
+    const _vc = elLblPos === 'left' || elLblPos === 'right';
+    s += '\n' + _renderLabel(elLblText, lx, ly, anchor, elLblSz, elLblFont, elLblBold, elLblItalic, elLblColor, _vc);
+  }
+
+  return { svgStr: s + '\n</svg>', width: _W, height: _H, shapeLp, shapeRp, shapeTp, shapeBp };
 }
 
 /* ─── Rectangle (with adaptive line subdivision) ─── */

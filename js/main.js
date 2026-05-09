@@ -1,5 +1,6 @@
 'use strict';
 
-// Entry point — wire all events then do the initial render.
+// Entry point — build dynamic UIs, wire all events, then do the initial render.
+buildNumberLineUI();
 wireAll();
 render();
