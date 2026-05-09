@@ -406,28 +406,49 @@ function wireAll() {
     render();
   });
 
-  /* ── Home screen navigation ── */
-  document.querySelectorAll('.home-tile').forEach(tile => {
-    tile.addEventListener('click', () => {
-      const tool = tile.dataset.tool;
-      const homeScreen = document.getElementById('home-screen');
-      const appWrapper = document.getElementById('app-wrapper');
-      const btnHome    = $('btn-home');
-      if (homeScreen) homeScreen.style.display = 'none';
-      if (appWrapper) appWrapper.style.display = '';
-      if (btnHome)    btnHome.style.display = '';
-      _activateTab(tool);
-    });
-  });
+  /* ── Hash-based routing ── */
+  const VALID_TOOLS = new Set(['imager','grapher','character','editor','cube3d']);
 
-  $('btn-home')?.addEventListener('click', () => {
+  function _showHome() {
     const homeScreen = document.getElementById('home-screen');
     const appWrapper = document.getElementById('app-wrapper');
     const btnHome    = $('btn-home');
     if (homeScreen) homeScreen.style.display = '';
     if (appWrapper) { appWrapper.style.display = 'none'; appWrapper.classList.remove('editor-active'); }
     if (btnHome)    btnHome.style.display = 'none';
+  }
+
+  function _showTool(tool) {
+    const homeScreen = document.getElementById('home-screen');
+    const appWrapper = document.getElementById('app-wrapper');
+    const btnHome    = $('btn-home');
+    if (homeScreen) homeScreen.style.display = 'none';
+    if (appWrapper) appWrapper.style.display = '';
+    if (btnHome)    btnHome.style.display = '';
+    _activateTab(tool);
+  }
+
+  function _routeHash() {
+    const hash = window.location.hash.replace(/^#\/?/, '');
+    if (hash && VALID_TOOLS.has(hash)) _showTool(hash);
+    else _showHome();
+  }
+
+  document.querySelectorAll('.home-tile').forEach(tile => {
+    tile.addEventListener('click', () => {
+      const tool = tile.dataset.tool;
+      if (tool) window.location.hash = tool;
+    });
   });
+
+  $('btn-home')?.addEventListener('click', () => {
+    window.location.hash = '';
+  });
+
+  window.addEventListener('hashchange', _routeHash);
+
+  // Route on initial load
+  _routeHash();
 
   /* ── Copy / Download ── */
   $('btnCopy')?.addEventListener('click',         copyToClipboard);
