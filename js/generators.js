@@ -618,6 +618,11 @@ function generateGeometry() {
   const count  = Math.max(1, Math.min(4, int('geo-count') || 1));
   const layout = val('geo-layout') || 'row';
   const gap    = Math.max(0, num('geo-gap') || 20);
+  // Reset per-render geometry state
+  shapeGeometry.handles = [];
+  shapeGeometry.rect = null;
+  shapeGeometry.polygon = null;
+  if (count !== 1) resetShading('geometry');
   const elems  = [];
   for (let ei = 0; ei < count; ei++) { const r = _genGeoEl(ei); if (r) elems.push(r); }
   if (!elems.length) return errorSVG('No shapes');
@@ -680,11 +685,14 @@ function _dimArr(x1, y1, x2, y2, lbl, clr, fs, st = {}) {
   const p1=`${fmt(x1+ny*aw)},${fmt(y1-nx*aw)} ${fmt(x1-nx*ah)},${fmt(y1-ny*ah)} ${fmt(x1-ny*aw)},${fmt(y1+nx*aw)}`;
   const p2=`${fmt(x2+ny*aw)},${fmt(y2-nx*aw)} ${fmt(x2+nx*ah)},${fmt(y2+ny*ah)} ${fmt(x2-ny*aw)},${fmt(y2+nx*aw)}`;
   const mx=(x1+x2)/2, my=(y1+y2)/2;
+  // Offset label perpendicular to line direction so it clears the arrow shaft
+  const LOFF = (fs||13) * 0.75 + 3;
+  const lx=fmt(mx+(-ny)*LOFF), ly=fmt(my+nx*LOFF);
   let ang=Math.atan2(dy,dx)*180/Math.PI; if (ang>90||ang<-90) ang+=180;
   let s=`\n<line x1="${fmt(x1)}" y1="${fmt(y1)}" x2="${fmt(x2)}" y2="${fmt(y2)}" stroke="${clr}" stroke-width="1.2"/>`;
   s+=`\n<polygon points="${p1}" fill="${clr}" stroke="none"/>`;
   s+=`\n<polygon points="${p2}" fill="${clr}" stroke="none"/>`;
-  if (lbl) s+=`\n<text x="${fmt(mx)}" y="${fmt(my)}" ${_txtAttr(st)} font-size="${fs||13}" fill="${clr}" text-anchor="middle" dominant-baseline="central" transform="rotate(${fmt(ang,1)},${fmt(mx)},${fmt(my)})">${escXml(lbl)}</text>`;
+  if (lbl) s+=`\n<text x="${lx}" y="${ly}" ${_txtAttr(st)} font-size="${fs||13}" fill="${clr}" text-anchor="middle" dominant-baseline="central" stroke="white" stroke-width="3" paint-order="stroke fill" transform="rotate(${fmt(ang,1)},${lx},${ly})">${escXml(lbl)}</text>`;
   return s;
 }
 
@@ -719,51 +727,126 @@ function _angArc(p, a, b, r, lbl, clr) {
 
 function _geoErr(msg) { return { svgStr: errorSVG(msg), width: 340, height: 40 }; }
 
+/* Render a vertex label offset outward from a centroid direction */
+function _vtxLbl(vx, vy, cx, cy, lbl, clr, fs, st) {
+  if (!lbl) return '';
+  const ddx=vx-cx, ddy=vy-cy, dl=Math.hypot(ddx,ddy)||1, OFF=14+(st.loff||0);
+  const tx=fmt(vx+ddx/dl*OFF), ty=fmt(vy+ddy/dl*OFF);
+  return `\n<text x="${tx}" y="${ty}" ${_txtAttr(st)} font-size="${fs||13}" fill="${clr}" text-anchor="middle" dominant-baseline="central">${escXml(lbl)}</text>`;
+}
+
+/* Push vertex handles for dragging (geometry tool single-shape mode) */
+function _pushHandle(x, y, params) {
+  shapeGeometry.handles.push({ x:fmt(x), y:fmt(y), params });
+}
+
 /* ── Rectangle ── */
 function _geoRect(n) {
   const wv=Math.max(0.5,num(`geo-rect-w-${n}`)||6), hv=Math.max(0.5,num(`geo-rect-h-${n}`)||4);
   const cr=Math.max(0,num(`geo-rect-corner-${n}`)||0), diag=val(`geo-rect-diag-${n}`)||'none';
   const showRA=chk(`geo-rect-ra-${n}`), wlbl=val(`geo-rect-wlbl-${n}`), hlbl=val(`geo-rect-hlbl-${n}`);
+  const va=val(`geo-rect-va-${n}`),vb=val(`geo-rect-vb-${n}`),vc=val(`geo-rect-vc-${n}`),vd=val(`geo-rect-vd-${n}`),vo=val(`geo-rect-vo-${n}`);
   const st=_gst(n);
   const sc=Math.min(50,Math.max(10,240/Math.max(wv,hv)));
-  const rW=fmt(wv*sc), rH=fmt(hv*sc);
-  const LP=50,RP=20,TP=20,BP=st.labels?48:22;
+  const rW=wv*sc, rH=hv*sc;
+  const LP=50,RP=22,TP=22,BP=st.labels?50:22;
   const W=LP+rW+RP, H=TP+rH+BP, rx=LP, ry=TP;
-  let s=svgOpen(W,H);
-  if (st.filled) s+=`\n<rect x="${rx}" y="${ry}" width="${rW}" height="${rH}" rx="${cr}" fill="${st.fill}" fill-opacity="${st.fillOp}"/>`;
-  if (diag==='one'||diag==='both') s+=`\n<line x1="${rx}" y1="${ry}" x2="${fmt(rx+rW)}" y2="${fmt(ry+rH)}" stroke="${st.stroke}" stroke-width="1.2" stroke-dasharray="6,3"/>`;
-  if (diag==='both') s+=`\n<line x1="${fmt(rx+rW)}" y1="${ry}" x2="${rx}" y2="${fmt(ry+rH)}" stroke="${st.stroke}" stroke-width="1.2" stroke-dasharray="6,3"/>`;
-  s+=`\n<rect x="${rx}" y="${ry}" width="${rW}" height="${rH}" rx="${cr}" fill="none" stroke="${st.stroke}" stroke-width="${st.sw}"/>`;
-  if (showRA&&cr===0) {
-    const m=10;
-    s+=_raMark(rx,ry,1,0,0,1,m,st.stroke)+_raMark(rx+rW,ry,-1,0,0,1,m,st.stroke);
-    s+=_raMark(rx,ry+rH,1,0,0,-1,m,st.stroke)+_raMark(rx+rW,ry+rH,-1,0,0,-1,m,st.stroke);
+
+  const geoSingle = currentShape==='geometry' && int('geo-count')===1;
+  if (geoSingle) {
+    shapeGeometry.rect = { x:rx, y:ry, w:rW, h:rH };
+    shapeGeometry.polygon = [[rx,ry],[rx+rW,ry],[rx+rW,ry+rH],[rx,ry+rH]];
   }
+  _pushHandle(rx+rW, ry+rH, [
+    { inputId:`geo-rect-w-${n}`, axis:'x', scale:sc, min:0.5 },
+    { inputId:`geo-rect-h-${n}`, axis:'y', scale:sc, min:0.5 }
+  ]);
+  _pushHandle(rx+rW, ry+rH/2, [{ inputId:`geo-rect-w-${n}`, axis:'x', scale:sc, min:0.5 }]);
+  _pushHandle(rx+rW/2, ry+rH, [{ inputId:`geo-rect-h-${n}`, axis:'y', scale:sc, min:0.5 }]);
+
+  let s=svgOpen(W,H);
+
+  // Grid/shading mode when lines exist
+  let gridMode = false;
+  if (geoSingle) {
+    const { hCuts, vCuts } = getRectLineDivisions();
+    if (hCuts.length || vCuts.length) {
+      gridMode = true;
+      const ys=[ry,...hCuts,ry+rH], xs=[rx,...vCuts,rx+rW];
+      const rows=ys.length-1, cols=xs.length-1;
+      const cells=getShading('geometry',rows*cols,()=>false);
+      let idx=0;
+      for (let r=0;r<rows;r++) for (let c=0;c<cols;c++) {
+        const [cx,cy,cw,ch]=[xs[c],ys[r],xs[c+1]-xs[c],ys[r+1]-ys[r]];
+        if (cells[idx]) s+=`\n<rect x="${fmt(cx)}" y="${fmt(cy)}" width="${fmt(cw)}" height="${fmt(ch)}" fill="${st.fill}" fill-opacity="0.7" stroke="none"/>`;
+        idx++;
+      }
+      for (const y of ys) s+=`\n<line x1="${fmt(rx)}" y1="${fmt(y)}" x2="${fmt(rx+rW)}" y2="${fmt(y)}" stroke="${st.stroke}" stroke-width="${(y===ry||y===ry+rH)?st.sw:1.2}"/>`;
+      for (const x of xs) s+=`\n<line x1="${fmt(x)}" y1="${fmt(ry)}" x2="${fmt(x)}" y2="${fmt(ry+rH)}" stroke="${st.stroke}" stroke-width="${(x===rx||x===rx+rW)?st.sw:1.2}"/>`;
+      idx=0;
+      for (let r=0;r<rows;r++) for (let c=0;c<cols;c++) {
+        const [cx,cy,cw,ch]=[xs[c],ys[r],xs[c+1]-xs[c],ys[r+1]-ys[r]];
+        s+=`\n<rect data-cell="${idx++}" x="${fmt(cx)}" y="${fmt(cy)}" width="${fmt(cw)}" height="${fmt(ch)}" fill="transparent" stroke="none" pointer-events="fill" style="cursor:pointer"/>`;
+      }
+    }
+  }
+
+  if (!gridMode) {
+    if (st.filled) s+=`\n<rect x="${fmt(rx)}" y="${fmt(ry)}" width="${fmt(rW)}" height="${fmt(rH)}" rx="${cr}" fill="${st.fill}" fill-opacity="${st.fillOp}"/>`;
+    if (diag==='one'||diag==='both') s+=`\n<line x1="${fmt(rx)}" y1="${fmt(ry)}" x2="${fmt(rx+rW)}" y2="${fmt(ry+rH)}" stroke="${st.stroke}" stroke-width="1.2" stroke-dasharray="6,3"/>`;
+    if (diag==='both') s+=`\n<line x1="${fmt(rx+rW)}" y1="${fmt(ry)}" x2="${fmt(rx)}" y2="${fmt(ry+rH)}" stroke="${st.stroke}" stroke-width="1.2" stroke-dasharray="6,3"/>`;
+    s+=`\n<rect x="${fmt(rx)}" y="${fmt(ry)}" width="${fmt(rW)}" height="${fmt(rH)}" rx="${cr}" fill="none" stroke="${st.stroke}" stroke-width="${st.sw}"/>`;
+    if (showRA&&cr===0) {
+      const m=10;
+      s+=_raMark(rx,ry,1,0,0,1,m,st.stroke)+_raMark(rx+rW,ry,-1,0,0,1,m,st.stroke);
+      s+=_raMark(rx,ry+rH,1,0,0,-1,m,st.stroke)+_raMark(rx+rW,ry+rH,-1,0,0,-1,m,st.stroke);
+    }
+  }
+
   if (st.labels) {
     const wt=wlbl||String(wv), ht=hlbl||String(hv);
     if (st.arrows) {
       s+=_dimArr(rx,ry+rH+28,rx+rW,ry+rH+28,wt,st.lc,st.fs,st);
-      s+=_dimArr(rx-32,ry+rH,rx-32,ry,ht,st.lc,st.fs,st);
+      s+=_dimArr(rx-32,ry,rx-32,ry+rH,ht,st.lc,st.fs,st);  // direction: DOWN → label goes LEFT
     } else {
       s+=`\n<text x="${fmt(rx+rW/2)}" y="${fmt(ry+rH+18)}" ${_txtAttr(st)} font-size="${st.fs}" fill="${st.lc}" text-anchor="middle">${escXml(wt)}</text>`;
       s+=`\n<text x="${fmt(rx-18)}" y="${fmt(ry+rH/2)}" ${_txtAttr(st)} font-size="${st.fs}" fill="${st.lc}" text-anchor="middle" dominant-baseline="central" transform="rotate(-90,${fmt(rx-18)},${fmt(ry+rH/2)})">${escXml(ht)}</text>`;
     }
   }
+
+  // Vertex labels
+  const vcx=rx+rW/2, vcy=ry+rH/2;
+  if (va) s+=_vtxLbl(rx,ry,vcx,vcy,va,st.lc,st.fs,st);
+  if (vb) s+=_vtxLbl(rx+rW,ry,vcx,vcy,vb,st.lc,st.fs,st);
+  if (vc) s+=_vtxLbl(rx+rW,ry+rH,vcx,vcy,vc,st.lc,st.fs,st);
+  if (vd) s+=_vtxLbl(rx,ry+rH,vcx,vcy,vd,st.lc,st.fs,st);
+  if (vo) s+=`\n<text x="${fmt(vcx)}" y="${fmt(vcy)}" ${_txtAttr(st)} font-size="${st.fs}" fill="${st.lc}" text-anchor="middle" dominant-baseline="central">${escXml(vo)}</text>`;
+
   return { svgStr:s+'\n</svg>', width:W, height:H };
 }
 
 /* ── Square ── */
 function _geoSquare(n) {
   const sv=Math.max(0.5,num(`geo-sq-side-${n}`)||5), showDiag=chk(`geo-sq-diag-${n}`), lbl=val(`geo-sq-lbl-${n}`), st=_gst(n);
-  const sc=Math.min(50,Math.max(10,240/sv)), side=fmt(sv*sc);
-  const LP=42, W=LP+side+20, H=46+side+(st.labels?40:20), rx=LP, ry=46;
-  let s=svgOpen(W,H);
-  if (st.filled) s+=`\n<rect x="${rx}" y="${ry}" width="${side}" height="${side}" fill="${st.fill}" fill-opacity="${st.fillOp}"/>`;
-  if (showDiag) {
-    s+=`\n<line x1="${rx}" y1="${ry}" x2="${fmt(rx+side)}" y2="${fmt(ry+side)}" stroke="${st.stroke}" stroke-width="1.2" stroke-dasharray="6,3"/>`;
-    s+=`\n<line x1="${fmt(rx+side)}" y1="${ry}" x2="${rx}" y2="${fmt(ry+side)}" stroke="${st.stroke}" stroke-width="1.2" stroke-dasharray="6,3"/>`;
+  const va=val(`geo-sq-va-${n}`),vb=val(`geo-sq-vb-${n}`),vc=val(`geo-sq-vc-${n}`),vd=val(`geo-sq-vd-${n}`);
+  const sc=Math.min(50,Math.max(10,240/sv)), side=sv*sc;
+  const LP=44, RP=22, TP=46, BP=st.labels?50:22;
+  const W=LP+side+RP, H=TP+side+BP, rx=LP, ry=TP;
+
+  const geoSingle = currentShape==='geometry' && int('geo-count')===1;
+  if (geoSingle) {
+    shapeGeometry.rect = { x:rx, y:ry, w:side, h:side };
+    shapeGeometry.polygon = [[rx,ry],[rx+side,ry],[rx+side,ry+side],[rx,ry+side]];
   }
-  s+=`\n<rect x="${rx}" y="${ry}" width="${side}" height="${side}" fill="none" stroke="${st.stroke}" stroke-width="${st.sw}"/>`;
+  _pushHandle(rx+side, ry+side, [{ inputId:`geo-sq-side-${n}`, axis:'x', scale:sc, min:0.5 }]);
+
+  let s=svgOpen(W,H);
+  if (st.filled) s+=`\n<rect x="${fmt(rx)}" y="${fmt(ry)}" width="${fmt(side)}" height="${fmt(side)}" fill="${st.fill}" fill-opacity="${st.fillOp}"/>`;
+  if (showDiag) {
+    s+=`\n<line x1="${fmt(rx)}" y1="${fmt(ry)}" x2="${fmt(rx+side)}" y2="${fmt(ry+side)}" stroke="${st.stroke}" stroke-width="1.2" stroke-dasharray="6,3"/>`;
+    s+=`\n<line x1="${fmt(rx+side)}" y1="${fmt(ry)}" x2="${fmt(rx)}" y2="${fmt(ry+side)}" stroke="${st.stroke}" stroke-width="1.2" stroke-dasharray="6,3"/>`;
+  }
+  s+=`\n<rect x="${fmt(rx)}" y="${fmt(ry)}" width="${fmt(side)}" height="${fmt(side)}" fill="none" stroke="${st.stroke}" stroke-width="${st.sw}"/>`;
   const m=10;
   s+=_raMark(rx,ry,1,0,0,1,m,st.stroke)+_raMark(rx+side,ry,-1,0,0,1,m,st.stroke);
   s+=_raMark(rx,ry+side,1,0,0,-1,m,st.stroke)+_raMark(rx+side,ry+side,-1,0,0,-1,m,st.stroke);
@@ -772,6 +855,11 @@ function _geoSquare(n) {
     if (st.arrows) s+=_dimArr(rx,ry+side+28,rx+side,ry+side+28,text,st.lc,st.fs,st);
     else s+=`\n<text x="${fmt(rx+side/2)}" y="${fmt(ry+side+18)}" ${_txtAttr(st)} font-size="${st.fs}" fill="${st.lc}" text-anchor="middle">${escXml(text)}</text>`;
   }
+  const vcx=rx+side/2, vcy=ry+side/2;
+  if (va) s+=_vtxLbl(rx,ry,vcx,vcy,va,st.lc,st.fs,st);
+  if (vb) s+=_vtxLbl(rx+side,ry,vcx,vcy,vb,st.lc,st.fs,st);
+  if (vc) s+=_vtxLbl(rx+side,ry+side,vcx,vcy,vc,st.lc,st.fs,st);
+  if (vd) s+=_vtxLbl(rx,ry+side,vcx,vcy,vd,st.lc,st.fs,st);
   return { svgStr:s+'\n</svg>', width:W, height:H };
 }
 
@@ -779,18 +867,25 @@ function _geoSquare(n) {
 function _geoCircle(n) {
   const rv=Math.max(0.5,num(`geo-circ-r-${n}`)||5), rlbl=val(`geo-circ-rlbl-${n}`), dlbl=val(`geo-circ-dlbl-${n}`);
   const showCtr=chk(`geo-circ-center-${n}`), showRL=chk(`geo-circ-rl-${n}`), showDiam=chk(`geo-circ-diam-${n}`), st=_gst(n);
-  const sc=Math.min(50,Math.max(10,110/rv)), r=fmt(rv*sc), PAD=40;
+  const vlblO=val(`geo-circ-vo-${n}`), vlblP=val(`geo-circ-vp-${n}`);
+  const sc=Math.min(50,Math.max(10,110/rv)), r=rv*sc, PAD=42;
   const W=r*2+PAD*2, H=r*2+PAD*2, cx=PAD+r, cy=PAD+r;
+
+  _pushHandle(cx+r, cy, [{ inputId:`geo-circ-r-${n}`, axis:'x', scale:sc, min:0.5 }]);
+
   let s=svgOpen(W,H);
-  s+=`\n<circle cx="${cx}" cy="${cy}" r="${r}" fill="${st.filled?st.fill:'none'}" fill-opacity="${st.filled?st.fillOp:0}" stroke="${st.stroke}" stroke-width="${st.sw}"/>`;
+  s+=`\n<circle cx="${fmt(cx)}" cy="${fmt(cy)}" r="${fmt(r)}" fill="${st.filled?st.fill:'none'}" fill-opacity="${st.filled?st.fillOp:0}" stroke="${st.stroke}" stroke-width="${st.sw}"/>`;
   if (showDiam) {
-    s+=`\n<line x1="${fmt(cx-r)}" y1="${cy}" x2="${fmt(cx+r)}" y2="${cy}" stroke="${st.stroke}" stroke-width="1.2" stroke-dasharray="6,3"/>`;
-    if (st.labels) { const t=dlbl||(rlbl?`2${rlbl}`:''); if (t) s+=`\n<text x="${cx}" y="${fmt(cy-r-12)}" ${_txtAttr(st)} font-size="${st.fs}" fill="${st.lc}" text-anchor="middle">${escXml(t)}</text>`; }
+    s+=`\n<line x1="${fmt(cx-r)}" y1="${fmt(cy)}" x2="${fmt(cx+r)}" y2="${fmt(cy)}" stroke="${st.stroke}" stroke-width="1.2" stroke-dasharray="6,3"/>`;
+    if (st.labels) { const t=dlbl||(rlbl?`2${rlbl}`:''); if (t) s+=`\n<text x="${fmt(cx)}" y="${fmt(cy-r-12)}" ${_txtAttr(st)} font-size="${st.fs}" fill="${st.lc}" text-anchor="middle">${escXml(t)}</text>`; }
   } else if (showRL) {
-    s+=`\n<line x1="${cx}" y1="${cy}" x2="${fmt(cx+r)}" y2="${cy}" stroke="${st.stroke}" stroke-width="1.2"/>`;
+    s+=`\n<line x1="${fmt(cx)}" y1="${fmt(cy)}" x2="${fmt(cx+r)}" y2="${fmt(cy)}" stroke="${st.stroke}" stroke-width="1.2"/>`;
     if (st.labels&&rlbl) { if (st.arrows) s+=_dimArr(cx,cy,cx+r,cy,rlbl,st.lc,st.fs,st); else s+=`\n<text x="${fmt(cx+r/2)}" y="${fmt(cy-10)}" ${_txtAttr(st)} font-size="${st.fs}" fill="${st.lc}" text-anchor="middle">${escXml(rlbl)}</text>`; }
   }
-  if (showCtr) s+=`\n<circle cx="${cx}" cy="${cy}" r="4" fill="${st.stroke}" stroke="none"/>`;
+  if (showCtr) s+=`\n<circle cx="${fmt(cx)}" cy="${fmt(cy)}" r="4" fill="${st.stroke}" stroke="none"/>`;
+  // Vertex labels: center and a point on circumference (right side)
+  if (vlblO) s+=`\n<text x="${fmt(cx)}" y="${fmt(cy-8)}" ${_txtAttr(st)} font-size="${st.fs}" fill="${st.lc}" text-anchor="middle">${escXml(vlblO)}</text>`;
+  if (vlblP) s+=`\n<text x="${fmt(cx+r+10)}" y="${fmt(cy)}" ${_txtAttr(st)} font-size="${st.fs}" fill="${st.lc}" text-anchor="start" dominant-baseline="central">${escXml(vlblP)}</text>`;
   return { svgStr:s+'\n</svg>', width:W, height:H };
 }
 
@@ -798,56 +893,94 @@ function _geoCircle(n) {
 function _geoEllipse(n) {
   const av=Math.max(0.5,num(`geo-ellip-a-${n}`)||6), bv=Math.max(0.5,num(`geo-ellip-b-${n}`)||4);
   const albl=val(`geo-ellip-albl-${n}`), blbl=val(`geo-ellip-blbl-${n}`), showAxes=chk(`geo-ellip-axes-${n}`), st=_gst(n);
-  const sc=Math.min(50,Math.max(10,120/Math.max(av,bv))), re=fmt(av*sc), rye=fmt(bv*sc), PAD=40;
+  const vo=val(`geo-ellip-vo-${n}`), va=val(`geo-ellip-va-${n}`), vb=val(`geo-ellip-vb-${n}`);
+  const sc=Math.min(50,Math.max(10,120/Math.max(av,bv))), re=av*sc, rye=bv*sc, PAD=40;
   const W=re*2+PAD*2, H=rye*2+PAD*2, cx=PAD+re, cy=PAD+rye;
+  _pushHandle(cx+re, cy, [{ inputId:`geo-ellip-a-${n}`, axis:'x', scale:sc, min:0.5 }]);
+  _pushHandle(cx, cy-rye, [{ inputId:`geo-ellip-b-${n}`, axis:'-y', scale:sc, min:0.5 }]);
   let s=svgOpen(W,H);
-  s+=`\n<ellipse cx="${cx}" cy="${cy}" rx="${re}" ry="${rye}" fill="${st.filled?st.fill:'none'}" fill-opacity="${st.filled?st.fillOp:0}" stroke="${st.stroke}" stroke-width="${st.sw}"/>`;
+  s+=`\n<ellipse cx="${fmt(cx)}" cy="${fmt(cy)}" rx="${fmt(re)}" ry="${fmt(rye)}" fill="${st.filled?st.fill:'none'}" fill-opacity="${st.filled?st.fillOp:0}" stroke="${st.stroke}" stroke-width="${st.sw}"/>`;
   if (showAxes) {
-    s+=`\n<line x1="${fmt(cx-re)}" y1="${cy}" x2="${fmt(cx+re)}" y2="${cy}" stroke="${st.stroke}" stroke-width="1" stroke-dasharray="5,3"/>`;
-    s+=`\n<line x1="${cx}" y1="${fmt(cy-rye)}" x2="${cx}" y2="${fmt(cy+rye)}" stroke="${st.stroke}" stroke-width="1" stroke-dasharray="5,3"/>`;
+    s+=`\n<line x1="${fmt(cx-re)}" y1="${fmt(cy)}" x2="${fmt(cx+re)}" y2="${fmt(cy)}" stroke="${st.stroke}" stroke-width="1" stroke-dasharray="5,3"/>`;
+    s+=`\n<line x1="${fmt(cx)}" y1="${fmt(cy-rye)}" x2="${fmt(cx)}" y2="${fmt(cy+rye)}" stroke="${st.stroke}" stroke-width="1" stroke-dasharray="5,3"/>`;
   }
   if (st.labels) {
     const at=albl||String(av), bt=blbl||String(bv);
     if (st.arrows) { s+=_dimArr(cx,cy,cx+re,cy,at,st.lc,st.fs,st); s+=_dimArr(cx,cy,cx,cy-rye,bt,st.lc,st.fs,st); }
     else { s+=`\n<text x="${fmt(cx+re/2)}" y="${fmt(cy-11)}" ${_txtAttr(st)} font-size="${st.fs}" fill="${st.lc}" text-anchor="middle">${escXml(at)}</text>`; s+=`\n<text x="${fmt(cx+re+16)}" y="${fmt(cy-rye/2)}" ${_txtAttr(st)} font-size="${st.fs}" fill="${st.lc}" text-anchor="start" dominant-baseline="central">${escXml(bt)}</text>`; }
   }
+  if (vo) s+=_vtxLbl(cx,cy,cx+re,cy+rye,vo,st.lc,st.fs,st);
+  if (va) s+=_vtxLbl(cx+re,cy,cx,cy,va,st.lc,st.fs,st);
+  if (vb) s+=_vtxLbl(cx,cy-rye,cx,cy,vb,st.lc,st.fs,st);
   return { svgStr:s+'\n</svg>', width:W, height:H };
 }
 
 /* ── Triangle ── */
 function _geoTriangle(n) {
-  const type=val(`geo-tri-type-${n}`)||'equilateral', showH=chk(`geo-tri-height-${n}`), showAng=chk(`geo-tri-angles-${n}`);
+  const type=val(`geo-tri-type-${n}`)||'equilateral', showH=chk(`geo-tri-height-${n}`);
+  const showAng=chk(`geo-tri-angles-${n}`);
+  // Per-vertex angle selection: individual checkboxes override/extend "show all"
+  const angOn=[chk(`geo-tri-ang0-${n}`),chk(`geo-tri-ang1-${n}`),chk(`geo-tri-ang2-${n}`)];
+  const angLbl=[val(`geo-tri-ang-lbl0-${n}`),val(`geo-tri-ang-lbl1-${n}`),val(`geo-tri-ang-lbl2-${n}`)];
   const lblA=val(`geo-tri-lbla-${n}`), lblB=val(`geo-tri-lblb-${n}`), lblC=val(`geo-tri-lblc-${n}`);
-  const hlbl=val(`geo-tri-hlbl-${n}`)||'h', st=_gst(n);
-  let verts, sA, sB, sC;
+  const hlbl=val(`geo-tri-hlbl-${n}`)||'h';
+  const vtxA=val(`geo-tri-va-${n}`),vtxB=val(`geo-tri-vb-${n}`),vtxC=val(`geo-tri-vc-${n}`);
+  const st=_gst(n);
+  let verts, sA, sB, sC, scUsed=1;
   if (type==='equilateral') {
     const sv=Math.max(0.5,num(`geo-tri-eq-side-${n}`)||6), sc=Math.min(55,Math.max(12,240/sv)), base=sv*sc;
-    sA=sB=sC=sv; verts=[[base/2,0],[0,base*Math.sqrt(3)/2],[base,base*Math.sqrt(3)/2]];
+    sA=sB=sC=sv; scUsed=sc; verts=[[base/2,0],[0,base*Math.sqrt(3)/2],[base,base*Math.sqrt(3)/2]];
   } else if (type==='isosceles') {
     const base=Math.max(0.5,num(`geo-tri-iso-base-${n}`)||4), leg=Math.max(0.5,num(`geo-tri-iso-leg-${n}`)||5);
     if (leg<=base/2) return _geoErr('Leg must be > base/2');
     const sc=Math.min(55,Math.max(12,200/Math.max(base,leg))), bpx=base*sc, lpx=leg*sc;
-    sA=base; sB=sC=leg; verts=[[bpx/2,0],[0,Math.sqrt(lpx*lpx-bpx*bpx/4)],[bpx,Math.sqrt(lpx*lpx-bpx*bpx/4)]];
+    sA=base; sB=sC=leg; scUsed=sc; verts=[[bpx/2,0],[0,Math.sqrt(lpx*lpx-bpx*bpx/4)],[bpx,Math.sqrt(lpx*lpx-bpx*bpx/4)]];
   } else if (type==='scalene') {
     const a=Math.max(0.5,num(`geo-tri-sc-a-${n}`)||5), b=Math.max(0.5,num(`geo-tri-sc-b-${n}`)||7), c=Math.max(0.5,num(`geo-tri-sc-c-${n}`)||6);
     if (a+b<=c||a+c<=b||b+c<=a) return _geoErr('Invalid triangle sides');
     const sc=Math.min(55,Math.max(12,200/Math.max(a,b,c))), apx=a*sc, bpx=b*sc, cpx=c*sc;
     const Ax=(apx*apx+cpx*cpx-bpx*bpx)/(2*apx), Ay=Math.sqrt(Math.max(0,cpx*cpx-Ax*Ax));
-    sA=a; sB=b; sC=c; verts=[[Ax,0],[0,Ay],[apx,Ay]];
+    sA=a; sB=b; sC=c; scUsed=sc; verts=[[Ax,0],[0,Ay],[apx,Ay]];
   } else {
     const base=Math.max(0.5,num(`geo-tri-rt-base-${n}`)||5), h=Math.max(0.5,num(`geo-tri-rt-height-${n}`)||4);
     const sc=Math.min(50,Math.max(12,200/Math.max(base,h))), bpx=base*sc, hpx=h*sc;
-    sA=base; sB=Math.hypot(base,h); sC=h; verts=[[0,0],[0,hpx],[bpx,hpx]];
+    sA=base; sB=Math.hypot(base,h); sC=h; scUsed=sc; verts=[[0,0],[0,hpx],[bpx,hpx]];
   }
   const minX=Math.min(...verts.map(v=>v[0])), minY=Math.min(...verts.map(v=>v[1]));
   const maxX=Math.max(...verts.map(v=>v[0])), maxY=Math.max(...verts.map(v=>v[1]));
-  const LP=52,RP=22,TP=24,BP=st.labels?48:26;
+  const LP=54,RP=24,TP=26,BP=st.labels?52:28;
   const W=LP+(maxX-minX)+RP, H=TP+(maxY-minY)+BP, ox=LP-minX, oy=TP-minY;
   const tv=verts.map(v=>[fmt(v[0]+ox),fmt(v[1]+oy)]);
   const ptStr=tv.map(v=>v.join(',')).join(' ');
+  const absVerts=tv.map(v=>[parseFloat(v[0]),parseFloat(v[1])]);
+
+  const geoSingle = currentShape==='geometry' && int('geo-count')===1;
+  if (geoSingle) shapeGeometry.polygon = absVerts;
+
+  // Drag handle on the bottom-right vertex (adjusts one key dimension)
+  if (type==='equilateral') _pushHandle(absVerts[2][0], absVerts[2][1], [{ inputId:`geo-tri-eq-side-${n}`, axis:'x', scale:scUsed, min:0.5 }]);
+  if (type==='right')       _pushHandle(absVerts[2][0], absVerts[2][1], [{ inputId:`geo-tri-rt-base-${n}`, axis:'x', scale:scUsed, min:0.5 }, { inputId:`geo-tri-rt-height-${n}`, axis:'-y', scale:scUsed, min:0.5 }]);
+
   let s=svgOpen(W,H);
-  if (st.filled) s+=`\n<polygon points="${ptStr}" fill="${st.fill}" fill-opacity="${st.fillOp}" stroke="none"/>`;
-  s+=`\n<polygon points="${ptStr}" fill="none" stroke="${st.stroke}" stroke-width="${st.sw}"/>`;
+
+  // Shading/split mode
+  let splitMode = false;
+  if (geoSingle) {
+    const regions=getPolygonSplit(absVerts);
+    if (regions) {
+      splitMode = true;
+      const cells=getShading('geometry',regions.length,()=>false);
+      const tp=p=>'M'+p.map(v=>v[0]+','+v[1]).join(' L')+'Z';
+      regions.forEach((poly,i)=>{ if (cells[i]) s+=`\n<path d="${tp(poly)}" fill="${st.fill}" fill-opacity="0.7" stroke="none"/>`; });
+      s+=`\n<polygon points="${ptStr}" fill="none" stroke="${st.stroke}" stroke-width="${st.sw}"/>`;
+      regions.forEach((poly,i)=>{ s+=`\n<path data-cell="${i}" d="${tp(poly)}" fill="transparent" stroke="none" pointer-events="fill" style="cursor:pointer"/>`; });
+    }
+  }
+  if (!splitMode) {
+    if (st.filled) s+=`\n<polygon points="${ptStr}" fill="${st.fill}" fill-opacity="${st.fillOp}" stroke="none"/>`;
+    s+=`\n<polygon points="${ptStr}" fill="none" stroke="${st.stroke}" stroke-width="${st.sw}"/>`;
+  }
+
   if (type==='right') s+=_raMark(tv[0][0],tv[0][1],0,1,1,0,12,st.stroke);
   if (showH) {
     const ax=tv[0][0],ay=tv[0][1],b1=tv[1],b2=tv[2];
@@ -858,15 +991,18 @@ function _geoTriangle(n) {
     s+=_raMark(fx,fy,ua[0],ua[1],ub[0],ub[1],10,st.stroke);
     s+=`\n<text x="${fmt((ax+fx)/2+12)}" y="${fmt((ay+fy)/2)}" ${_txtAttr(st)} font-size="${st.fs}" fill="${st.lc}" dominant-baseline="central">${escXml(hlbl)}</text>`;
   }
-  if (showAng) {
-    for (let i=0;i<3;i++) {
-      const p=tv[i],prev=tv[(i+2)%3],next=tv[(i+1)%3];
-      const dx1=prev[0]-p[0],dy1=prev[1]-p[1],dx2=next[0]-p[0],dy2=next[1]-p[1];
-      const cosA=(dx1*dx2+dy1*dy2)/(Math.hypot(dx1,dy1)*Math.hypot(dx2,dy2));
-      const deg=Math.round(Math.acos(Math.max(-1,Math.min(1,cosA)))*180/Math.PI);
-      s+=_angArc(p,prev,next,20,`${deg}°`,st.lc);
-    }
+
+  // Angle arcs: show all (legacy checkbox) or per-vertex
+  for (let i=0;i<3;i++) {
+    if (!showAng && !angOn[i]) continue;
+    const p=tv[i],prev=tv[(i+2)%3],next=tv[(i+1)%3];
+    const dx1=prev[0]-p[0],dy1=prev[1]-p[1],dx2=next[0]-p[0],dy2=next[1]-p[1];
+    const cosA=(dx1*dx2+dy1*dy2)/(Math.hypot(dx1,dy1)*Math.hypot(dx2,dy2));
+    const deg=Math.round(Math.acos(Math.max(-1,Math.min(1,cosA)))*180/Math.PI);
+    const lbl = angLbl[i] || `${deg}°`;
+    s+=_angArc(p,prev,next,20,lbl,st.lc);
   }
+
   if (st.labels) {
     const sides=[[tv[1],tv[2],lblA,sA],[tv[0],tv[2],lblB,sB],[tv[0],tv[1],lblC,sC]];
     for (const [p1,p2,lbl,sv2] of sides) {
@@ -876,6 +1012,14 @@ function _geoTriangle(n) {
       else s+=_sideLbl(p1[0],p1[1],p2[0],p2[1],text,st.lc,st.fs,true,st);
     }
   }
+
+  // Vertex labels (placed outside the triangle at each vertex)
+  const ccx=(absVerts[0][0]+absVerts[1][0]+absVerts[2][0])/3;
+  const ccy=(absVerts[0][1]+absVerts[1][1]+absVerts[2][1])/3;
+  if (vtxA) s+=_vtxLbl(absVerts[0][0],absVerts[0][1],ccx,ccy,vtxA,st.lc,st.fs,st);
+  if (vtxB) s+=_vtxLbl(absVerts[1][0],absVerts[1][1],ccx,ccy,vtxB,st.lc,st.fs,st);
+  if (vtxC) s+=_vtxLbl(absVerts[2][0],absVerts[2][1],ccx,ccy,vtxC,st.lc,st.fs,st);
+
   return { svgStr:s+'\n</svg>', width:W, height:H };
 }
 
@@ -889,13 +1033,22 @@ function _geoParallelogram(n) {
   const skew=fmt(hpx/Math.tan(ang*Math.PI/180)), ox=40, oy=20;
   const pts=[[ox,oy+hpx],[ox+bpx,oy+hpx],[ox+bpx+skew,oy],[ox+skew,oy]];
   const W=bpx+skew+80, H=hpx+80, ptStr=pts.map(p=>`${fmt(p[0])},${fmt(p[1])}`).join(' ');
+  const absV=pts.map(p=>[p[0],p[1]]);
+  const pva=val(`geo-para-va-${n}`),pvb=val(`geo-para-vb-${n}`),pvc=val(`geo-para-vc-${n}`),pvd=val(`geo-para-vd-${n}`);
+  const geoSingle=currentShape==='geometry'&&int('geo-count')===1;
+  if (geoSingle) shapeGeometry.polygon=absV;
+  _pushHandle(pts[1][0],pts[1][1],[{inputId:`geo-para-base-${n}`,axis:'x',scale:sc,min:0.5}]);
   let s=svgOpen(W,H);
-  if (st.filled) s+=`\n<polygon points="${ptStr}" fill="${st.fill}" fill-opacity="${st.fillOp}" stroke="none"/>`;
-  if (showDiag) {
-    s+=`\n<line x1="${fmt(pts[0][0])}" y1="${fmt(pts[0][1])}" x2="${fmt(pts[2][0])}" y2="${fmt(pts[2][1])}" stroke="${st.stroke}" stroke-width="1.2" stroke-dasharray="6,3"/>`;
-    s+=`\n<line x1="${fmt(pts[1][0])}" y1="${fmt(pts[1][1])}" x2="${fmt(pts[3][0])}" y2="${fmt(pts[3][1])}" stroke="${st.stroke}" stroke-width="1.2" stroke-dasharray="6,3"/>`;
+  let splitMode=false;
+  if (geoSingle) { const rg=getPolygonSplit(absV); if (rg) { splitMode=true; const cells=getShading('geometry',rg.length,()=>false); const tp=p=>'M'+p.map(v=>v[0]+','+v[1]).join(' L')+'Z'; rg.forEach((poly,i)=>{if(cells[i])s+=`\n<path d="${tp(poly)}" fill="${st.fill}" fill-opacity="0.7" stroke="none"/>`;});s+=`\n<polygon points="${ptStr}" fill="none" stroke="${st.stroke}" stroke-width="${st.sw}"/>`;rg.forEach((poly,i)=>{s+=`\n<path data-cell="${i}" d="${tp(poly)}" fill="transparent" stroke="none" pointer-events="fill" style="cursor:pointer"/>`;});} }
+  if (!splitMode) {
+    if (st.filled) s+=`\n<polygon points="${ptStr}" fill="${st.fill}" fill-opacity="${st.fillOp}" stroke="none"/>`;
+    if (showDiag) {
+      s+=`\n<line x1="${fmt(pts[0][0])}" y1="${fmt(pts[0][1])}" x2="${fmt(pts[2][0])}" y2="${fmt(pts[2][1])}" stroke="${st.stroke}" stroke-width="1.2" stroke-dasharray="6,3"/>`;
+      s+=`\n<line x1="${fmt(pts[1][0])}" y1="${fmt(pts[1][1])}" x2="${fmt(pts[3][0])}" y2="${fmt(pts[3][1])}" stroke="${st.stroke}" stroke-width="1.2" stroke-dasharray="6,3"/>`;
+    }
+    s+=`\n<polygon points="${ptStr}" fill="none" stroke="${st.stroke}" stroke-width="${st.sw}"/>`;
   }
-  s+=`\n<polygon points="${ptStr}" fill="none" stroke="${st.stroke}" stroke-width="${st.sw}"/>`;
   if (showHline) {
     s+=`\n<line x1="${fmt(pts[3][0])}" y1="${fmt(pts[3][1])}" x2="${fmt(pts[3][0])}" y2="${fmt(pts[0][1])}" stroke="${st.stroke}" stroke-width="1.2" stroke-dasharray="5,3"/>`;
     s+=_raMark(pts[3][0],pts[0][1],1,0,0,-1,10,st.stroke);
@@ -906,6 +1059,11 @@ function _geoParallelogram(n) {
     if (st.arrows) s+=_dimArr(pts[0][0],pts[0][1]+25,pts[1][0],pts[1][1]+25,bt,st.lc,st.fs,st);
     else s+=`\n<text x="${fmt((pts[0][0]+pts[1][0])/2)}" y="${fmt(pts[0][1]+18)}" ${_txtAttr(st)} font-size="${st.fs}" fill="${st.lc}" text-anchor="middle">${escXml(bt)}</text>`;
   }
+  const pcx=(pts[0][0]+pts[1][0]+pts[2][0]+pts[3][0])/4,pcy=(pts[0][1]+pts[1][1]+pts[2][1]+pts[3][1])/4;
+  if (pva) s+=_vtxLbl(pts[0][0],pts[0][1],pcx,pcy,pva,st.lc,st.fs,st);
+  if (pvb) s+=_vtxLbl(pts[1][0],pts[1][1],pcx,pcy,pvb,st.lc,st.fs,st);
+  if (pvc) s+=_vtxLbl(pts[2][0],pts[2][1],pcx,pcy,pvc,st.lc,st.fs,st);
+  if (pvd) s+=_vtxLbl(pts[3][0],pts[3][1],pcx,pcy,pvd,st.lc,st.fs,st);
   return { svgStr:s+'\n</svg>', width:W, height:H };
 }
 
@@ -918,15 +1076,28 @@ function _geoRhombus(n) {
   const cx=PAD+a, cy=PAD+b, W=2*a+PAD*2, H=2*b+PAD*2;
   const pts=[[cx,cy-b],[cx+a,cy],[cx,cy+b],[cx-a,cy]];
   const ptStr=pts.map(p=>`${fmt(p[0])},${fmt(p[1])}`).join(' ');
+  const absVR=pts.map(p=>[p[0],p[1]]);
+  const rva=val(`geo-rhom-va-${n}`),rvb=val(`geo-rhom-vb-${n}`),rvc=val(`geo-rhom-vc-${n}`),rvd=val(`geo-rhom-vd-${n}`);
+  const geoSingle=currentShape==='geometry'&&int('geo-count')===1;
+  if (geoSingle) shapeGeometry.polygon=absVR;
+  _pushHandle(pts[1][0],pts[1][1],[{inputId:`geo-rhom-side-${n}`,axis:'x',scale:sc*Math.cos(ar/2),min:0.5}]);
   let s=svgOpen(W,H);
-  if (st.filled) s+=`\n<polygon points="${ptStr}" fill="${st.fill}" fill-opacity="${st.fillOp}" stroke="none"/>`;
-  if (showDiag) {
-    s+=`\n<line x1="${fmt(pts[0][0])}" y1="${fmt(pts[0][1])}" x2="${fmt(pts[2][0])}" y2="${fmt(pts[2][1])}" stroke="${st.stroke}" stroke-width="1.2" stroke-dasharray="6,3"/>`;
-    s+=`\n<line x1="${fmt(pts[1][0])}" y1="${fmt(pts[1][1])}" x2="${fmt(pts[3][0])}" y2="${fmt(pts[3][1])}" stroke="${st.stroke}" stroke-width="1.2" stroke-dasharray="6,3"/>`;
-    s+=_raMark(cx,cy,0,-1,1,0,9,st.stroke);
+  let splitMode=false;
+  if (geoSingle) { const rg=getPolygonSplit(absVR); if (rg) { splitMode=true; const cells=getShading('geometry',rg.length,()=>false); const tp=p=>'M'+p.map(v=>v[0]+','+v[1]).join(' L')+'Z'; rg.forEach((poly,i)=>{if(cells[i])s+=`\n<path d="${tp(poly)}" fill="${st.fill}" fill-opacity="0.7" stroke="none"/>`;});s+=`\n<polygon points="${ptStr}" fill="none" stroke="${st.stroke}" stroke-width="${st.sw}"/>`;rg.forEach((poly,i)=>{s+=`\n<path data-cell="${i}" d="${tp(poly)}" fill="transparent" stroke="none" pointer-events="fill" style="cursor:pointer"/>`;});} }
+  if (!splitMode) {
+    if (st.filled) s+=`\n<polygon points="${ptStr}" fill="${st.fill}" fill-opacity="${st.fillOp}" stroke="none"/>`;
+    if (showDiag) {
+      s+=`\n<line x1="${fmt(pts[0][0])}" y1="${fmt(pts[0][1])}" x2="${fmt(pts[2][0])}" y2="${fmt(pts[2][1])}" stroke="${st.stroke}" stroke-width="1.2" stroke-dasharray="6,3"/>`;
+      s+=`\n<line x1="${fmt(pts[1][0])}" y1="${fmt(pts[1][1])}" x2="${fmt(pts[3][0])}" y2="${fmt(pts[3][1])}" stroke="${st.stroke}" stroke-width="1.2" stroke-dasharray="6,3"/>`;
+      s+=_raMark(cx,cy,0,-1,1,0,9,st.stroke);
+    }
+    s+=`\n<polygon points="${ptStr}" fill="none" stroke="${st.stroke}" stroke-width="${st.sw}"/>`;
   }
-  s+=`\n<polygon points="${ptStr}" fill="none" stroke="${st.stroke}" stroke-width="${st.sw}"/>`;
   if (st.labels&&lbl) s+=_sideLbl(pts[0][0],pts[0][1],pts[1][0],pts[1][1],lbl,st.lc,st.fs,false,st);
+  if (rva) s+=_vtxLbl(pts[0][0],pts[0][1],cx,cy,rva,st.lc,st.fs,st);
+  if (rvb) s+=_vtxLbl(pts[1][0],pts[1][1],cx,cy,rvb,st.lc,st.fs,st);
+  if (rvc) s+=_vtxLbl(pts[2][0],pts[2][1],cx,cy,rvc,st.lc,st.fs,st);
+  if (rvd) s+=_vtxLbl(pts[3][0],pts[3][1],cx,cy,rvd,st.lc,st.fs,st);
   return { svgStr:s+'\n</svg>', width:W, height:H };
 }
 
@@ -939,21 +1110,35 @@ function _geoTrapezoid(n) {
   let pts;
   if (type==='right') pts=[[PAD,PAD],[PAD+tpx,PAD],[PAD+bpx,PAD+hpx],[PAD,PAD+hpx]];
   else { const off=(bpx-tpx)/2; pts=[[PAD+off,PAD],[PAD+off+tpx,PAD],[PAD+bpx,PAD+hpx],[PAD,PAD+hpx]]; }
-  const W=Math.max(...pts.map(p=>p[0]))+PAD, H=PAD+hpx+(st.labels?48:26);
+  const W=Math.max(...pts.map(p=>p[0]))+PAD, H=PAD+hpx+(st.labels?50:28);
   const ptStr=pts.map(p=>`${fmt(p[0])},${fmt(p[1])}`).join(' ');
+  const absVT=pts.map(p=>[p[0],p[1]]);
+  const tva=val(`geo-trap-va-${n}`),tvb=val(`geo-trap-vb-${n}`),tvc=val(`geo-trap-vc-${n}`),tvd=val(`geo-trap-vd-${n}`);
+  const geoSingle=currentShape==='geometry'&&int('geo-count')===1;
+  if (geoSingle) shapeGeometry.polygon=absVT;
+  _pushHandle(pts[2][0],pts[2][1],[{inputId:`geo-trap-bottom-${n}`,axis:'x',scale:sc,min:0.5}]);
   let s=svgOpen(W,H);
-  if (st.filled) s+=`\n<polygon points="${ptStr}" fill="${st.fill}" fill-opacity="${st.fillOp}" stroke="none"/>`;
-  if (showDiag) {
-    s+=`\n<line x1="${fmt(pts[0][0])}" y1="${fmt(pts[0][1])}" x2="${fmt(pts[2][0])}" y2="${fmt(pts[2][1])}" stroke="${st.stroke}" stroke-width="1.2" stroke-dasharray="6,3"/>`;
-    s+=`\n<line x1="${fmt(pts[1][0])}" y1="${fmt(pts[1][1])}" x2="${fmt(pts[3][0])}" y2="${fmt(pts[3][1])}" stroke="${st.stroke}" stroke-width="1.2" stroke-dasharray="6,3"/>`;
+  let splitMode=false;
+  if (geoSingle) { const rg=getPolygonSplit(absVT); if (rg) { splitMode=true; const cells=getShading('geometry',rg.length,()=>false); const tp=p=>'M'+p.map(v=>v[0]+','+v[1]).join(' L')+'Z'; rg.forEach((poly,i)=>{if(cells[i])s+=`\n<path d="${tp(poly)}" fill="${st.fill}" fill-opacity="0.7" stroke="none"/>`;});s+=`\n<polygon points="${ptStr}" fill="none" stroke="${st.stroke}" stroke-width="${st.sw}"/>`;rg.forEach((poly,i)=>{s+=`\n<path data-cell="${i}" d="${tp(poly)}" fill="transparent" stroke="none" pointer-events="fill" style="cursor:pointer"/>`;});} }
+  if (!splitMode) {
+    if (st.filled) s+=`\n<polygon points="${ptStr}" fill="${st.fill}" fill-opacity="${st.fillOp}" stroke="none"/>`;
+    if (showDiag) {
+      s+=`\n<line x1="${fmt(pts[0][0])}" y1="${fmt(pts[0][1])}" x2="${fmt(pts[2][0])}" y2="${fmt(pts[2][1])}" stroke="${st.stroke}" stroke-width="1.2" stroke-dasharray="6,3"/>`;
+      s+=`\n<line x1="${fmt(pts[1][0])}" y1="${fmt(pts[1][1])}" x2="${fmt(pts[3][0])}" y2="${fmt(pts[3][1])}" stroke="${st.stroke}" stroke-width="1.2" stroke-dasharray="6,3"/>`;
+    }
+    if (type==='right') { s+=_raMark(pts[0][0],pts[0][1],1,0,0,1,10,st.stroke); s+=_raMark(pts[3][0],pts[3][1],1,0,0,-1,10,st.stroke); }
+    s+=`\n<polygon points="${ptStr}" fill="none" stroke="${st.stroke}" stroke-width="${st.sw}"/>`;
   }
-  if (type==='right') { s+=_raMark(pts[0][0],pts[0][1],1,0,0,1,10,st.stroke); s+=_raMark(pts[3][0],pts[3][1],1,0,0,-1,10,st.stroke); }
-  s+=`\n<polygon points="${ptStr}" fill="none" stroke="${st.stroke}" stroke-width="${st.sw}"/>`;
   if (st.labels) {
     const tt=tlbl||String(top), bt=blbl||String(bot);
     if (st.arrows) { s+=_dimArr(pts[0][0],pts[0][1]-24,pts[1][0],pts[1][1]-24,tt,st.lc,st.fs,st); s+=_dimArr(pts[3][0],pts[3][1]+24,pts[2][0],pts[2][1]+24,bt,st.lc,st.fs,st); }
     else { s+=`\n<text x="${fmt((pts[0][0]+pts[1][0])/2)}" y="${fmt(pts[0][1]-14)}" ${_txtAttr(st)} font-size="${st.fs}" fill="${st.lc}" text-anchor="middle">${escXml(tt)}</text>`; s+=`\n<text x="${fmt((pts[2][0]+pts[3][0])/2)}" y="${fmt(pts[2][1]+16)}" ${_txtAttr(st)} font-size="${st.fs}" fill="${st.lc}" text-anchor="middle">${escXml(bt)}</text>`; }
   }
+  const tcx=(pts[0][0]+pts[1][0]+pts[2][0]+pts[3][0])/4,tcy=(pts[0][1]+pts[1][1]+pts[2][1]+pts[3][1])/4;
+  if (tva) s+=_vtxLbl(pts[0][0],pts[0][1],tcx,tcy,tva,st.lc,st.fs,st);
+  if (tvb) s+=_vtxLbl(pts[1][0],pts[1][1],tcx,tcy,tvb,st.lc,st.fs,st);
+  if (tvc) s+=_vtxLbl(pts[2][0],pts[2][1],tcx,tcy,tvc,st.lc,st.fs,st);
+  if (tvd) s+=_vtxLbl(pts[3][0],pts[3][1],tcx,tcy,tvd,st.lc,st.fs,st);
   return { svgStr:s+'\n</svg>', width:W, height:H };
 }
 
@@ -961,17 +1146,42 @@ function _geoTrapezoid(n) {
 function _geoRegPoly(n, sides) {
   const sv=Math.max(0.5,num(`geo-poly-side-${n}`)||5), orient=val(`geo-poly-orient-${n}`)||'pointy';
   const lbl=val(`geo-poly-lbl-${n}`), showDiag=chk(`geo-poly-diag-${n}`), st=_gst(n);
-  const R=sv/(2*Math.sin(Math.PI/sides)), sc=Math.min(55,Math.max(10,110/R)), Rpx=R*sc, PAD=40;
+  const R=sv/(2*Math.sin(Math.PI/sides)), sc=Math.min(55,Math.max(10,110/R)), Rpx=R*sc, PAD=42;
   const W=Rpx*2+PAD*2, H=Rpx*2+PAD*2, cx=PAD+Rpx, cy=PAD+Rpx;
   const startA=(orient==='flat'?0:-90), pts=[];
   for (let i=0;i<sides;i++) { const a=(startA+i*360/sides)*Math.PI/180; pts.push([fmt(cx+Rpx*Math.cos(a)),fmt(cy+Rpx*Math.sin(a))]); }
   const ptStr=pts.map(p=>p.join(',')).join(' ');
+  const absVerts=pts.map(p=>[parseFloat(p[0]),parseFloat(p[1])]);
+
+  const geoSingle = currentShape==='geometry' && int('geo-count')===1;
+  if (geoSingle) shapeGeometry.polygon = absVerts;
+  // Handle on first vertex to resize
+  _pushHandle(absVerts[0][0], absVerts[0][1], [{ inputId:`geo-poly-side-${n}`, axis:'x', scale:sc/(2*Math.sin(Math.PI/sides)), min:0.5 }]);
+
   let s=svgOpen(W,H);
-  if (st.filled) s+=`\n<polygon points="${ptStr}" fill="${st.fill}" fill-opacity="${st.fillOp}" stroke="none"/>`;
-  if (showDiag) { for (let i=0;i<sides;i++) for (let j=i+2;j<sides;j++) { if (i===0&&j===sides-1) continue; s+=`\n<line x1="${pts[i][0]}" y1="${pts[i][1]}" x2="${pts[j][0]}" y2="${pts[j][1]}" stroke="${st.stroke}" stroke-width="1" stroke-dasharray="5,3"/>`; } }
-  s+=`\n<polygon points="${ptStr}" fill="none" stroke="${st.stroke}" stroke-width="${st.sw}"/>`;
-  if (lbl) s+=`\n<text x="${cx}" y="${cy}" ${_txtAttr(st)} font-size="${st.fs}" fill="${st.lc}" text-anchor="middle" dominant-baseline="central">${escXml(lbl)}</text>`;
+
+  let splitMode = false;
+  if (geoSingle) {
+    const regions=getPolygonSplit(absVerts);
+    if (regions) {
+      splitMode = true;
+      const cells=getShading('geometry',regions.length,()=>false);
+      const tp=p=>'M'+p.map(v=>v[0]+','+v[1]).join(' L')+'Z';
+      regions.forEach((poly,i)=>{ if (cells[i]) s+=`\n<path d="${tp(poly)}" fill="${st.fill}" fill-opacity="0.7" stroke="none"/>`; });
+      s+=`\n<polygon points="${ptStr}" fill="none" stroke="${st.stroke}" stroke-width="${st.sw}"/>`;
+      regions.forEach((poly,i)=>{ s+=`\n<path data-cell="${i}" d="${tp(poly)}" fill="transparent" stroke="none" pointer-events="fill" style="cursor:pointer"/>`; });
+    }
+  }
+  if (!splitMode) {
+    if (st.filled) s+=`\n<polygon points="${ptStr}" fill="${st.fill}" fill-opacity="${st.fillOp}" stroke="none"/>`;
+    if (showDiag) { for (let i=0;i<sides;i++) for (let j=i+2;j<sides;j++) { if (i===0&&j===sides-1) continue; s+=`\n<line x1="${pts[i][0]}" y1="${pts[i][1]}" x2="${pts[j][0]}" y2="${pts[j][1]}" stroke="${st.stroke}" stroke-width="1" stroke-dasharray="5,3"/>`; } }
+    s+=`\n<polygon points="${ptStr}" fill="none" stroke="${st.stroke}" stroke-width="${st.sw}"/>`;
+  }
+  if (lbl) s+=`\n<text x="${fmt(cx)}" y="${fmt(cy)}" ${_txtAttr(st)} font-size="${st.fs}" fill="${st.lc}" text-anchor="middle" dominant-baseline="central">${escXml(lbl)}</text>`;
   if (st.labels) { const p1=pts[0],p2=pts[1]; s+=_sideLbl(p1[0],p1[1],p2[0],p2[1],String(sv),st.lc,st.fs,false,st); }
+  // Vertex labels for each vertex
+  const vtxIds=['a','b','c','d','e','f','g','h'].slice(0,sides);
+  absVerts.forEach((v,i)=>{ const lv=val(`geo-poly-v${vtxIds[i]}-${n}`); if(lv) s+=_vtxLbl(v[0],v[1],cx,cy,lv,st.lc,st.fs,st); });
   return { svgStr:s+'\n</svg>', width:W, height:H };
 }
 function _geoPentagon(n) { return _geoRegPoly(n,5); }
@@ -997,6 +1207,10 @@ function _geoSector(n) {
   }
   if (lbl) { const am=(a1+a2)/2; s+=`\n<text x="${fmt(cx+r*0.6*Math.cos(am))}" y="${fmt(cy+r*0.6*Math.sin(am))}" ${_txtAttr(st)} font-size="${st.fs}" fill="${st.lc}" text-anchor="middle" dominant-baseline="central">${escXml(lbl)}</text>`; }
   if (st.labels&&rv) s+=_dimArr(cx,cy,x1,y1,String(rv),st.lc,st.fs,st);
+  const svo=val(`geo-sec-vo-${n}`), sva=val(`geo-sec-va-${n}`), svb=val(`geo-sec-vb-${n}`);
+  if (svo) s+=_vtxLbl(cx,cy,parseFloat(x1),parseFloat(y1),svo,st.lc,st.fs,st);
+  if (sva) s+=_vtxLbl(parseFloat(x1),parseFloat(y1),cx,cy,sva,st.lc,st.fs,st);
+  if (svb) s+=_vtxLbl(parseFloat(x2),parseFloat(y2),cx,cy,svb,st.lc,st.fs,st);
   return { svgStr:s+'\n</svg>', width:W, height:H };
 }
 
@@ -1005,6 +1219,7 @@ function generateShape() {
   const map = {
     numberLine:      generateNumberLine,
     fraction:        generateFraction,
+    angle:           generateAngle,
     geometry:        generateGeometry,
     rectangle:       generateRectangle,
     circle:          generateCircle,

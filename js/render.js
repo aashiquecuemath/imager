@@ -29,6 +29,8 @@ function render() {
   $('svgCode').value = getCleanSVG();
   attachDragHandlers();
   attachImageDragHandlers();
+  attachVertexHandles();
+  attachAngleDragHandles();
   _updateDims();
 }
 
@@ -50,6 +52,9 @@ function getCleanSVG() {
   const clone = svgEl.cloneNode(true);
   clone.querySelectorAll('[data-cell]').forEach(el => el.remove());
   clone.querySelectorAll('[data-canvas-outline]').forEach(el => el.remove());
+  clone.querySelectorAll('[data-vertex-handle]').forEach(el => el.remove());
+  clone.querySelectorAll('[data-ang-handle]').forEach(el => el.remove());
+  clone.querySelectorAll('[data-ang-lid]').forEach(el => el.removeAttribute('data-ang-lid'));
   clone.querySelectorAll('[data-oid]').forEach(el => {
     el.removeAttribute('data-oid');
     el.removeAttribute('style');

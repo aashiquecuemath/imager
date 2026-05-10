@@ -5,6 +5,7 @@ const SHAPE_SHADING_KEY = {
   triangle:   'triangleSplit',
   pentagon:   'pentagonSplit',
   hexagon:    'hexagonSplit',
+  geometry:   'geometry',
 };
 
 const SHADING_RESET_INPUTS = {
@@ -112,7 +113,13 @@ function wireAll() {
       document.querySelectorAll('.param-section').forEach(s => s.classList.remove('visible'));
       $(`params-${currentShape}`)?.classList.add('visible');
       resetShading('rectangle');
+      resetShading('geometry');
       shapeGeometry.polygon = null;
+      shapeGeometry.handles = [];
+      // Show draw-lines only for geometry tool
+      const dlCard = $('draw-lines-card');
+      if (dlCard) dlCard.style.display = (currentShape === 'geometry') ? '' : 'none';
+      if (currentShape === 'angle') renderAngUI();
       render();
     });
   });
@@ -462,6 +469,65 @@ function wireAll() {
 
   /* ── Number line ── */
   wireNumberLine();
+
+  /* ── Angles tool ── */
+  wireAngles();
+}
+
+/* ── Vertex handle dragging (geometry tool only) ── */
+function attachVertexHandles() {
+  if (currentShape !== 'geometry') return;
+  if (int('geo-count') !== 1) return;
+  const svgEl = $('svgPreview').querySelector('svg');
+  if (!svgEl || !shapeGeometry.handles.length) return;
+  const ns = 'http://www.w3.org/2000/svg';
+  for (const h of shapeGeometry.handles) {
+    const c = document.createElementNS(ns, 'circle');
+    c.setAttribute('cx', h.x); c.setAttribute('cy', h.y); c.setAttribute('r', '10');
+    c.setAttribute('fill', 'transparent');
+    c.setAttribute('stroke', 'none');
+    c.setAttribute('style', 'cursor:ew-resize'); c.setAttribute('data-vertex-handle', '1');
+    c.setAttribute('pointer-events', 'all');
+    c.addEventListener('mousedown', e => {
+      if (drawMode) return;
+      e.preventDefault(); e.stopPropagation();
+      isDragging = false;
+      // Use the live SVG element at mousedown time for coordinate mapping
+      const liveSvg = $('svgPreview').querySelector('svg');
+      const startPt = svgLocalCoords(liveSvg, e.clientX, e.clientY);
+      const origVals = {};
+      for (const p of (h.params || [])) { const el = $(p.inputId); if (el) origVals[p.inputId] = parseFloat(el.value) || 0; }
+      const onMove = ev => {
+        isDragging = true;
+        // Always re-fetch the current SVG element — render() replaces it
+        const curSvg = $('svgPreview').querySelector('svg');
+        if (!curSvg) return;
+        const pt = svgLocalCoords(curSvg, ev.clientX, ev.clientY);
+        const dx = pt.x - startPt.x, dy = pt.y - startPt.y;
+        let changed = false;
+        for (const p of (h.params || [])) {
+          const el = $(p.inputId); if (!el) continue;
+          const orig = origVals[p.inputId];
+          let delta = 0;
+          if (p.axis === 'x')  delta =  dx / p.scale;
+          if (p.axis === '-x') delta = -dx / p.scale;
+          if (p.axis === 'y')  delta =  dy / p.scale;
+          if (p.axis === '-y') delta = -dy / p.scale;
+          el.value = Math.max(p.min || 0.5, orig + delta).toFixed(2);
+          changed = true;
+        }
+        if (changed) render();
+      };
+      const onUp = () => {
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+        setTimeout(() => { isDragging = false; }, 0);
+      };
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+    });
+    svgEl.appendChild(c);
+  }
 }
 
 /* ── Fraction helpers ── */
@@ -517,4 +583,17 @@ function wireFraction() {
       shapeEl.addEventListener('change', () => { _updateFracDimRows(ei); render(); });
     }
   }
+}
+
+/* ── Angles tool: wire canvas/label inputs (add-buttons are wired in renderAngUI) ── */
+function wireAngles() {
+  var ids = ['ang-canvas-w','ang-canvas-h','ang-vx','ang-vy','ang-vertex-lbl',
+             'ang-vertex-dot','ang-lbl-size','ang-lbl-color','ang-lbl-weight',
+             'ang-lbl-fstyle','ang-lbl-family'];
+  ids.forEach(function(id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('input',  function() { render(); });
+    el.addEventListener('change', function() { render(); });
+  });
 }

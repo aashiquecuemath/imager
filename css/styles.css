@@ -788,6 +788,89 @@ kbd {
 .sub-group--geo-el2 > .sub-group-title { color: #c05508; background: #fde8c8; }
 .sub-group--geo-el3 > .sub-group-title { color: #9f1239; background: #fdd5df; }
 
+/* ── Geometry param-category headers ── */
+.param-cat {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: #6b7280;
+  margin: 10px 0 4px;
+  padding-bottom: 3px;
+  border-bottom: 1px solid #e5e7eb;
+}
+.param-cat:first-child { margin-top: 4px; }
+
+/* ── Angles tool UI ── */
+.ang-item {
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 7px 8px;
+  margin-bottom: 6px;
+  background: #fff;
+}
+.ang-arc-item {
+  border-color: #fecdd3;
+  background: #fff1f2;
+}
+.ang-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.ang-num {
+  font-size: 10px;
+  font-weight: 700;
+  color: #6b7280;
+  min-width: 14px;
+}
+.ang-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; flex: 1; }
+.ang-grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; flex: 1; }
+.ang-grid4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 4px; }
+.ang-chk {
+  font-size: 10px;
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  white-space: nowrap;
+  cursor: pointer;
+  padding-top: 13px;
+}
+.ang-item label { font-size: 10px; display:block; margin-bottom:2px; }
+.ang-item input[type="number"],
+.ang-item input[type="text"],
+.ang-item select { font-size: 11px; }
+.btn-ang-del {
+  flex-shrink: 0;
+  width: 22px; height: 22px;
+  padding: 0;
+  border: 1px solid #fca5a5;
+  border-radius: 4px;
+  background: #fff1f2;
+  color: #dc2626;
+  font-size: 11px;
+  line-height: 1;
+  cursor: pointer;
+  align-self: center;
+}
+.btn-ang-del:hover { background: #fee2e2; }
+.ang-fmt-btn {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  width: 28px; height: 28px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  background: #f9fafb;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 0 !important;
+  user-select: none;
+  align-self: end;
+}
+.ang-fmt-btn:hover { background: #f3f4f6; border-color: #9ca3af; }
+.ang-fmt-on { background: #dbeafe !important; border-color: #3b82f6 !important; color: #1d4ed8; }
+
 /* ── Character tab layout ── */
 .controls--character {
   display: grid;

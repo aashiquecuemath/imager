@@ -324,10 +324,10 @@ function _genNLLine(i) {
 
   let s = svgOpen(svgW, H);
   s += '\n<defs>';
-  s += `\n  <marker id="${lcId}f" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+  s += `\n  <marker id="${lcId}f" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
     <path d="M0,0 L10,5 L0,10 Z" fill="${lineColor}"/>
   </marker>
-  <marker id="${lcId}r" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+  <marker id="${lcId}r" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
     <path d="M0,0 L10,5 L0,10 Z" fill="${lineColor}"/>
   </marker>`;
   for (const c of jumpMarkerColors) {
