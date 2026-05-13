@@ -70,6 +70,14 @@ function _gpLblOffset(pos, r) {
 /* ─── Graph Plot Generator ─── */
 
 function generateGraphPlot() {
+  const ct = val('gp-chart-type') || 'line';
+  if (ct === 'bar')       return generateBarChart();
+  if (ct === 'histogram') return generateHistogram();
+  if (ct === 'pie')       return generatePieChart();
+  if (ct === 'lineplot')  return generateLinePlot();
+  if (ct === 'dotplot')   return generateDotPlot();
+  if (ct === 'stemleaf')  return generateStemLeafPlot();
+
   const firstOnly = val('gp-quadrant') === 'first';
 
   let xMin = firstOnly ? 0 : (num('gp-xmin') || -5);

@@ -16,6 +16,12 @@ function render() {
     _updateDims();
     return;
   }
+  if (currentShape === 'svgPatterns') {
+    $('svgPreview').innerHTML = svg;
+    $('svgCode').value = svg;
+    _updateDims();
+    return;
+  }
 
   svg = applyCanvas(svg);
   svg = applyRotation(svg);

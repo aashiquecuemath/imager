@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Vector Space</title>
   <link rel="stylesheet" href="css/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&family=Poppins:wght@400;700&family=Comfortaa:wght@400;700&family=Fredoka+One&display=swap" rel="stylesheet">
   <script>
     window.MathJax = {
       tex: { packages: {'[+]': ['base', 'ams', 'newcommand']} },
@@ -142,6 +145,21 @@
         <h3>SVG 3D</h3>
         <p>Stack &amp; arrange 3D shapes on a grid canvas</p>
         <span class="tile-badge">3D</span>
+      </button>
+
+      <button class="home-tile" data-tool="patterns">
+        <div class="home-tile-icon">
+          <svg width="52" height="52" viewBox="0 0 52 52" fill="none" aria-hidden="true">
+            <rect x="4"  y="18" width="14" height="14" rx="3" fill="var(--accent6)" fill-opacity=".18" stroke="var(--accent6)" stroke-width="1.7"/>
+            <rect x="22" y="18" width="14" height="14" rx="3" fill="var(--accent6)" fill-opacity=".30" stroke="var(--accent6)" stroke-width="1.7"/>
+            <rect x="40" y="18" width="8"  height="14" rx="3" fill="var(--accent6)" fill-opacity=".14" stroke="var(--accent6)" stroke-width="1.7" stroke-dasharray="2.5,2"/>
+            <text x="11" y="28" text-anchor="middle" font-size="8" font-weight="700" fill="var(--accent6)">1</text>
+            <text x="29" y="28" text-anchor="middle" font-size="8" font-weight="700" fill="var(--accent6)">4</text>
+          </svg>
+        </div>
+        <h3>SVG Patterns</h3>
+        <p>Build numeric &amp; shape sequence patterns</p>
+        <span class="tile-badge">Pattern</span>
       </button>
 
     </div>
@@ -314,9 +332,12 @@
                 <option value="pentagon">Pentagon</option>
                 <option value="parallelogram">Parallelogram</option>
               </select>
-              <div class="row2" style="margin-top:7px">
+              <div id="frac-den-row-0" class="row2" style="margin-top:7px">
                 <div><label for="frac-den-0">Total parts</label><input type="number" id="frac-den-0" value="4" min="1" max="24"></div>
                 <div><label for="frac-num-0">Shaded parts</label><input type="number" id="frac-num-0" value="1" min="0" max="24"></div>
+              </div>
+              <div id="frac-cell-subs-row-0" class="row2" style="margin-top:6px">
+                <div><label for="frac-cell-subs-0">Sub-divs per cell <span class="hint" style="display:inline">(1 = none)</span></label><input type="number" id="frac-cell-subs-0" value="1" min="1" max="8"></div>
               </div>
               <div class="check-row" style="margin-top:6px"><input type="checkbox" id="frac-label-0" checked><label for="frac-label-0">Show fraction label</label></div>
               <div class="check-row"><input type="checkbox" id="frac-cellnums-0"><label for="frac-cellnums-0">Number cells</label></div>
@@ -427,6 +448,10 @@
                   </div>
                   <div id="frac-dims-grid-0" style="display:none">
                     <div class="row2">
+                      <div><label for="frac-dim-rows-0">Rows</label><input type="number" id="frac-dim-rows-0" value="2" min="1" max="12"></div>
+                      <div><label for="frac-dim-cols-0">Columns</label><input type="number" id="frac-dim-cols-0" value="4" min="1" max="12"></div>
+                    </div>
+                    <div class="row2" style="margin-top:4px">
                       <div><label for="frac-dim-gw-0">Width (px)</label><input type="number" id="frac-dim-gw-0" value="240" min="40" max="600"></div>
                       <div><label for="frac-dim-gh-0">Height (px)</label><input type="number" id="frac-dim-gh-0" value="240" min="40" max="400"></div>
                     </div>
@@ -463,9 +488,12 @@
                 <option value="pentagon">Pentagon</option>
                 <option value="parallelogram">Parallelogram</option>
               </select>
-              <div class="row2" style="margin-top:7px">
+              <div id="frac-den-row-1" class="row2" style="margin-top:7px">
                 <div><label for="frac-den-1">Total parts</label><input type="number" id="frac-den-1" value="4" min="1" max="24"></div>
                 <div><label for="frac-num-1">Shaded parts</label><input type="number" id="frac-num-1" value="1" min="0" max="24"></div>
+              </div>
+              <div id="frac-cell-subs-row-1" class="row2" style="margin-top:6px">
+                <div><label for="frac-cell-subs-1">Sub-divs per cell <span class="hint" style="display:inline">(1 = none)</span></label><input type="number" id="frac-cell-subs-1" value="1" min="1" max="8"></div>
               </div>
               <div class="check-row" style="margin-top:6px"><input type="checkbox" id="frac-label-1" checked><label for="frac-label-1">Show fraction label</label></div>
               <div class="check-row"><input type="checkbox" id="frac-cellnums-1"><label for="frac-cellnums-1">Number cells</label></div>
@@ -576,6 +604,10 @@
                   </div>
                   <div id="frac-dims-grid-1" style="display:none">
                     <div class="row2">
+                      <div><label for="frac-dim-rows-1">Rows</label><input type="number" id="frac-dim-rows-1" value="2" min="1" max="12"></div>
+                      <div><label for="frac-dim-cols-1">Columns</label><input type="number" id="frac-dim-cols-1" value="4" min="1" max="12"></div>
+                    </div>
+                    <div class="row2" style="margin-top:4px">
                       <div><label for="frac-dim-gw-1">Width (px)</label><input type="number" id="frac-dim-gw-1" value="240" min="40" max="600"></div>
                       <div><label for="frac-dim-gh-1">Height (px)</label><input type="number" id="frac-dim-gh-1" value="240" min="40" max="400"></div>
                     </div>
@@ -612,9 +644,12 @@
                 <option value="pentagon">Pentagon</option>
                 <option value="parallelogram">Parallelogram</option>
               </select>
-              <div class="row2" style="margin-top:7px">
+              <div id="frac-den-row-2" class="row2" style="margin-top:7px">
                 <div><label for="frac-den-2">Total parts</label><input type="number" id="frac-den-2" value="4" min="1" max="24"></div>
                 <div><label for="frac-num-2">Shaded parts</label><input type="number" id="frac-num-2" value="1" min="0" max="24"></div>
+              </div>
+              <div id="frac-cell-subs-row-2" class="row2" style="margin-top:6px">
+                <div><label for="frac-cell-subs-2">Sub-divs per cell <span class="hint" style="display:inline">(1 = none)</span></label><input type="number" id="frac-cell-subs-2" value="1" min="1" max="8"></div>
               </div>
               <div class="check-row" style="margin-top:6px"><input type="checkbox" id="frac-label-2" checked><label for="frac-label-2">Show fraction label</label></div>
               <div class="check-row"><input type="checkbox" id="frac-cellnums-2"><label for="frac-cellnums-2">Number cells</label></div>
@@ -725,6 +760,10 @@
                   </div>
                   <div id="frac-dims-grid-2" style="display:none">
                     <div class="row2">
+                      <div><label for="frac-dim-rows-2">Rows</label><input type="number" id="frac-dim-rows-2" value="2" min="1" max="12"></div>
+                      <div><label for="frac-dim-cols-2">Columns</label><input type="number" id="frac-dim-cols-2" value="4" min="1" max="12"></div>
+                    </div>
+                    <div class="row2" style="margin-top:4px">
                       <div><label for="frac-dim-gw-2">Width (px)</label><input type="number" id="frac-dim-gw-2" value="240" min="40" max="600"></div>
                       <div><label for="frac-dim-gh-2">Height (px)</label><input type="number" id="frac-dim-gh-2" value="240" min="40" max="400"></div>
                     </div>
@@ -761,9 +800,12 @@
                 <option value="pentagon">Pentagon</option>
                 <option value="parallelogram">Parallelogram</option>
               </select>
-              <div class="row2" style="margin-top:7px">
+              <div id="frac-den-row-3" class="row2" style="margin-top:7px">
                 <div><label for="frac-den-3">Total parts</label><input type="number" id="frac-den-3" value="4" min="1" max="24"></div>
                 <div><label for="frac-num-3">Shaded parts</label><input type="number" id="frac-num-3" value="1" min="0" max="24"></div>
+              </div>
+              <div id="frac-cell-subs-row-3" class="row2" style="margin-top:6px">
+                <div><label for="frac-cell-subs-3">Sub-divs per cell <span class="hint" style="display:inline">(1 = none)</span></label><input type="number" id="frac-cell-subs-3" value="1" min="1" max="8"></div>
               </div>
               <div class="check-row" style="margin-top:6px"><input type="checkbox" id="frac-label-3" checked><label for="frac-label-3">Show fraction label</label></div>
               <div class="check-row"><input type="checkbox" id="frac-cellnums-3"><label for="frac-cellnums-3">Number cells</label></div>
@@ -874,6 +916,10 @@
                   </div>
                   <div id="frac-dims-grid-3" style="display:none">
                     <div class="row2">
+                      <div><label for="frac-dim-rows-3">Rows</label><input type="number" id="frac-dim-rows-3" value="2" min="1" max="12"></div>
+                      <div><label for="frac-dim-cols-3">Columns</label><input type="number" id="frac-dim-cols-3" value="4" min="1" max="12"></div>
+                    </div>
+                    <div class="row2" style="margin-top:4px">
                       <div><label for="frac-dim-gw-3">Width (px)</label><input type="number" id="frac-dim-gw-3" value="240" min="40" max="600"></div>
                       <div><label for="frac-dim-gh-3">Height (px)</label><input type="number" id="frac-dim-gh-3" value="240" min="40" max="400"></div>
                     </div>
@@ -1456,8 +1502,25 @@
   <div id="tab-grapher" class="tab-content">
     <div class="controls controls--grapher">
 
+      <!-- ── Chart type selector ── -->
+      <div class="card grapher-col-span" id="gp-type-card">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <span style="font-size:.78rem;font-weight:600;color:#555;white-space:nowrap">Chart type:</span>
+          <div class="gp-ctype-group">
+            <button class="gp-ctype active" data-ct="line">Line Graph</button>
+            <button class="gp-ctype" data-ct="bar">Bar Chart</button>
+            <button class="gp-ctype" data-ct="histogram">Histogram</button>
+            <button class="gp-ctype" data-ct="pie">Pie Chart</button>
+            <button class="gp-ctype" data-ct="lineplot">Line Plot</button>
+            <button class="gp-ctype" data-ct="dotplot">Dot Plot</button>
+            <button class="gp-ctype" data-ct="stemleaf">Stem &amp; Leaf</button>
+          </div>
+        </div>
+        <input type="hidden" id="gp-chart-type" value="line">
+      </div>
+
       <!-- ── Plot Setup card ── -->
-      <div class="card grapher-col1">
+      <div class="card grapher-col1" id="gp-line-col1">
         <div class="card-title">Plot Setup</div>
 
         <div class="sub-group collapsible collapsed sub-group--axes">
@@ -1572,7 +1635,7 @@
       </div><!-- /Plot Setup -->
 
       <!-- ── Series card ── -->
-      <div class="card grapher-col2">
+      <div class="card grapher-col2" id="gp-line-col2">
         <div class="card-title">Series</div>
 
         <!-- Series 1 — always visible -->
@@ -1895,6 +1958,580 @@
 
       </div><!-- /Series -->
 
+      <!-- ══ BAR CHART panels ══ -->
+      <div class="card grapher-col1" id="gp-bar-col1" style="display:none">
+        <div class="card-title">Chart Setup</div>
+
+        <div class="sub-group collapsible sub-group--bc-labels">
+          <div class="sub-group-title">Labels &amp; Title <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="sub-body">
+            <label for="bc-title">Chart title</label>
+            <input type="text" id="bc-title" placeholder="e.g. Monthly Sales">
+            <div class="row2">
+              <div><label for="bc-xlabel">X-axis label</label><input type="text" id="bc-xlabel" placeholder="Category"></div>
+              <div><label for="bc-ylabel">Y-axis label</label><input type="text" id="bc-ylabel" placeholder="Value"></div>
+            </div>
+            <div class="row3" style="margin-top:7px">
+              <div><label for="bc-lbl-size">Size</label><input type="number" id="bc-lbl-size" value="13" min="8" max="28"></div>
+              <div><label>Color</label><input type="color" id="bc-lbl-color" value="#333333"></div>
+              <div>
+                <label for="bc-lbl-style">Style</label>
+                <select id="bc-lbl-style"><option value="normal">Normal</option><option value="italic">Italic</option></select>
+              </div>
+            </div>
+            <div class="check-row"><input type="checkbox" id="bc-lbl-bold"><label for="bc-lbl-bold">Bold</label></div>
+          </div>
+        </div>
+
+        <div class="sub-group collapsible collapsed sub-group--bc-axes">
+          <div class="sub-group-title">Y-Axis &amp; Grid <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="sub-body">
+            <div class="check-row"><input type="checkbox" id="bc-auto-y" checked><label for="bc-auto-y">Auto Y max</label></div>
+            <div id="bc-ymax-wrap" style="display:none">
+              <label for="bc-ymax">Y max</label>
+              <input type="number" id="bc-ymax" value="100" min="0.01">
+            </div>
+            <div class="check-row" style="margin-top:7px"><input type="checkbox" id="bc-grid" checked><label for="bc-grid">Show grid lines</label></div>
+            <div class="row2">
+              <div>
+                <label for="bc-grid-style">Grid style</label>
+                <select id="bc-grid-style"><option value="dashed">Dashed</option><option value="solid">Solid</option><option value="dotted">Dotted</option></select>
+              </div>
+              <div><label for="bc-grid-color">Grid color</label><input type="color" id="bc-grid-color" value="#DDDDDD"></div>
+            </div>
+            <label for="bc-grid-step" style="margin-top:6px">Grid step <span class="hint" style="display:inline">(0 = auto)</span></label>
+            <input type="number" id="bc-grid-step" value="0" min="0">
+            <div class="check-row" style="margin-top:7px"><input type="checkbox" id="bc-tick-labels" checked><label for="bc-tick-labels">Show tick labels</label></div>
+            <div class="row3" style="margin-top:5px">
+              <div><label for="bc-tk-size">Size</label><input type="number" id="bc-tk-size" value="11" min="7" max="20"></div>
+              <div><label>Color</label><input type="color" id="bc-tk-color" value="#444444"></div>
+              <div>
+                <label for="bc-tk-style">Style</label>
+                <select id="bc-tk-style"><option value="normal">Normal</option><option value="italic">Italic</option></select>
+              </div>
+            </div>
+            <div class="check-row"><input type="checkbox" id="bc-tk-bold"><label for="bc-tk-bold">Bold ticks</label></div>
+            <div class="row2" style="margin-top:7px">
+              <div><label for="bc-axis-color">Axis color</label><input type="color" id="bc-axis-color" value="#333333"></div>
+              <div><div class="check-row" style="margin-top:20px"><input type="checkbox" id="bc-axis-arrows" checked><label for="bc-axis-arrows">Axis arrows</label></div></div>
+            </div>
+          </div>
+        </div>
+      </div><!-- /gp-bar-col1 -->
+
+      <div class="card grapher-col2" id="gp-bar-col2" style="display:none">
+        <div class="card-title">Bar Data</div>
+
+        <label for="bc-data">Data <span class="hint" style="display:inline">(Label,Value per line)</span></label>
+        <textarea id="bc-data" rows="6" placeholder="Apples,25&#10;Bananas,40&#10;Cherries,18&#10;Dates,32"></textarea>
+
+        <div class="sub-group collapsible sub-group--bc-style" style="margin-top:10px">
+          <div class="sub-group-title">Bar Style <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="sub-body">
+            <label for="bc-orient">Orientation</label>
+            <select id="bc-orient"><option value="vertical">Vertical</option><option value="horizontal">Horizontal</option></select>
+            <label for="bc-color-mode" style="margin-top:7px">Colors</label>
+            <select id="bc-color-mode"><option value="palette">Auto palette</option><option value="single">Single color</option></select>
+            <div id="bc-single-color-wrap" style="display:none;margin-top:5px">
+              <label for="bc-color">Bar color</label>
+              <input type="color" id="bc-color" value="#4A90D9">
+            </div>
+            <div class="row2" style="margin-top:7px">
+              <div><label for="bc-gap">Bar gap (%)</label><input type="number" id="bc-gap" value="20" min="0" max="80"></div>
+              <div><label for="bc-radius">Corner radius</label><input type="number" id="bc-radius" value="0" min="0" max="20"></div>
+            </div>
+            <div class="row2" style="margin-top:7px">
+              <div><label for="bc-stroke-color">Stroke color</label><input type="color" id="bc-stroke-color" value="#cccccc"></div>
+              <div><label for="bc-stroke-w">Stroke width</label><input type="number" id="bc-stroke-w" value="0" min="0" max="5" step="0.5"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sub-group collapsible collapsed sub-group--bc-vallbl">
+          <div class="sub-group-title">Value Labels <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="sub-body">
+            <label for="bc-val-lbl">Show values</label>
+            <select id="bc-val-lbl"><option value="top">Above bar</option><option value="inside">Inside bar</option><option value="none">Hidden</option></select>
+            <div class="row3" style="margin-top:7px">
+              <div><label for="bc-val-lbl-size">Size</label><input type="number" id="bc-val-lbl-size" value="11" min="8" max="20"></div>
+              <div><label>Color</label><input type="color" id="bc-val-lbl-color" value="#333333"></div>
+              <div><div class="check-row" style="margin-top:18px"><input type="checkbox" id="bc-val-lbl-bold" checked><label for="bc-val-lbl-bold">Bold</label></div></div>
+            </div>
+          </div>
+        </div>
+      </div><!-- /gp-bar-col2 -->
+
+      <!-- ══ HISTOGRAM panels ══ -->
+      <div class="card grapher-col1" id="gp-hist-col1" style="display:none">
+        <div class="card-title">Chart Setup</div>
+
+        <div class="sub-group collapsible sub-group--hs-labels">
+          <div class="sub-group-title">Labels &amp; Title <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="sub-body">
+            <label for="hs-title">Chart title</label>
+            <input type="text" id="hs-title" placeholder="e.g. Score Distribution">
+            <div class="row2">
+              <div><label for="hs-xlabel">X-axis label</label><input type="text" id="hs-xlabel" placeholder="Value"></div>
+              <div><label for="hs-ylabel">Y-axis label</label><input type="text" id="hs-ylabel" placeholder="Frequency"></div>
+            </div>
+            <div class="row3" style="margin-top:7px">
+              <div><label for="hs-lbl-size">Size</label><input type="number" id="hs-lbl-size" value="13" min="8" max="28"></div>
+              <div><label>Color</label><input type="color" id="hs-lbl-color" value="#333333"></div>
+              <div>
+                <label for="hs-lbl-style">Style</label>
+                <select id="hs-lbl-style"><option value="normal">Normal</option><option value="italic">Italic</option></select>
+              </div>
+            </div>
+            <div class="check-row"><input type="checkbox" id="hs-lbl-bold"><label for="hs-lbl-bold">Bold</label></div>
+          </div>
+        </div>
+
+        <div class="sub-group collapsible collapsed sub-group--hs-axes">
+          <div class="sub-group-title">Axes &amp; Grid <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="sub-body">
+            <div class="check-row"><input type="checkbox" id="hs-auto-y" checked><label for="hs-auto-y">Auto Y max</label></div>
+            <div id="hs-ymax-wrap" style="display:none">
+              <label for="hs-ymax">Y max</label>
+              <input type="number" id="hs-ymax" value="100" min="0.01">
+            </div>
+            <div class="check-row" style="margin-top:7px"><input type="checkbox" id="hs-grid" checked><label for="hs-grid">Show grid lines</label></div>
+            <div class="row2">
+              <div>
+                <label for="hs-grid-style">Grid style</label>
+                <select id="hs-grid-style"><option value="dashed">Dashed</option><option value="solid">Solid</option><option value="dotted">Dotted</option></select>
+              </div>
+              <div><label for="hs-grid-color">Grid color</label><input type="color" id="hs-grid-color" value="#DDDDDD"></div>
+            </div>
+            <div class="check-row" style="margin-top:7px"><input type="checkbox" id="hs-tick-labels" checked><label for="hs-tick-labels">Show tick labels</label></div>
+            <div class="row3" style="margin-top:5px">
+              <div><label for="hs-tk-size">Size</label><input type="number" id="hs-tk-size" value="11" min="7" max="20"></div>
+              <div><label>Color</label><input type="color" id="hs-tk-color" value="#444444"></div>
+              <div>
+                <label for="hs-tk-style">Style</label>
+                <select id="hs-tk-style"><option value="normal">Normal</option><option value="italic">Italic</option></select>
+              </div>
+            </div>
+            <div class="check-row"><input type="checkbox" id="hs-tk-bold"><label for="hs-tk-bold">Bold ticks</label></div>
+            <div class="row2" style="margin-top:7px">
+              <div><label for="hs-axis-color">Axis color</label><input type="color" id="hs-axis-color" value="#333333"></div>
+              <div><div class="check-row" style="margin-top:20px"><input type="checkbox" id="hs-axis-arrows" checked><label for="hs-axis-arrows">Axis arrows</label></div></div>
+            </div>
+          </div>
+        </div>
+      </div><!-- /gp-hist-col1 -->
+
+      <div class="card grapher-col2" id="gp-hist-col2" style="display:none">
+        <div class="card-title">Histogram Data</div>
+
+        <label for="hs-data">Values <span class="hint" style="display:inline">(one per line)</span></label>
+        <textarea id="hs-data" rows="6" placeholder="14&#10;22&#10;17&#10;35&#10;28&#10;19&#10;22&#10;31&#10;25&#10;18"></textarea>
+
+        <div class="sub-group collapsible sub-group--hs-bins" style="margin-top:10px">
+          <div class="sub-group-title">Bin Settings <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="sub-body">
+            <label for="hs-bin-mode">Bin mode</label>
+            <select id="hs-bin-mode">
+              <option value="auto">Auto (Sturges' rule)</option>
+              <option value="count">Fixed count</option>
+              <option value="width">Fixed width</option>
+            </select>
+            <div id="hs-bin-count-wrap" style="display:none;margin-top:5px">
+              <label for="hs-bin-count">Bin count</label>
+              <input type="number" id="hs-bin-count" value="10" min="2" max="50">
+            </div>
+            <div id="hs-bin-width-wrap" style="display:none;margin-top:5px">
+              <label for="hs-bin-width">Bin width</label>
+              <input type="number" id="hs-bin-width" value="5" min="0.001">
+            </div>
+            <label for="hs-freq" style="margin-top:7px">Frequency type</label>
+            <select id="hs-freq"><option value="count">Count</option><option value="percent">Percent (%)</option></select>
+          </div>
+        </div>
+
+        <div class="sub-group collapsible collapsed sub-group--hs-style">
+          <div class="sub-group-title">Bar Style <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="sub-body">
+            <div class="row2">
+              <div><label for="hs-fill">Fill color</label><input type="color" id="hs-fill" value="#4A90D9"></div>
+              <div><label for="hs-stroke">Stroke color</label><input type="color" id="hs-stroke" value="#2667A0"></div>
+            </div>
+            <label for="hs-stroke-w" style="margin-top:5px">Stroke width</label>
+            <input type="number" id="hs-stroke-w" value="1" min="0" max="5" step="0.5">
+          </div>
+        </div>
+
+        <div class="sub-group collapsible collapsed sub-group--hs-vallbl">
+          <div class="sub-group-title">Value Labels <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="sub-body">
+            <div class="check-row"><input type="checkbox" id="hs-val-lbl" checked><label for="hs-val-lbl">Show frequency labels</label></div>
+            <div class="row3" style="margin-top:7px">
+              <div><label for="hs-val-lbl-size">Size</label><input type="number" id="hs-val-lbl-size" value="10" min="8" max="20"></div>
+              <div><label>Color</label><input type="color" id="hs-val-lbl-color" value="#333333"></div>
+              <div><div class="check-row" style="margin-top:18px"><input type="checkbox" id="hs-val-lbl-bold"><label for="hs-val-lbl-bold">Bold</label></div></div>
+            </div>
+          </div>
+        </div>
+      </div><!-- /gp-hist-col2 -->
+
+      <!-- ══ PIE CHART panels ══ -->
+      <div class="card grapher-col1" id="gp-pie-col1" style="display:none">
+        <div class="card-title">Pie Setup</div>
+
+        <div class="sub-group collapsible sub-group--pc-labels">
+          <div class="sub-group-title">Title &amp; Labels <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="sub-body">
+            <label for="pc-title">Chart title</label>
+            <input type="text" id="pc-title" placeholder="e.g. Market Share">
+            <label for="pc-labels" style="margin-top:7px">Slice labels</label>
+            <select id="pc-labels">
+              <option value="percent">Percent</option>
+              <option value="value">Value</option>
+              <option value="label">Label</option>
+              <option value="label-pct">Label + percent</option>
+              <option value="outside">Outside (with lines)</option>
+              <option value="none">None</option>
+            </select>
+            <div class="row3" style="margin-top:7px">
+              <div><label for="pc-lbl-size">Size</label><input type="number" id="pc-lbl-size" value="12" min="8" max="24"></div>
+              <div><label>Color</label><input type="color" id="pc-lbl-color" value="#ffffff"></div>
+              <div>
+                <label for="pc-lbl-style">Style</label>
+                <select id="pc-lbl-style"><option value="normal">Normal</option><option value="italic">Italic</option></select>
+              </div>
+            </div>
+            <div class="check-row"><input type="checkbox" id="pc-lbl-bold" checked><label for="pc-lbl-bold">Bold</label></div>
+          </div>
+        </div>
+
+        <div class="sub-group collapsible collapsed sub-group--pc-layout">
+          <div class="sub-group-title">Layout &amp; Legend <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="sub-body">
+            <div class="check-row"><input type="checkbox" id="pc-legend" checked><label for="pc-legend">Show legend</label></div>
+            <label for="pc-start" style="margin-top:7px">Start angle (degrees) <span class="hint" style="display:inline">−90 = top</span></label>
+            <input type="number" id="pc-start" value="-90" min="-360" max="360">
+            <div class="check-row" style="margin-top:7px"><input type="checkbox" id="pc-donut"><label for="pc-donut">Donut style</label></div>
+            <div id="pc-hole-wrap" style="display:none">
+              <label for="pc-hole" style="margin-top:5px">Hole size (%)</label>
+              <input type="number" id="pc-hole" value="40" min="10" max="90">
+              <label for="pc-center-text" style="margin-top:5px">Center text</label>
+              <input type="text" id="pc-center-text" placeholder="e.g. Total">
+            </div>
+          </div>
+        </div>
+      </div><!-- /gp-pie-col1 -->
+
+      <div class="card grapher-col2" id="gp-pie-col2" style="display:none">
+        <div class="card-title">Pie Data</div>
+
+        <label for="pc-data">Data <span class="hint" style="display:inline">(Label,Value per line)</span></label>
+        <textarea id="pc-data" rows="6" placeholder="Apples,35&#10;Bananas,25&#10;Cherries,20&#10;Dates,12&#10;Others,8"></textarea>
+
+        <div class="sub-group collapsible sub-group--pc-style" style="margin-top:10px">
+          <div class="sub-group-title">Slice Colors <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="sub-body">
+            <label for="pc-color-mode">Color mode</label>
+            <select id="pc-color-mode"><option value="palette">Auto palette</option><option value="custom">Custom per slice</option></select>
+            <div id="pc-custom-colors-wrap" style="display:none;margin-top:8px">
+              <div style="display:flex;flex-wrap:wrap;gap:8px">
+                <div><label style="font-size:.7rem;display:block">S1</label><input type="color" id="pc-slice-color-1" value="#4A90D9"></div>
+                <div><label style="font-size:.7rem;display:block">S2</label><input type="color" id="pc-slice-color-2" value="#E2534A"></div>
+                <div><label style="font-size:.7rem;display:block">S3</label><input type="color" id="pc-slice-color-3" value="#5CB85C"></div>
+                <div><label style="font-size:.7rem;display:block">S4</label><input type="color" id="pc-slice-color-4" value="#F0AD4E"></div>
+                <div><label style="font-size:.7rem;display:block">S5</label><input type="color" id="pc-slice-color-5" value="#9B59B6"></div>
+                <div><label style="font-size:.7rem;display:block">S6</label><input type="color" id="pc-slice-color-6" value="#1ABC9C"></div>
+                <div><label style="font-size:.7rem;display:block">S7</label><input type="color" id="pc-slice-color-7" value="#E67E22"></div>
+                <div><label style="font-size:.7rem;display:block">S8</label><input type="color" id="pc-slice-color-8" value="#2980B9"></div>
+              </div>
+            </div>
+            <div class="row2" style="margin-top:8px">
+              <div><label for="pc-stroke-color">Slice border</label><input type="color" id="pc-stroke-color" value="#ffffff"></div>
+              <div><label for="pc-stroke-w">Border width</label><input type="number" id="pc-stroke-w" value="1.5" min="0" max="8" step="0.5"></div>
+            </div>
+          </div>
+        </div>
+      </div><!-- /gp-pie-col2 -->
+
+      <!-- ══ LINE PLOT panels ══ -->
+      <div class="card grapher-col1" id="gp-lp-col1" style="display:none">
+        <div class="card-title">Plot Setup</div>
+
+        <div class="sub-group collapsible sub-group--lp-labels">
+          <div class="sub-group-title">Labels &amp; Title <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="sub-body">
+            <label for="lp-title">Chart title</label>
+            <input type="text" id="lp-title" placeholder="e.g. Monthly Sales">
+            <div class="row2" style="margin-top:7px">
+              <div><label for="lp-xlabel">X-axis label</label><input type="text" id="lp-xlabel"></div>
+              <div><label for="lp-ylabel">Y-axis label</label><input type="text" id="lp-ylabel"></div>
+            </div>
+            <div class="row3" style="margin-top:7px">
+              <div><label for="lp-lbl-size">Size</label><input type="number" id="lp-lbl-size" value="13" min="8" max="28"></div>
+              <div><label>Color</label><input type="color" id="lp-lbl-color" value="#333333"></div>
+              <div>
+                <label for="lp-lbl-style">Style</label>
+                <select id="lp-lbl-style"><option value="normal">Normal</option><option value="italic">Italic</option></select>
+              </div>
+            </div>
+            <div class="check-row"><input type="checkbox" id="lp-lbl-bold"><label for="lp-lbl-bold">Bold</label></div>
+          </div>
+        </div>
+
+        <div class="sub-group collapsible collapsed sub-group--lp-axes">
+          <div class="sub-group-title">Y-Axis &amp; Grid <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="sub-body">
+            <div class="check-row"><input type="checkbox" id="lp-auto-y" checked><label for="lp-auto-y">Auto Y max</label></div>
+            <label for="lp-ymax" style="margin-top:5px">Y max (manual)</label>
+            <input type="number" id="lp-ymax" value="100" min="0.01">
+            <div class="check-row" style="margin-top:7px"><input type="checkbox" id="lp-grid" checked><label for="lp-grid">Show grid lines</label></div>
+            <div class="row2" style="margin-top:5px">
+              <div>
+                <label for="lp-grid-style">Grid style</label>
+                <select id="lp-grid-style"><option value="dashed">Dashed</option><option value="solid">Solid</option><option value="dotted">Dotted</option></select>
+              </div>
+              <div><label for="lp-grid-color">Grid color</label><input type="color" id="lp-grid-color" value="#DDDDDD"></div>
+            </div>
+            <div class="check-row" style="margin-top:7px"><input type="checkbox" id="lp-tick-labels" checked><label for="lp-tick-labels">Show tick labels</label></div>
+            <div class="row3" style="margin-top:5px">
+              <div><label for="lp-tk-size">Size</label><input type="number" id="lp-tk-size" value="11" min="7" max="20"></div>
+              <div><label>Color</label><input type="color" id="lp-tk-color" value="#444444"></div>
+              <div>
+                <label for="lp-tk-style">Style</label>
+                <select id="lp-tk-style"><option value="normal">Normal</option><option value="italic">Italic</option></select>
+              </div>
+            </div>
+            <div class="check-row"><input type="checkbox" id="lp-tk-bold"><label for="lp-tk-bold">Bold ticks</label></div>
+            <div class="row2" style="margin-top:7px">
+              <div><label for="lp-axis-color">Axis color</label><input type="color" id="lp-axis-color" value="#333333"></div>
+              <div><div class="check-row" style="margin-top:20px"><input type="checkbox" id="lp-axis-arrows" checked><label for="lp-axis-arrows">Axis arrows</label></div></div>
+            </div>
+          </div>
+        </div>
+      </div><!-- /gp-lp-col1 -->
+
+      <div class="card grapher-col2" id="gp-lp-col2" style="display:none">
+        <div class="card-title">Line Plot Data</div>
+
+        <label for="lp-data">Data <span class="hint" style="display:inline">(Label,Value per line)</span></label>
+        <textarea id="lp-data" rows="6" placeholder="Jan,12&#10;Feb,19&#10;Mar,15&#10;Apr,22&#10;May,18">Jan,12
+Feb,19
+Mar,15
+Apr,22
+May,18</textarea>
+
+        <div class="sub-group collapsible sub-group--lp-style" style="margin-top:10px">
+          <div class="sub-group-title">Line Style <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="sub-body">
+            <div class="row2">
+              <div><label for="lp-line-color">Line color</label><input type="color" id="lp-line-color" value="#3b82f6"></div>
+              <div><label for="lp-line-width">Line width</label><input type="number" id="lp-line-width" value="2" min="0.5" max="10" step="0.5"></div>
+            </div>
+            <label for="lp-line-style" style="margin-top:7px">Line style</label>
+            <select id="lp-line-style"><option value="solid">Solid</option><option value="dashed">Dashed</option><option value="dotted">Dotted</option></select>
+          </div>
+        </div>
+
+        <div class="sub-group collapsible collapsed sub-group--lp-dots">
+          <div class="sub-group-title">Dot Markers <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="sub-body">
+            <div class="check-row"><input type="checkbox" id="lp-dots" checked><label for="lp-dots">Show dot markers</label></div>
+            <div class="row2" style="margin-top:5px">
+              <div><label for="lp-dot-r">Dot radius</label><input type="number" id="lp-dot-r" value="4" min="1" max="14" step="1"></div>
+              <div><label for="lp-dot-color">Dot color</label><input type="color" id="lp-dot-color" value="#3b82f6"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sub-group collapsible collapsed sub-group--lp-vallbl">
+          <div class="sub-group-title">Value Labels <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="sub-body">
+            <div class="check-row"><input type="checkbox" id="lp-val-lbl"><label for="lp-val-lbl">Show value labels</label></div>
+            <div class="row3" style="margin-top:7px">
+              <div><label for="lp-val-lbl-size">Size</label><input type="number" id="lp-val-lbl-size" value="10" min="7" max="20"></div>
+              <div><label>Color</label><input type="color" id="lp-val-lbl-color" value="#333333"></div>
+              <div><div class="check-row" style="margin-top:18px"><input type="checkbox" id="lp-val-lbl-bold"><label for="lp-val-lbl-bold">Bold</label></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sub-group collapsible collapsed sub-group--lp-area">
+          <div class="sub-group-title">Area Fill <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="sub-body">
+            <div class="check-row"><input type="checkbox" id="lp-area"><label for="lp-area">Fill area under line</label></div>
+            <div class="row2" style="margin-top:5px">
+              <div><label for="lp-area-color">Fill color</label><input type="color" id="lp-area-color" value="#3b82f6"></div>
+              <div><label for="lp-area-opacity">Opacity</label><input type="number" id="lp-area-opacity" value="0.18" min="0" max="1" step="0.05"></div>
+            </div>
+          </div>
+        </div>
+      </div><!-- /gp-lp-col2 -->
+
+      <!-- ══ DOT PLOT panels ══ -->
+      <div class="card grapher-col1" id="gp-dp-col1" style="display:none">
+        <div class="card-title">Plot Setup</div>
+
+        <div class="sub-group collapsible sub-group--dp-labels">
+          <div class="sub-group-title">Labels &amp; Title <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="sub-body">
+            <label for="dp-title">Chart title</label>
+            <input type="text" id="dp-title" placeholder="e.g. Dot Plot">
+            <label for="dp-xlabel" style="margin-top:7px">X-axis label</label>
+            <input type="text" id="dp-xlabel">
+            <div class="row3" style="margin-top:7px">
+              <div><label for="dp-lbl-size">Size</label><input type="number" id="dp-lbl-size" value="13" min="8" max="28"></div>
+              <div><label>Color</label><input type="color" id="dp-lbl-color" value="#333333"></div>
+              <div>
+                <label for="dp-lbl-style">Style</label>
+                <select id="dp-lbl-style"><option value="normal">Normal</option><option value="italic">Italic</option></select>
+              </div>
+            </div>
+            <div class="check-row"><input type="checkbox" id="dp-lbl-bold"><label for="dp-lbl-bold">Bold</label></div>
+          </div>
+        </div>
+
+        <div class="sub-group collapsible collapsed sub-group--dp-axes">
+          <div class="sub-group-title">X-Axis &amp; Grid <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="sub-body">
+            <div class="check-row"><input type="checkbox" id="dp-grid"><label for="dp-grid">Vertical grid lines</label></div>
+            <div class="row2" style="margin-top:5px">
+              <div><label for="dp-grid-color">Grid color</label><input type="color" id="dp-grid-color" value="#dddddd"></div>
+              <div><label for="dp-axis-color">Axis color</label><input type="color" id="dp-axis-color" value="#333333"></div>
+            </div>
+            <label for="dp-axis-gap" style="margin-top:7px">Gap from axis (px)</label>
+            <input type="number" id="dp-axis-gap" value="8" min="0" max="40">
+            <div class="row2" style="margin-top:7px">
+              <div></div>
+              <div><div class="check-row" style="margin-top:4px"><input type="checkbox" id="dp-axis-arrows" checked><label for="dp-axis-arrows">Axis arrows</label></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sub-group collapsible collapsed sub-group--dp-ticks">
+          <div class="sub-group-title">Tick Labels <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="sub-body">
+            <div class="check-row"><input type="checkbox" id="dp-tick-labels" checked><label for="dp-tick-labels">Show tick labels</label></div>
+            <div class="row3" style="margin-top:5px">
+              <div><label for="dp-tk-size">Size</label><input type="number" id="dp-tk-size" value="11" min="7" max="20"></div>
+              <div><label>Color</label><input type="color" id="dp-tk-color" value="#444444"></div>
+              <div>
+                <label for="dp-tk-style">Style</label>
+                <select id="dp-tk-style"><option value="normal">Normal</option><option value="italic">Italic</option></select>
+              </div>
+            </div>
+            <div class="check-row"><input type="checkbox" id="dp-tk-bold"><label for="dp-tk-bold">Bold ticks</label></div>
+            <label for="dp-tick-vals" style="margin-top:7px">Custom tick values <span class="hint" style="display:inline">(comma-separated, blank = auto)</span></label>
+            <input type="text" id="dp-tick-vals" placeholder="e.g. 0,2,4,6,8,10">
+          </div>
+        </div>
+      </div><!-- /gp-dp-col1 -->
+
+      <div class="card grapher-col2" id="gp-dp-col2" style="display:none">
+        <div class="card-title">Dot Plot Data</div>
+
+        <label for="dp-data">Data <span class="hint" style="display:inline">(one value per line)</span></label>
+        <textarea id="dp-data" rows="8" placeholder="2&#10;3&#10;3&#10;5&#10;7&#10;7&#10;7">2
+3
+3
+5
+7
+7
+7
+8
+10
+10</textarea>
+
+        <div class="sub-group collapsible sub-group--dp-style" style="margin-top:10px">
+          <div class="sub-group-title">Marker Style <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="sub-body">
+            <label for="dp-marker-shape">Marker shape</label>
+            <select id="dp-marker-shape">
+              <option value="circle">● Circle</option>
+              <option value="square">■ Square</option>
+              <option value="diamond">◆ Diamond</option>
+              <option value="triangle">▲ Triangle</option>
+              <option value="star">★ Star</option>
+              <option value="cross">✚ Cross / Plus</option>
+              <option value="x">✕ X Mark</option>
+            </select>
+            <div class="row2" style="margin-top:7px">
+              <div><label for="dp-dot-r">Marker size</label><input type="number" id="dp-dot-r" value="7" min="2" max="20"></div>
+              <div><label for="dp-dot-color">Fill color</label><input type="color" id="dp-dot-color" value="#3b82f6"></div>
+            </div>
+            <div class="row2" style="margin-top:7px">
+              <div><label for="dp-dot-stroke">Stroke color</label><input type="color" id="dp-dot-stroke" value="#1d4ed8"></div>
+              <div><label for="dp-dot-stroke-w">Stroke width</label><input type="number" id="dp-dot-stroke-w" value="1" min="0" max="4" step="0.5"></div>
+            </div>
+            <label for="dp-dot-gap" style="margin-top:7px">Gap between markers (px)</label>
+            <input type="number" id="dp-dot-gap" value="2" min="0" max="20">
+          </div>
+        </div>
+      </div><!-- /gp-dp-col2 -->
+
+      <!-- ══ STEM-AND-LEAF panels ══ -->
+      <div class="card grapher-col1" id="gp-sl-col1" style="display:none">
+        <div class="card-title">Data</div>
+
+        <div class="sub-group collapsible sub-group--sl-data">
+          <div class="sub-group-title">Data &amp; Title <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="sub-body">
+            <label for="sl-data">Values <span class="hint" style="display:inline">(one per line)</span></label>
+            <textarea id="sl-data" rows="7" placeholder="12&#10;15&#10;21&#10;34&#10;37">12
+15
+21
+23
+34
+37
+41
+45
+52</textarea>
+            <label for="sl-title" style="margin-top:7px">Title</label>
+            <input type="text" id="sl-title" placeholder="Stem &amp; Leaf Plot">
+            <div class="row2" style="margin-top:7px">
+              <div>
+                <label for="sl-stem-unit">Stem unit</label>
+                <select id="sl-stem-unit">
+                  <option value="10" selected>10 (tens)</option>
+                  <option value="100">100 (hundreds)</option>
+                  <option value="1">1 (ones)</option>
+                </select>
+              </div>
+              <div>
+                <label for="sl-sort">Sort</label>
+                <select id="sl-sort"><option value="asc" selected>Ascending</option><option value="desc">Descending</option></select>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div><!-- /gp-sl-col1 -->
+
+      <div class="card grapher-col2" id="gp-sl-col2" style="display:none">
+        <div class="card-title">Table Style</div>
+
+        <div class="sub-group collapsible sub-group--sl-style">
+          <div class="sub-group-title">Font &amp; Colors <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="sub-body">
+            <div class="row2">
+              <div><label for="sl-font-size">Font size</label><input type="number" id="sl-font-size" value="14" min="9" max="24"></div>
+              <div><label for="sl-font-color">Font color</label><input type="color" id="sl-font-color" value="#111111"></div>
+            </div>
+            <div class="check-row" style="margin-top:5px"><input type="checkbox" id="sl-font-bold"><label for="sl-font-bold">Bold numbers</label></div>
+            <div class="row2" style="margin-top:7px">
+              <div><label for="sl-hdr-bg">Header bg</label><input type="color" id="sl-hdr-bg" value="#374151"></div>
+              <div><label for="sl-hdr-color">Header text</label><input type="color" id="sl-hdr-color" value="#ffffff"></div>
+            </div>
+            <div style="margin-top:7px"><label for="sl-sep-color">Separator color</label><input type="color" id="sl-sep-color" value="#6b7280"></div>
+          </div>
+        </div>
+
+        <div class="sub-group collapsible collapsed sub-group--sl-rows">
+          <div class="sub-group-title">Row Options <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="sub-body">
+            <div class="check-row"><input type="checkbox" id="sl-alt-rows" checked><label for="sl-alt-rows">Alternate row colors</label></div>
+            <div style="margin-top:5px"><label for="sl-alt-color">Alt row color</label><input type="color" id="sl-alt-color" value="#f3f4f6"></div>
+            <div class="check-row" style="margin-top:7px"><input type="checkbox" id="sl-show-key" checked><label for="sl-show-key">Show key</label></div>
+          </div>
+        </div>
+      </div><!-- /gp-sl-col2 -->
+
     </div><!-- /controls--grapher -->
   </div><!-- /#tab-grapher -->
 
@@ -2048,6 +2685,364 @@
     </div><!-- /controls--character -->
   </div><!-- /#tab-character -->
 
+  <!-- ══════════ PATTERNS TAB ══════════ -->
+  <div id="tab-patterns" class="tab-content">
+    <div class="controls">
+
+      <!-- Type selector -->
+      <div class="card col1">
+        <div class="card-title">Pattern Type</div>
+        <div class="pt-type-row">
+          <button class="pt-type-btn active" data-pt="number" onclick="_ptSwitchType('number')">Numeric Pattern</button>
+          <button class="pt-type-btn"        data-pt="shape"  onclick="_ptSwitchType('shape')">Shape Pattern</button>
+        </div>
+        <input id="pt-type" type="hidden" value="number">
+      </div>
+
+      <!-- ═══ NUMBER PATTERN PANEL ═══ -->
+      <div id="pt-panel-number">
+
+        <!-- Layout & Spacing (blue) -->
+        <div class="card col1 collapsible collapsed pt-card-blue">
+          <div class="card-title" role="button" tabindex="0" aria-expanded="false">Layout &amp; Spacing <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="card-body">
+            <div class="field-row">
+              <label>Layout</label>
+              <select id="pt-np-layout" onchange="_ptSyncNpLayout();render()">
+                <option value="row">Row</option>
+                <option value="col">Column</option>
+                <option value="grid">Grid</option>
+                <option value="wrap">Wrap</option>
+              </select>
+            </div>
+            <div id="pt-np-wrap-extra" style="display:none">
+              <div class="field-row">
+                <label>Columns</label>
+                <input id="pt-np-wrap-cols" type="number" min="1" max="12" value="4" step="1" style="width:60px" oninput="render()">
+              </div>
+            </div>
+            <div class="field-row">
+              <label>Cell size</label>
+              <input id="pt-np-cell-size" type="number" min="24" max="120" value="60" step="4" style="width:70px" oninput="render()">
+              <label style="margin-left:8px">Gap</label>
+              <input id="pt-np-cell-gap" type="number" min="0" max="40" value="10" step="2" style="width:60px" oninput="render()">
+            </div>
+            <div class="field-row">
+              <label>Cell shape</label>
+              <select id="pt-np-cell-shape" onchange="_ptSyncCellShape();render()">
+                <option value="rectangle">Rectangle</option>
+                <option value="circle">Circle</option>
+                <option value="diamond">Diamond</option>
+                <option value="hexagon">Hexagon</option>
+              </select>
+            </div>
+            <div class="field-row" id="pt-np-brx-row">
+              <label>Corner radius</label>
+              <input id="pt-np-border-rx" type="number" min="0" max="30" value="8" step="1" style="width:70px" oninput="render()">
+            </div>
+          </div>
+        </div>
+
+        <!-- Box Style (purple) -->
+        <div class="card col1 collapsible collapsed pt-card-purple">
+          <div class="card-title" role="button" tabindex="0" aria-expanded="false">Box Style <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="card-body">
+            <div class="field-row">
+              <label>Fill</label>
+              <input id="pt-np-fill-color" type="color" value="#4ECDC4" style="width:42px;height:28px;padding:1px;cursor:pointer" onchange="render()">
+              <label style="margin-left:8px">Opacity</label>
+              <input id="pt-np-fill-opacity" type="range" min="0.05" max="1" step="0.05" value="1" style="flex:1;min-width:60px" oninput="render()">
+            </div>
+            <div class="field-row">
+              <label>Border</label>
+              <input id="pt-np-stroke-color" type="color" value="#2C7873" style="width:42px;height:28px;padding:1px;cursor:pointer" onchange="render()">
+              <label style="margin-left:8px">Width</label>
+              <input id="pt-np-stroke-w" type="number" min="0" max="6" value="2" step="0.5" style="width:55px" oninput="render()">
+              <label class="chk-lbl" style="margin-left:8px"><input id="pt-np-stroke-dash" type="checkbox" onchange="render()"> Dash</label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Text Style (cyan) -->
+        <div class="card col1 collapsible collapsed pt-card-cyan">
+          <div class="card-title" role="button" tabindex="0" aria-expanded="false">Text Style <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="card-body">
+            <div class="field-row">
+              <label>Font</label>
+              <select id="pt-np-font-family" onchange="render()" style="flex:1">
+                <option value="sans-serif">Sans-serif</option>
+                <option value="serif">Serif</option>
+                <option value="monospace">Monospace</option>
+                <option value="Georgia, serif">Georgia</option>
+                <option value="Arial, sans-serif">Arial</option>
+                <option value="Nunito, sans-serif">Nunito (rounded)</option>
+                <option value="Poppins, sans-serif">Poppins (rounded)</option>
+                <option value="Comfortaa, cursive">Comfortaa (rounded)</option>
+                <option value="Fredoka One, cursive">Fredoka One</option>
+              </select>
+            </div>
+            <div class="field-row">
+              <label>Size</label>
+              <input id="pt-np-font-size" type="number" min="8" max="48" value="20" step="1" style="width:70px" oninput="render()">
+              <label style="margin-left:8px">Color</label>
+              <input id="pt-np-font-color" type="color" value="#1a1a2e" style="width:42px;height:28px;padding:1px;cursor:pointer" onchange="render()">
+            </div>
+            <div class="field-row">
+              <label class="chk-lbl"><input id="pt-np-font-bold" type="checkbox" onchange="render()"> Bold</label>
+              <label class="chk-lbl" style="margin-left:12px"><input id="pt-np-font-italic" type="checkbox" onchange="render()"> Italic</label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Overall Label (amber) -->
+        <div class="card col1 collapsible collapsed pt-card-amber">
+          <div class="card-title" role="button" tabindex="0" aria-expanded="false">Overall Label <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="card-body">
+            <div class="field-row">
+              <label>Text</label>
+              <input id="pt-np-label-text" type="text" value="" placeholder="Label or $LaTeX$…" style="flex:1" oninput="render()">
+            </div>
+            <div class="field-row">
+              <label>Position</label>
+              <select id="pt-np-label-pos" onchange="render()">
+                <option value="none">None</option>
+                <option value="above">Above</option>
+                <option value="below">Below</option>
+                <option value="left">Left</option>
+                <option value="right">Right</option>
+              </select>
+            </div>
+            <div class="field-row">
+              <label>Size</label>
+              <input id="pt-np-label-size" type="number" min="8" max="32" value="16" step="1" style="width:70px" oninput="render()">
+              <label style="margin-left:8px">Color</label>
+              <input id="pt-np-label-color" type="color" value="#333333" style="width:42px;height:28px;padding:1px;cursor:pointer" onchange="render()">
+            </div>
+            <div class="field-row">
+              <label>Font</label>
+              <select id="pt-np-label-family" onchange="render()" style="flex:1">
+                <option value="sans-serif">Sans-serif</option>
+                <option value="serif">Serif</option>
+                <option value="monospace">Monospace</option>
+                <option value="Nunito, sans-serif">Nunito (rounded)</option>
+                <option value="Poppins, sans-serif">Poppins (rounded)</option>
+                <option value="Comfortaa, cursive">Comfortaa (rounded)</option>
+                <option value="Fredoka One, cursive">Fredoka One</option>
+              </select>
+              <label class="chk-lbl" style="margin-left:10px"><input id="pt-np-label-bold" type="checkbox" onchange="render()"> Bold</label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Animation -->
+        <div class="card col1 collapsible collapsed">
+          <div class="card-title" role="button" tabindex="0" aria-expanded="false">Animation <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="card-body">
+            <div class="field-row">
+              <label>Type</label>
+              <select id="pt-np-anim" onchange="render()">
+                <option value="none">None</option>
+                <option value="shine">✨ Shine streak</option>
+                <option value="glow">💛 Glow pulse</option>
+                <option value="bounce">Bounce</option>
+                <option value="wobble">Wobble</option>
+                <option value="pulse">Pulse</option>
+                <option value="fadein">Fade In</option>
+                <option value="spin">Spin</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Elements section -->
+        <div class="pt-elements-section">
+          <div class="pt-elements-hdr">
+            <span>Elements</span>
+            <button class="btn btn-secondary pt-add-btn" onclick="_addNpElement()">+ Add Element</button>
+          </div>
+          <div id="pt-np-elements-list"></div>
+        </div>
+
+      </div><!-- /pt-panel-number -->
+
+      <!-- ═══ SHAPE PATTERN PANEL ═══ -->
+      <div id="pt-panel-shape" style="display:none">
+
+        <!-- Shape picker -->
+        <div class="card col1">
+          <div class="card-title">Shape</div>
+          <div class="sp-shape-grid">
+            <button class="sp-shape-btn active" data-shape="heart"    onclick="_ptPickShape('heart',this)">❤ Heart</button>
+            <button class="sp-shape-btn"        data-shape="diamond"  onclick="_ptPickShape('diamond',this)">◆ Diamond</button>
+            <button class="sp-shape-btn"        data-shape="star"     onclick="_ptPickShape('star',this)">★ Star</button>
+            <button class="sp-shape-btn"        data-shape="circle"   onclick="_ptPickShape('circle',this)">● Circle</button>
+            <button class="sp-shape-btn"        data-shape="square"   onclick="_ptPickShape('square',this)">■ Square</button>
+            <button class="sp-shape-btn"        data-shape="triangle" onclick="_ptPickShape('triangle',this)">▲ Triangle</button>
+            <button class="sp-shape-btn"        data-shape="pentagon" onclick="_ptPickShape('pentagon',this)">⬠ Pentagon</button>
+            <button class="sp-shape-btn"        data-shape="leaf"     onclick="_ptPickShape('leaf',this)">🍃 Leaf</button>
+            <button class="sp-shape-btn"        data-shape="cross"    onclick="_ptPickShape('cross',this)">✚ Cross</button>
+            <button class="sp-shape-btn"        data-shape="arrow"    onclick="_ptPickShape('arrow',this)">➤ Arrow</button>
+          </div>
+          <input id="pt-sp-shape" type="hidden" value="heart">
+        </div>
+
+        <!-- Shape & Size (blue) -->
+        <div class="card col1 collapsible collapsed pt-card-blue">
+          <div class="card-title" role="button" tabindex="0" aria-expanded="false">Shape &amp; Size <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="card-body">
+            <div class="field-row">
+              <label>Size</label>
+              <input id="pt-sp-size" type="number" min="12" max="80" value="30" step="2" style="width:70px" oninput="render()">
+              <label style="margin-left:8px">Shape gap</label>
+              <input id="pt-sp-pad" type="number" min="2" max="30" value="6" step="1" style="width:60px" oninput="render()">
+            </div>
+            <div class="field-row">
+              <label>Term gap</label>
+              <input id="pt-sp-term-gap" type="number" min="0" max="80" value="30" step="4" style="width:70px" oninput="render()">
+            </div>
+            <div class="field-row">
+              <label>Default arrange</label>
+              <select id="pt-sp-default-arrange" onchange="render()">
+                <option value="pyramid">Pyramid</option>
+                <option value="row">Row</option>
+                <option value="col">Column</option>
+                <option value="square">Square</option>
+                <option value="righttri">Right △</option>
+                <option value="invpyramid">Inv △</option>
+                <option value="diamond">Diamond</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Colors (purple) -->
+        <div class="card col1 collapsible collapsed pt-card-purple">
+          <div class="card-title" role="button" tabindex="0" aria-expanded="false">Colors <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="card-body">
+            <div class="field-row">
+              <label>Color mode</label>
+              <select id="pt-sp-color-mode" onchange="_ptSyncSpColorMode();render()">
+                <option value="single">Single</option>
+                <option value="gradient">Gradient (per term)</option>
+                <option value="alternating">Alternating terms</option>
+                <option value="sequence">Per-term sequence</option>
+              </select>
+            </div>
+            <div class="field-row">
+              <label>Color 1</label>
+              <input id="pt-sp-color1" type="color" value="#FF6B6B" style="width:42px;height:28px;padding:1px;cursor:pointer" onchange="render()">
+            </div>
+            <div class="field-row" id="pt-sp-col2-row" style="display:none">
+              <label>Color 2</label>
+              <input id="pt-sp-color2" type="color" value="#45B7D1" style="width:42px;height:28px;padding:1px;cursor:pointer" onchange="render()">
+            </div>
+            <div class="field-row">
+              <label>Stroke</label>
+              <input id="pt-sp-stroke-color" type="color" value="#000000" style="width:42px;height:28px;padding:1px;cursor:pointer" onchange="render()">
+              <label style="margin-left:8px">Width</label>
+              <input id="pt-sp-stroke-w" type="number" min="0" max="4" value="0" step="0.5" style="width:55px" oninput="render()">
+            </div>
+          </div>
+        </div>
+
+        <!-- Term Boundaries (cyan) -->
+        <div class="card col1 collapsible collapsed pt-card-cyan">
+          <div class="card-title" role="button" tabindex="0" aria-expanded="false">Term Boundaries <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="card-body">
+            <div class="field-row">
+              <label class="chk-lbl"><input id="pt-sp-boundary" type="checkbox" checked onchange="render()"> Show</label>
+              <label class="chk-lbl" style="margin-left:14px"><input id="pt-sp-bound-dash" type="checkbox" onchange="render()"> Dashed</label>
+              <label class="chk-lbl" style="margin-left:14px"><input id="pt-sp-bound-uniform" type="checkbox" onchange="render()"> Uniform size</label>
+            </div>
+            <div class="field-row">
+              <label>Color</label>
+              <input id="pt-sp-bound-color" type="color" value="#006B6B" style="width:42px;height:28px;padding:1px;cursor:pointer" onchange="render()">
+              <label style="margin-left:8px">Width</label>
+              <input id="pt-sp-bound-stroke" type="number" min="0.5" max="5" value="1.5" step="0.5" style="width:55px" oninput="render()">
+            </div>
+            <div class="field-row">
+              <label>Radius</label>
+              <input id="pt-sp-bound-rx" type="number" min="0" max="40" value="8" step="2" style="width:70px" oninput="render()">
+              <label style="margin-left:8px">Padding</label>
+              <input id="pt-sp-bound-pad" type="number" min="4" max="30" value="10" step="2" style="width:60px" oninput="render()">
+            </div>
+          </div>
+        </div>
+
+        <!-- Overall Label (amber) -->
+        <div class="card col1 collapsible collapsed pt-card-amber">
+          <div class="card-title" role="button" tabindex="0" aria-expanded="false">Overall Label <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="card-body">
+            <div class="field-row">
+              <label>Text</label>
+              <input id="pt-sp-label-overall" type="text" value="" placeholder="Label or $LaTeX$…" style="flex:1" oninput="render()">
+            </div>
+            <div class="field-row">
+              <label>Position</label>
+              <select id="pt-sp-label-pos-overall" onchange="render()">
+                <option value="none">None</option>
+                <option value="above">Above</option>
+                <option value="below">Below</option>
+                <option value="left">Left</option>
+                <option value="right">Right</option>
+              </select>
+            </div>
+            <div class="field-row">
+              <label>Size</label>
+              <input id="pt-sp-olbl-size" type="number" min="8" max="32" value="16" step="1" style="width:70px" oninput="render()">
+              <label style="margin-left:8px">Color</label>
+              <input id="pt-sp-olbl-color" type="color" value="#333333" style="width:42px;height:28px;padding:1px;cursor:pointer" onchange="render()">
+              <label class="chk-lbl" style="margin-left:8px"><input id="pt-sp-olbl-bold" type="checkbox" onchange="render()"> Bold</label>
+            </div>
+            <div class="field-row">
+              <label>Font</label>
+              <select id="pt-sp-olbl-family" onchange="render()" style="flex:1">
+                <option value="sans-serif">Sans-serif</option>
+                <option value="serif">Serif</option>
+                <option value="monospace">Monospace</option>
+                <option value="Nunito, sans-serif">Nunito (rounded)</option>
+                <option value="Poppins, sans-serif">Poppins (rounded)</option>
+                <option value="Comfortaa, cursive">Comfortaa (rounded)</option>
+                <option value="Fredoka One, cursive">Fredoka One</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Animation -->
+        <div class="card col1 collapsible collapsed">
+          <div class="card-title" role="button" tabindex="0" aria-expanded="false">Animation <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="card-body">
+            <div class="field-row">
+              <label>Type</label>
+              <select id="pt-sp-anim" onchange="render()">
+                <option value="none">None</option>
+                <option value="shine">✨ Shine streak</option>
+                <option value="glow">💛 Glow pulse</option>
+                <option value="bounce">Bounce</option>
+                <option value="wobble">Wobble</option>
+                <option value="pulse">Pulse</option>
+                <option value="fadein">Fade In</option>
+                <option value="spin">Spin</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Terms section -->
+        <div class="pt-elements-section">
+          <div class="pt-elements-hdr">
+            <span>Terms</span>
+            <button class="btn btn-secondary pt-add-btn" onclick="_addSpTerm()">+ Add Term</button>
+          </div>
+          <div id="pt-sp-terms-list"></div>
+        </div>
+
+      </div><!-- /pt-panel-shape -->
+
+    </div><!-- /controls -->
+  </div><!-- /#tab-patterns -->
+
   <!-- ── Export panel (always visible) ── -->
   <div class="card export-panel">
     <div class="card-title">Export</div>
@@ -2141,11 +3136,13 @@
 <script src="js/generators.js"></script>
 <script src="js/angles.js"></script>
 <script src="js/character.js"></script>
+<script src="js/chartTypes.js"></script>
 <script src="js/graphPlot.js"></script>
 <script src="js/canvas.js"></script>
 <script src="js/overlays.js"></script>
 <script src="js/render.js"></script>
 <script src="js/stage.js"></script>
+<script src="js/patterns.js"></script>
 <script src="js/events.js"></script>
 <script src="js/main.js"></script>
 
@@ -2240,6 +3237,18 @@ window.render = function () { _origRender(); syncClearBtn(); };
     .catch(() => { /* silently ignore missing / malformed file */ });
 })();
 </script>
+
+<!-- ── SVG Patterns: custom layout editor modal ── -->
+<div id="pt-custom-editor">
+  <div class="pt-ced-box">
+    <h4>Custom Shape Layout &nbsp;<small style="font-weight:400;color:#5a6a7a;font-size:12px">Drag shapes to reposition</small></h4>
+    <svg id="pt-custom-canvas" width="320" height="240"></svg>
+    <div class="pt-ced-actions">
+      <button class="btn" style="background:#f0f4f8;color:var(--muted);border:1.5px solid var(--border)" onclick="_ptResetCustomPos();_openCustomEditor()">↺ Reset</button>
+      <button class="btn btn-primary" onclick="_closeCustomEditor()">Done</button>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>

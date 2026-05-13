@@ -19,7 +19,8 @@ function _textToLatex(text, bold = false, italic = false) {
   const parts = text.split(/(\$[^$]+\$)/g);
   return parts.map(part => {
     if (part.startsWith('$') && part.endsWith('$')) {
-      return part.slice(1, -1); // math bold handled via SVG stroke, not \boldsymbol
+      // \displaystyle makes fractions render with full-size numerator/denominator
+      return `\\displaystyle{${part.slice(1, -1)}}`;
     }
     const escaped = part.replace(/\\/g, '\\\\').replace(/\{/g, '\\{').replace(/\}/g, '\\}');
     if (!escaped) return '';
@@ -166,7 +167,7 @@ function _genNLLine(i) {
   }
 
   const PAD   = 18;
-  const EXT   = Math.max(30, Math.round(totalW * 0.092));
+  const EXT   = 30;
   const SCALE = (totalW - 2 * PAD - 2 * EXT) / (end - start);
 
   /* ── Integer labels ── */
@@ -180,6 +181,13 @@ function _genNLLine(i) {
   const intLblColor  = val(S('nl-int-lbl-color')) || '#111111';
   const intLblBold   = chk(S('nl-int-lbl-bold'));
 
+  /* ── Tick heights & widths, arrowhead size ── */
+  const majorTickH = Math.max(1,   num(S('nl-major-tick-h')) || 10);
+  const subTickH   = Math.max(1,   num(S('nl-sub-tick-h'))   || 6);
+  const majorTickW = Math.max(0.5, num(S('nl-major-tick-w')) || 2);
+  const subTickW   = Math.max(0.5, num(S('nl-sub-tick-w'))   || 1.5);
+  const arrowSize  = Math.max(1,   num(S('nl-arrow-size'))   || 5);
+
   /* ── Subdivisions ── */
   const subs          = Math.max(1, int(S('nl-subs')) || 1);
   const showSubLbl    = chk(S('nl-sub-labels'));
@@ -192,27 +200,36 @@ function _genNLLine(i) {
   const subLblColor   = val(S('nl-sub-lbl-color')) || '#555555';
 
   /* ── Point markers ── */
-  const ptDefColor = val(S('nl-pt-color'))     || '#FF0000';
-  const ptR        = Math.max(2, num(S('nl-pt-radius')) || 6);
-  const ptDefPos   = val(S('nl-pt-pos'))       || 'above';
-  const ptLblSz    = Math.max(8, num(S('nl-pt-lbl-size'))  || 16);
-  const ptLblColor = val(S('nl-pt-lbl-color')) || '#000000';
-
   const points = [];
-  (val(S('nl-points')) || '').trim().split('\n').forEach(line => {
-    line = line.trim(); if (!line) return;
-    const parts = line.split(':');
-    const vs    = parts[0].trim();
-    const lbl   = parts[1]?.trim() ?? '';
-    const rawC  = parts[2]?.trim() ?? '';
-    const color = /^#[0-9a-fA-F]{3,6}$/.test(rawC) ? rawC : ptDefColor;
-    const pos   = parts[3]?.trim() || ptDefPos;
-    let v;
-    if (vs.includes('/')) { const [a, b] = vs.split('/'); v = parseFloat(a) / parseFloat(b); }
-    else v = parseFloat(vs);
-    if (isNaN(v)) return;
-    points.push({ v, lbl, color, pos });
-  });
+  {
+    const ptList = document.getElementById(`nl-pt-list-${i}`);
+    if (ptList) {
+      for (const entry of ptList.querySelectorAll('.nl-pt-entry')) {
+        const fv = s => (entry.querySelector(`[data-field="${s}"]`)?.value ?? '').trim();
+        const fc = s =>  entry.querySelector(`[data-field="${s}"]`)?.checked ?? false;
+        const fn = s => parseFloat(fv(s));
+        const vs = fv('val');
+        if (!vs) continue;
+        let v;
+        if (vs.includes('/')) { const [a, b] = vs.split('/'); v = parseFloat(a) / parseFloat(b); }
+        else v = parseFloat(vs);
+        if (isNaN(v)) continue;
+        points.push({
+          v,
+          lbl:       fv('lbl'),
+          color:     fv('color') || '#E53935',
+          pos:       fv('pos')   || 'above',
+          leader:    fc('leader'),
+          radius:    Math.max(2, fn('radius') || 6),
+          lblSz:     Math.max(8, fn('lbl-size') || 16),
+          lblBold:   fc('lbl-bold'),
+          lblItalic: fc('lbl-italic'),
+          lblClr:    fv('lbl-color') || '#000000',
+          offset:    Math.max(0, fn('offset') || 0),
+        });
+      }
+    }
+  }
 
   /* ── Jump arrows ── */
   const jumpHeight   = Math.max(10, num(S('nl-jump-height')) || 35);
@@ -294,6 +311,12 @@ function _genNLLine(i) {
   const hasPtAbove  = points.some(p => p.pos !== 'below' && p.lbl);
   const hasPtBelow  = points.some(p => p.pos === 'below' && p.lbl);
 
+  // Space required by labeled points, accounting for per-point size + offset
+  const _aPts = points.filter(p => p.pos !== 'below' && p.lbl);
+  const _bPts = points.filter(p => p.pos === 'below' && p.lbl);
+  const ptAboveSp = _aPts.length ? Math.max(..._aPts.map(p => p.lblSz + p.radius + p.offset + 6)) : 0;
+  const ptBelowSp = _bPts.length ? Math.max(..._bPts.map(p => p.lblSz + p.radius + p.offset + 8)) : 0;
+
   const LIFT = 5;
   const topLblH = (hasLbl && lblPos === 'above') ? lblFontSz + 14 : 0;
 
@@ -301,18 +324,18 @@ function _genNLLine(i) {
   if (hasJumps) {
     topSpace = LIFT + jumpHeight + (hasJumpLbl ? 22 : 10) + 8 + topLblH;
   } else if (topLblH > 0) {
-    topSpace = topLblH + (hasPtAbove ? ptLblSz + ptR + 6 : 6);
+    topSpace = topLblH + (hasPtAbove ? ptAboveSp : 6);
   } else {
-    topSpace = hasPtAbove ? ptLblSz + ptR + 14 : 20;
+    topSpace = hasPtAbove ? ptAboveSp + 14 : 20;
   }
 
   const LINE_Y = topSpace;
 
   const botContent = Math.max(
     0,
-    showIntLbl               ? intLblSz + 8 : 0,
-    (showSubLbl && subs > 1) ? subLblSz + 8 : 0,
-    hasPtBelow               ? ptLblSz + ptR + 8 : 0
+    showIntLbl               ? intLblSz + majorTickH + 4 : 0,
+    (showSubLbl && subs > 1) ? subLblSz + subTickH  + 3 : 0,
+    hasPtBelow               ? ptBelowSp : 0
   );
   const botLblH  = (hasLbl && lblPos === 'below') ? botContent + 12 + lblFontSz + 8 : 0;
   const botSpace = Math.max(8, botContent, botLblH) + 10;
@@ -324,15 +347,15 @@ function _genNLLine(i) {
 
   let s = svgOpen(svgW, H);
   s += '\n<defs>';
-  s += `\n  <marker id="${lcId}f" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+  s += `\n  <marker id="${lcId}f" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="${arrowSize}" markerHeight="${arrowSize}" orient="auto">
     <path d="M0,0 L10,5 L0,10 Z" fill="${lineColor}"/>
   </marker>
-  <marker id="${lcId}r" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+  <marker id="${lcId}r" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="${arrowSize}" markerHeight="${arrowSize}" orient="auto-start-reverse">
     <path d="M0,0 L10,5 L0,10 Z" fill="${lineColor}"/>
   </marker>`;
   for (const c of jumpMarkerColors) {
     const jid = `nlj${i}` + c.replace(/[^a-zA-Z0-9]/g, '');
-    s += `\n  <marker id="${jid}" viewBox="0 0 10 10" refX="0" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+    s += `\n  <marker id="${jid}" viewBox="0 0 10 10" refX="0" refY="5" markerWidth="${arrowSize}" markerHeight="${arrowSize}" orient="auto">
     <path d="M0,0 L10,5 L0,10 Z" fill="${c}"/>
   </marker>`;
   }
@@ -345,14 +368,14 @@ function _genNLLine(i) {
   const intFW = intLblBold ? 'bold' : 'normal';
   for (let n = Math.ceil(start); n <= Math.floor(end); n++) {
     const x = fmt(tx(n));
-    s += `\n<line x1="${x}" y1="${fmt(LINE_Y - 8)}" x2="${x}" y2="${fmt(LINE_Y + 8)}" stroke="${lineColor}" stroke-width="2"/>`;
+    s += `\n<line x1="${x}" y1="${fmt(LINE_Y - majorTickH)}" x2="${x}" y2="${fmt(LINE_Y + majorTickH)}" stroke="${lineColor}" stroke-width="${majorTickW}"/>`;
     let show = false;
     if (showIntLbl) {
       if (lblSpecific) show = lblSpecific.some(v => Math.abs(v - n) < 1e-9);
       else show = ((n - Math.ceil(start)) % lblInterval === 0);
     }
     if (show) {
-      s += `\n<text x="${x}" y="${fmt(LINE_Y + 8 + 4 + intLblSz)}" font-family="Arial,sans-serif" font-size="${intLblSz}" font-weight="${intFW}" fill="${intLblColor}" text-anchor="middle">${n}</text>`;
+      s += `\n<text x="${x}" y="${fmt(LINE_Y + majorTickH + 4 + intLblSz)}" font-family="Arial,sans-serif" font-size="${intLblSz}" font-weight="${intFW}" fill="${intLblColor}" text-anchor="middle">${n}</text>`;
     }
   }
 
@@ -365,7 +388,7 @@ function _genNLLine(i) {
         const sv = parseFloat((n + k / subs).toFixed(10));
         if (sv <= start || sv >= end) continue;
         const x = fmt(tx(sv));
-        s += `\n<line x1="${x}" y1="${fmt(LINE_Y - 5)}" x2="${x}" y2="${fmt(LINE_Y + 5)}" stroke="${lineColor}" stroke-width="1.5"/>`;
+        s += `\n<line x1="${x}" y1="${fmt(LINE_Y - subTickH)}" x2="${x}" y2="${fmt(LINE_Y + subTickH)}" stroke="${lineColor}" stroke-width="${subTickW}"/>`;
         let showS = false;
         if (showSubLbl) {
           if (subLblSpec) showS = subLblSpec.some(v => Math.abs(v - sv) < 1e-9);
@@ -373,7 +396,7 @@ function _genNLLine(i) {
         }
         if (showS) {
           const svLbl = sv % 1 === 0 ? Math.round(sv) : parseFloat(sv.toFixed(4));
-          s += `\n<text x="${x}" y="${fmt(LINE_Y + 5 + 3 + subLblSz)}" font-family="Arial,sans-serif" font-size="${subLblSz}" fill="${subLblColor}" text-anchor="middle">${svLbl}</text>`;
+          s += `\n<text x="${x}" y="${fmt(LINE_Y + subTickH + 3 + subLblSz)}" font-family="Arial,sans-serif" font-size="${subLblSz}" fill="${subLblColor}" text-anchor="middle">${svLbl}</text>`;
         }
       }
     }
@@ -401,13 +424,42 @@ function _genNLLine(i) {
 
   /* ── Point markers + labels ── */
   for (const pt of points) {
-    const x = fmt(tx(pt.v));
-    s += `\n<circle cx="${x}" cy="${LINE_Y}" r="${ptR}" fill="${pt.color}"/>`;
+    const px   = tx(pt.v);
+    const exPx = pt.lblSz * 0.5;
+    const GAP  = 4;
+
+    // Pre-compute label y (needed for leader line drawn before circle)
+    let ly;
     if (pt.lbl) {
-      const ly = pt.pos === 'below'
-        ? fmt(LINE_Y + ptR + 4 + ptLblSz)
-        : fmt(LINE_Y - ptR - 6);
-      s += `\n<text x="${x}" y="${ly}" font-family="Arial,sans-serif" font-size="${ptLblSz}" font-weight="bold" fill="${ptLblColor}" text-anchor="middle">${escXml(pt.lbl)}</text>`;
+      if (pt.pos === 'below') {
+        ly = LINE_Y + pt.radius + 4 + pt.lblSz + pt.offset;
+        if (pt.lbl.includes('$')) {
+          const info = _getMathInfo(_textToLatex(pt.lbl, pt.lblBold, pt.lblItalic));
+          if (info) {
+            const minLy = LINE_Y + pt.radius + GAP + pt.offset + info.vAlignEx * exPx + info.hEx * exPx;
+            if (minLy > ly) ly = minLy;
+          }
+        }
+      } else {
+        ly = LINE_Y - pt.radius - 6 - pt.offset;
+        if (pt.lbl.includes('$')) {
+          const info = _getMathInfo(_textToLatex(pt.lbl, pt.lblBold, pt.lblItalic));
+          if (info) {
+            ly = LINE_Y - pt.radius - GAP - pt.offset + info.vAlignEx * exPx;
+          }
+        }
+      }
+    }
+
+    // Leader line drawn before circle so circle renders on top
+    if (pt.leader && ly !== undefined) {
+      s += `\n<line x1="${fmt(px)}" y1="${fmt(LINE_Y)}" x2="${fmt(px)}" y2="${fmt(ly)}" stroke="${pt.color}" stroke-width="1.5" stroke-dasharray="4,3"/>`;
+    }
+
+    s += `\n<circle cx="${fmt(px)}" cy="${LINE_Y}" r="${pt.radius}" fill="${pt.color}"/>`;
+
+    if (ly !== undefined) {
+      s += '\n' + _renderLabel(pt.lbl, px, ly, 'middle', pt.lblSz, 'Arial, sans-serif', pt.lblBold, pt.lblItalic, pt.lblClr);
     }
   }
 
@@ -428,7 +480,8 @@ function _genNLLine(i) {
     s += '\n' + _renderLabel(lblText, lx, ly, anchor, lblFontSz, lblFont, lblBold, lblItalic, lblColor);
   }
 
-  return { svgStr: s + '\n</svg>', width: svgW, height: H, topPad: topSpace, botPad: botSpace };
+  const axisStartX = leftPad + PAD + EXT;
+  return { svgStr: s + '\n</svg>', width: svgW, height: H, topPad: topSpace, botPad: botSpace, axisStartX };
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -446,17 +499,20 @@ function generateNumberLine() {
   const validLines = lines.filter(Boolean);
   if (!validLines.length) return errorSVG('No valid lines');
 
-  const W = Math.max(...validLines.map(l => l.width));
-  // Collapse inner padding so `gap` separates line contents, but never overlap SVG boxes
+  // Left-align all lines so their axis start points share the same x position
+  const maxAxisX = Math.max(...validLines.map(l => l.axisStartX));
+  const xOffsets = validLines.map(l => maxAxisX - l.axisStartX);
+  const W = Math.max(...validLines.map((l, i) => xOffsets[i] + l.width));
+
+  // Stack lines: gap is extra whitespace added after each line's full SVG box
   const ypos = [0];
   for (let i = 1; i < validLines.length; i++) {
-    const collapsed = validLines[i-1].height - validLines[i-1].botPad + gap - validLines[i].topPad;
-    ypos[i] = ypos[i-1] + Math.max(validLines[i-1].height, collapsed);
+    ypos[i] = ypos[i-1] + validLines[i-1].height + gap;
   }
   const H = ypos[validLines.length-1] + validLines[validLines.length-1].height;
   let s = svgOpen(W, H);
   for (let i = 0; i < validLines.length; i++)
-    s += '\n' + withPos(validLines[i].svgStr, Math.round((W - validLines[i].width) / 2), ypos[i]);
+    s += '\n' + withPos(validLines[i].svgStr, xOffsets[i], ypos[i]);
   return s + '\n</svg>';
 }
 
@@ -493,6 +549,15 @@ function _nlLineSectionHTML(i) {
     <div class="row2" style="margin-top:6px">
       ${dv('Line color', S('nl-color'), `<input type="color" id="${S('nl-color')}" value="#000000">`)}
       ${dv('Thickness (px)', S('nl-line-width'), `<input type="number" id="${S('nl-line-width')}" value="3" min="0.5" max="10" step="0.5">`)}
+    </div>
+    <div class="row2" style="margin-top:6px">
+      ${dv('Major tick height', S('nl-major-tick-h'), `<input type="number" id="${S('nl-major-tick-h')}" value="10" min="1" max="40" step="1">`)}
+      ${dv('Sub tick height', S('nl-sub-tick-h'), `<input type="number" id="${S('nl-sub-tick-h')}" value="6" min="1" max="30" step="1">`)}
+    </div>
+    <div class="row3" style="margin-top:6px">
+      ${dv('Major tick width', S('nl-major-tick-w'), `<input type="number" id="${S('nl-major-tick-w')}" value="2" min="0.5" max="8" step="0.5">`)}
+      ${dv('Sub tick width', S('nl-sub-tick-w'), `<input type="number" id="${S('nl-sub-tick-w')}" value="1.5" min="0.5" max="6" step="0.5">`)}
+      ${dv('Arrow size', S('nl-arrow-size'), `<input type="number" id="${S('nl-arrow-size')}" value="5" min="1" max="12" step="0.5">`)}
     </div>`;
 
   /* Integer Labels */
@@ -524,23 +589,8 @@ function _nlLineSectionHTML(i) {
 
   /* Point Markers */
   const pointsHTML = `
-    <label for="${S('nl-points')}">Points <span class="hint" style="display:inline">(value:label:color:pos — fractions ok)</span></label>
-    <textarea id="${S('nl-points')}" rows="4" placeholder="3.5:A&#10;7:B:#0000FF:below&#10;3/4:C:#009900"></textarea>
-    <div class="row3" style="margin-top:7px">
-      ${dv('Default color', S('nl-pt-color'), `<input type="color" id="${S('nl-pt-color')}" value="#FF0000">`)}
-      ${dv('Radius (px)', S('nl-pt-radius'), `<input type="number" id="${S('nl-pt-radius')}" value="6" min="2" max="20">`)}
-      <div>
-        <label for="${S('nl-pt-pos')}">Default pos</label>
-        <select id="${S('nl-pt-pos')}">
-          <option value="above">Above</option>
-          <option value="below">Below</option>
-        </select>
-      </div>
-    </div>
-    <div class="row2" style="margin-top:5px">
-      ${dv('Label size', S('nl-pt-lbl-size'), `<input type="number" id="${S('nl-pt-lbl-size')}" value="16" min="8" max="36">`)}
-      ${dv('Label color', S('nl-pt-lbl-color'), `<input type="color" id="${S('nl-pt-lbl-color')}" value="#000000">`)}
-    </div>`;
+    <div id="nl-pt-list-${i}" style="display:flex;flex-direction:column;gap:8px"></div>
+    <button type="button" id="nl-pt-add-${i}" style="width:100%;margin-top:8px;padding:7px 0;border:1.5px dashed #aab4c8;border-radius:7px;background:none;color:#5a6ea4;cursor:pointer;font-size:13px;font-weight:500">+ Add Point</button>`;
 
   /* Jump Arrows */
   const jumpsHTML = `
@@ -630,6 +680,70 @@ function _nlLineSectionHTML(i) {
   );
 }
 
+/* ══════════════════════════════════════════════════════════════════════════
+   _nlAddPoint(lineIdx) — adds a new point entry card to the list
+   ══════════════════════════════════════════════════════════════════════════ */
+
+const _NL_PT_COLORS = ['#E53935','#1E88E5','#43A047','#FB8C00','#8E24AA','#00ACC1','#F4511E','#6D4C41'];
+let _nlPtColorIdx = 0;
+
+function _nlAddPoint(lineIdx) {
+  const container = document.getElementById(`nl-pt-list-${lineIdx}`);
+  if (!container) return;
+
+  const color = _NL_PT_COLORS[_nlPtColorIdx % _NL_PT_COLORS.length];
+  _nlPtColorIdx++;
+
+  const entry = document.createElement('div');
+  entry.className = 'nl-pt-entry';
+  entry.style.cssText = 'border:1px solid #dde3ec;border-radius:8px;padding:10px 10px 8px;background:#f8fafc;position:relative';
+
+  entry.innerHTML = `
+    <button type="button" class="nl-pt-del" title="Remove" style="position:absolute;top:4px;right:7px;background:none;border:none;color:#94a3b8;cursor:pointer;font-size:20px;line-height:1;padding:0;width:22px;height:22px">×</button>
+    <div class="row3" style="margin-bottom:6px">
+      <div><label>Value</label><input type="text" data-field="val" placeholder="e.g. 3/4" style="font-size:13px"></div>
+      <div><label>Radius (px)</label><input type="number" data-field="radius" value="6" min="2" max="20"></div>
+      <div><label>Point color</label><input type="color" data-field="color" value="${color}"></div>
+    </div>
+    <div class="row2" style="margin-bottom:6px">
+      <div>
+        <label>Placed</label>
+        <select data-field="pos">
+          <option value="above">Above</option>
+          <option value="below">Below</option>
+        </select>
+      </div>
+      <div><label>Gap from point (px)</label><input type="number" data-field="offset" value="0" min="0" max="120" step="2"></div>
+    </div>
+    <label style="margin:0 0 3px;display:block">Label <span class="hint" style="display:inline">(supports $math$)</span></label>
+    <input type="text" data-field="lbl" placeholder="e.g. $\\frac{1}{4}$" style="width:100%;box-sizing:border-box;margin-bottom:6px">
+    <div class="row3" style="margin-bottom:5px">
+      <div><label>Lbl size</label><input type="number" data-field="lbl-size" value="16" min="8" max="36"></div>
+      <div><label>Lbl color</label><input type="color" data-field="lbl-color" value="#000000"></div>
+      <div style="display:flex;gap:8px;align-items:flex-end;padding-bottom:2px">
+        <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-weight:normal;font-size:13px"><input type="checkbox" data-field="lbl-bold" checked> Bold</label>
+        <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-weight:normal;font-size:13px"><input type="checkbox" data-field="lbl-italic"> Italic</label>
+      </div>
+    </div>
+    <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-weight:normal;font-size:13px;margin:0"><input type="checkbox" data-field="leader"> Leader line</label>`;
+
+  entry.querySelector('.nl-pt-del').addEventListener('click', () => {
+    entry.remove();
+    if (typeof render === 'function') render();
+  });
+
+  entry.querySelectorAll('input:not([type=color]), select').forEach(el => {
+    el.addEventListener('input',  () => { if (typeof render === 'function') render(); });
+    el.addEventListener('change', () => { if (typeof render === 'function') render(); });
+  });
+  entry.querySelectorAll('input[type=color]').forEach(el => {
+    el.addEventListener('input', () => { if (typeof render === 'function') render(); });
+  });
+
+  container.appendChild(entry);
+  if (typeof render === 'function') render();
+}
+
 function buildNumberLineUI() {
   const container = $('params-numberLine');
   if (!container) return;
@@ -671,6 +785,11 @@ function wireNumberLine() {
       if (typeof render === 'function') render();
     });
   });
+
+  /* Add Point buttons */
+  for (let li = 0; li < 4; li++) {
+    document.getElementById(`nl-pt-add-${li}`)?.addEventListener('click', () => _nlAddPoint(li));
+  }
 
   /* Hook MathJax startup */
   if (window.MathJax && window.MathJax.startup) {

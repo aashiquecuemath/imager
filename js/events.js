@@ -9,10 +9,22 @@ const SHAPE_SHADING_KEY = {
 };
 
 const SHADING_RESET_INPUTS = {
-  'frac-num-0': 'fraction-0',
-  'frac-num-1': 'fraction-1',
-  'frac-num-2': 'fraction-2',
-  'frac-num-3': 'fraction-3',
+  'frac-num-0':       'fraction-0',
+  'frac-num-1':       'fraction-1',
+  'frac-num-2':       'fraction-2',
+  'frac-num-3':       'fraction-3',
+  'frac-cell-subs-0': 'fraction-0',
+  'frac-cell-subs-1': 'fraction-1',
+  'frac-cell-subs-2': 'fraction-2',
+  'frac-cell-subs-3': 'fraction-3',
+  'frac-dim-rows-0':  'fraction-0',
+  'frac-dim-rows-1':  'fraction-1',
+  'frac-dim-rows-2':  'fraction-2',
+  'frac-dim-rows-3':  'fraction-3',
+  'frac-dim-cols-0':  'fraction-0',
+  'frac-dim-cols-1':  'fraction-1',
+  'frac-dim-cols-2':  'fraction-2',
+  'frac-dim-cols-3':  'fraction-3',
 };
 
 function _activateTab(tab) {
@@ -31,7 +43,11 @@ function _activateTab(tab) {
 
   appWrapper?.classList.remove('editor-active');
 
-  if (tab === 'grapher') {
+  if (tab === 'patterns') {
+    currentShape = 'svgPatterns';
+    if (stageRow) stageRow.style.display = 'none';
+    if (stageDivider) stageDivider.style.display = 'none';
+  } else if (tab === 'grapher') {
     currentShape = 'graphPlot';
     if (stageRow) stageRow.style.display = 'none';
     if (stageDivider) stageDivider.style.display = 'none';
@@ -413,8 +429,89 @@ function wireAll() {
     render();
   });
 
+  /* ── Chart type selector ── */
+  function _gpSyncChartType(ct) {
+    const panelMap = {
+      line:      ['gp-line-col1',  'gp-line-col2'],
+      bar:       ['gp-bar-col1',   'gp-bar-col2'],
+      histogram: ['gp-hist-col1',  'gp-hist-col2'],
+      pie:       ['gp-pie-col1',   'gp-pie-col2'],
+      lineplot:  ['gp-lp-col1',    'gp-lp-col2'],
+      dotplot:   ['gp-dp-col1',    'gp-dp-col2'],
+      stemleaf:  ['gp-sl-col1',    'gp-sl-col2'],
+    };
+    const allIds = Object.values(panelMap).flat();
+    const showIds = panelMap[ct] || panelMap.line;
+    allIds.forEach(id => {
+      const el = $(id);
+      if (el) el.style.display = showIds.includes(id) ? '' : 'none';
+    });
+    const hidden = $('gp-chart-type');
+    if (hidden) hidden.value = ct;
+  }
+
+  document.querySelectorAll('.gp-ctype').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.gp-ctype').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      _gpSyncChartType(btn.dataset.ct);
+      render();
+    });
+  });
+  _gpSyncChartType(val('gp-chart-type') || 'line');
+
+  /* ── Bar chart: auto-Y toggle ── */
+  function _bcSyncAutoY() {
+    const w = $('bc-ymax-wrap');
+    if (w) w.style.display = chk('bc-auto-y') ? 'none' : '';
+  }
+  $('bc-auto-y')?.addEventListener('change', _bcSyncAutoY);
+  _bcSyncAutoY();
+
+  /* ── Bar chart: single color toggle ── */
+  function _bcSyncColorMode() {
+    const w = $('bc-single-color-wrap');
+    if (w) w.style.display = val('bc-color-mode') === 'single' ? '' : 'none';
+  }
+  $('bc-color-mode')?.addEventListener('change', _bcSyncColorMode);
+  _bcSyncColorMode();
+
+  /* ── Histogram: auto-Y toggle ── */
+  function _hsSyncAutoY() {
+    const w = $('hs-ymax-wrap');
+    if (w) w.style.display = chk('hs-auto-y') ? 'none' : '';
+  }
+  $('hs-auto-y')?.addEventListener('change', _hsSyncAutoY);
+  _hsSyncAutoY();
+
+  /* ── Histogram: bin mode toggle ── */
+  function _hsSyncBinMode() {
+    const mode = val('hs-bin-mode');
+    const cw = $('hs-bin-count-wrap'), ww = $('hs-bin-width-wrap');
+    if (cw) cw.style.display = mode === 'count' ? '' : 'none';
+    if (ww) ww.style.display = mode === 'width' ? '' : 'none';
+  }
+  $('hs-bin-mode')?.addEventListener('change', _hsSyncBinMode);
+  _hsSyncBinMode();
+
+  /* ── Pie chart: donut toggle ── */
+  function _pcSyncDonut() {
+    const w = $('pc-hole-wrap');
+    if (w) w.style.display = chk('pc-donut') ? '' : 'none';
+  }
+  $('pc-donut')?.addEventListener('change', _pcSyncDonut);
+  _pcSyncDonut();
+
+  /* ── Pie chart: custom colors toggle ── */
+  function _pcSyncColorMode() {
+    const w = $('pc-custom-colors-wrap');
+    if (w) w.style.display = val('pc-color-mode') === 'custom' ? '' : 'none';
+  }
+  $('pc-color-mode')?.addEventListener('change', _pcSyncColorMode);
+  _pcSyncColorMode();
+
   /* ── Hash-based routing ── */
-  const VALID_TOOLS = new Set(['imager','grapher','character','editor','cube3d']);
+  const VALID_TOOLS = new Set(['imager','grapher','character','editor','cube3d','patterns']);
 
   function _showHome() {
     const homeScreen = document.getElementById('home-screen');
@@ -472,6 +569,9 @@ function wireAll() {
 
   /* ── Angles tool ── */
   wireAngles();
+
+  /* ── Patterns: build initial element / term cards ── */
+  if (typeof _ptInitElements === 'function') _ptInitElements();
 }
 
 /* ── Vertex handle dragging (geometry tool only) ── */
@@ -566,6 +666,11 @@ function _updateFracDimRows(ei) {
     const el = document.getElementById(`frac-dims-${k}-${ei}`);
     if (el) el.style.display = (k === active) ? '' : 'none';
   }
+  const isGrid = shape === 'grid';
+  const denRow     = document.getElementById(`frac-den-row-${ei}`);
+  const subsRow    = document.getElementById(`frac-cell-subs-row-${ei}`);
+  if (denRow)  denRow.style.display  = isGrid ? 'none' : '';
+  if (subsRow) subsRow.style.display = isGrid ? 'none' : '';
 }
 
 function wireFraction() {

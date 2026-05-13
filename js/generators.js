@@ -48,7 +48,13 @@ function generateFraction() {
 function _genFracEl(elIdx, c) {
   const E = s => `${s}-${elIdx}`;
   const shape    = val(E('frac-shape'))   || 'rectangle';
-  const den      = Math.max(1, Math.min(24, int(E('frac-den'))));
+  let den        = Math.max(1, Math.min(24, int(E('frac-den'))));
+  let gridRows = 0, gridCols = 0;
+  if (shape === 'grid') {
+    gridRows = Math.max(1, Math.min(12, int(E('frac-dim-rows')) || 2));
+    gridCols = Math.max(1, Math.min(12, int(E('frac-dim-cols')) || 4));
+    den = gridRows * gridCols;
+  }
   const numN     = Math.max(0, Math.min(den, int(E('frac-num'))));
   const showLbl  = chk(E('frac-label'));
   const cellNums = chk(E('frac-cellnums'));
@@ -86,7 +92,11 @@ function _genFracEl(elIdx, c) {
   const clUcWt    = chk(E('frac-cl-uc-bold'))   ? 'bold'   : 'normal';
   const clUcFs    = chk(E('frac-cl-uc-italic')) ? 'italic' : 'normal';
 
-  const cells  = getShading('fraction-' + elIdx, den, i => i < numN);
+  let cellSubs     = Math.max(1, Math.min(8, int(E('frac-cell-subs')) || 1));
+  if (shape === 'grid') cellSubs = 1;
+  const totalCells = den * cellSubs;
+
+  const cells  = getShading('fraction-' + elIdx, totalCells, i => i < numN * cellSubs);
   const shaded = countShaded('fraction-' + elIdx);
   const lblH   = showLbl ? lblSize * 2 + 14 : 0;
 
@@ -110,13 +120,14 @@ function _genFracEl(elIdx, c) {
   // Stacked a/b fraction label centred at (cx, topY)
   function lblSVG(cx, topY) {
     if (!showLbl) return '';
-    const lineW = (Math.max(String(shaded).length, String(den).length) * lblSize * 0.62 + lblSize * 0.5);
+    const denomDisp = totalCells;
+    const lineW = (Math.max(String(shaded).length, String(denomDisp).length) * lblSize * 0.62 + lblSize * 0.5);
     const lw    = Math.max(1, Math.round(lblSize * 0.07));
     const lineY = topY + lblSize + 3;
     const denY  = lineY + 3 + Math.round(lblSize * 0.72);
     return `\n<text x="${fmt(cx)}" y="${fmt(topY + lblSize)}" font-family="Arial,sans-serif" font-size="${lblSize}" font-weight="${lblWt}" fill="${lblColor}" text-anchor="middle">${shaded}</text>` +
            `\n<line x1="${fmt(cx - lineW/2)}" y1="${fmt(lineY)}" x2="${fmt(cx + lineW/2)}" y2="${fmt(lineY)}" stroke="${lblColor}" stroke-width="${lw}"/>` +
-           `\n<text x="${fmt(cx)}" y="${fmt(denY)}" font-family="Arial,sans-serif" font-size="${lblSize}" font-weight="${lblWt}" fill="${lblColor}" text-anchor="middle">${den}</text>`;
+           `\n<text x="${fmt(cx)}" y="${fmt(denY)}" font-family="Arial,sans-serif" font-size="${lblSize}" font-weight="${lblWt}" fill="${lblColor}" text-anchor="middle">${denomDisp}</text>`;
   }
 
   // Cell text (ordinal number + optional user cell label)
@@ -158,15 +169,29 @@ function _genFracEl(elIdx, c) {
     _H = y0 + cH + (showLbl ? 16 + lblH : 12) + botPad;
     shpCx = x0 + (den * cW) / 2;
     shpCy = y0 + cH / 2;
+    const subW = cW / cellSubs;
     s = svgOpen(_W, _H);
+    // Shaded fills — per sub-cell
     for (let i = 0; i < den; i++)
-      if (cells[i]) s += `\n<rect x="${x0 + i*cW}" y="${y0}" width="${cW}" height="${cH}" fill="${c.light}" fill-opacity="0.6" stroke="none"/>`;
+      for (let k = 0; k < cellSubs; k++)
+        if (cells[i * cellSubs + k]) s += `\n<rect x="${fmt(x0 + i*cW + k*subW)}" y="${y0}" width="${fmt(subW)}" height="${cH}" fill="${c.light}" fill-opacity="0.6" stroke="none"/>`;
+    // Main cell dividers
     for (let i = 1; i < den; i++)
       s += `\n<line x1="${x0 + i*cW}" y1="${y0}" x2="${x0 + i*cW}" y2="${y0 + cH}" stroke="${c.dark}" stroke-width="1.2"/>`;
+    // Sub-cell dividers
+    if (cellSubs > 1)
+      for (let i = 0; i < den; i++)
+        for (let k = 1; k < cellSubs; k++) {
+          const sx = fmt(x0 + i * cW + k * subW);
+          s += `\n<line x1="${sx}" y1="${y0}" x2="${sx}" y2="${y0 + cH}" stroke="${c.dark}" stroke-width="0.6" stroke-dasharray="3,2" opacity="0.5"/>`;
+        }
+    // Cell text — per main cell; isShaded = any sub-cell in that main cell is shaded
     for (let i = 0; i < den; i++)
-      s += cellTextSVG(x0 + i*cW + cW/2, y0 + cH/2, i, cells[i]);
+      s += cellTextSVG(x0 + i*cW + cW/2, y0 + cH/2, i, cells.slice(i*cellSubs, (i+1)*cellSubs).some(Boolean));
+    // Hit areas — per sub-cell for individual click-to-shade
     for (let i = 0; i < den; i++)
-      s += `\n<rect ${de} data-cell="${i}" x="${x0 + i*cW}" y="${y0}" width="${cW}" height="${cH}" fill="transparent" stroke="none" pointer-events="fill" style="cursor:pointer"/>`;
+      for (let k = 0; k < cellSubs; k++)
+        s += `\n<rect ${de} data-cell="${i * cellSubs + k}" x="${fmt(x0 + i*cW + k*subW)}" y="${y0}" width="${fmt(subW)}" height="${cH}" fill="transparent" stroke="none" pointer-events="fill" style="cursor:pointer"/>`;
     s += `\n<rect x="${x0}" y="${y0}" width="${den * cW}" height="${cH}" fill="none" stroke="${c.dark}" stroke-width="2.5"/>`;
     s += lblSVG(shpCx, y0 + cH + 14);
 
@@ -180,30 +205,41 @@ function _genFracEl(elIdx, c) {
     shpCx = cx; shpCy = cy;
     s = svgOpen(_W, _H);
     const pt = deg => { const rad = (90 - deg) * Math.PI / 180; return [fmt(cx + r * Math.cos(rad)), fmt(cy - r * Math.sin(rad))]; };
-    if (den === 1) {
+    if (totalCells === 1) {
       if (cells[0]) s += `\n<circle cx="${cx}" cy="${cy}" r="${r}" fill="${c.light}" fill-opacity="0.6" stroke="none"/>`;
       s += `\n<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${c.dark}" stroke-width="2.5"/>`;
       s += `\n<circle ${de} data-cell="0" cx="${cx}" cy="${cy}" r="${r}" fill="transparent" stroke="none" pointer-events="fill" style="cursor:pointer"/>`;
       s += cellTextSVG(cx, cy, 0, cells[0]);
     } else {
-      const step = 360 / den;
-      const arc = i => { const [x1,y1] = pt(i*step), [x2,y2] = pt((i+1)*step); return `M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${step>180?1:0} 1 ${x2} ${y2} Z`; };
-      for (let i = 0; i < den; i++) if (cells[i]) s += `\n<path d="${arc(i)}" fill="${c.light}" fill-opacity="0.6" stroke="none"/>`;
-      for (let i = 0; i < den; i++) s += `\n<path d="${arc(i)}" fill="none" stroke="${c.dark}" stroke-width="1.2"/>`;
+      const secStep = 360 / totalCells;
+      const arc = i => { const [x1,y1] = pt(i*secStep), [x2,y2] = pt((i+1)*secStep); return `M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${secStep>180?1:0} 1 ${x2} ${y2} Z`; };
+      // Shaded fills — per sub-cell
+      for (let i = 0; i < totalCells; i++) if (cells[i]) s += `\n<path d="${arc(i)}" fill="${c.light}" fill-opacity="0.6" stroke="none"/>`;
+      // Outer circle
       s += `\n<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${c.dark}" stroke-width="2.5"/>`;
-      for (let i = 0; i < den; i++) s += `\n<path ${de} data-cell="${i}" d="${arc(i)}" fill="transparent" stroke="none" pointer-events="fill" style="cursor:pointer"/>`;
-      for (let i = 0; i < den; i++) {
-        const mid = (90 - (i + 0.5) * step) * Math.PI / 180;
-        s += cellTextSVG(cx + r*0.6*Math.cos(mid), cy - r*0.6*Math.sin(mid), i, cells[i]);
+      // Dividers: solid at main-cell boundaries, dashed at sub-cell boundaries
+      for (let i = 0; i < totalCells; i++) {
+        const [x1,y1] = pt(i * secStep);
+        if (i % cellSubs === 0) {
+          s += `\n<line x1="${cx}" y1="${cy}" x2="${x1}" y2="${y1}" stroke="${c.dark}" stroke-width="1.2"/>`;
+        } else {
+          s += `\n<line x1="${cx}" y1="${cy}" x2="${x1}" y2="${y1}" stroke="${c.dark}" stroke-width="0.6" stroke-dasharray="3,2" opacity="0.5"/>`;
+        }
       }
+      // Cell text — per main cell
+      for (let j = 0; j < den; j++) {
+        const mid = (90 - (j + 0.5) * 360/den) * Math.PI / 180;
+        s += cellTextSVG(cx + r*0.6*Math.cos(mid), cy - r*0.6*Math.sin(mid), j, cells.slice(j*cellSubs, (j+1)*cellSubs).some(Boolean));
+      }
+      // Hit areas — per sub-cell
+      for (let i = 0; i < totalCells; i++) s += `\n<path ${de} data-cell="${i}" d="${arc(i)}" fill="transparent" stroke="none" pointer-events="fill" style="cursor:pointer"/>`;
     }
     s += lblSVG(cx, cy + r + 10);
 
   // ── Grid ───────────────────────────────────────────────────────────────────
   } else if (shape === 'grid') {
-    let rows = Math.floor(Math.sqrt(den));
-    while (rows > 1 && den % rows !== 0) rows--;
-    const cols = den / rows;
+    const rows = gridRows;
+    const cols = gridCols;
     const gW = Math.max(40, int(E('frac-dim-gw')) || 240);
     const gH = Math.max(40, int(E('frac-dim-gh')) || 240);
     const cellW = gW / cols;
@@ -252,39 +288,44 @@ function _genFracEl(elIdx, c) {
     s = svgOpen(_W, _H);
     s += `\n<defs><clipPath id="${clipId}"><polygon points="${ptStr}"/></clipPath></defs>`;
     const clip = `clip-path="url(#${clipId})"`;
-    if (den === 1) {
+    if (totalCells === 1) {
       if (cells[0]) s += `\n<polygon points="${ptStr}" fill="${c.light}" fill-opacity="0.6" stroke="none"/>`;
     } else {
-      const step = 360 / den;
+      const secStep = 360 / totalCells;
       const bigR = pR * 1.7;
-      for (let i = 0; i < den; i++) {
-        const a1 = (-90 + i * step) * Math.PI/180;
-        const a2 = (-90 + (i+1) * step) * Math.PI/180;
+      for (let i = 0; i < totalCells; i++) {
+        const a1 = (-90 + i * secStep) * Math.PI/180;
+        const a2 = (-90 + (i+1) * secStep) * Math.PI/180;
         const x1 = fmt(pCx + bigR*Math.cos(a1)), y1 = fmt(pCy + bigR*Math.sin(a1));
         const x2 = fmt(pCx + bigR*Math.cos(a2)), y2 = fmt(pCy + bigR*Math.sin(a2));
-        const d = `M ${pCx} ${pCy} L ${x1} ${y1} A ${bigR} ${bigR} 0 ${step>180?1:0} 1 ${x2} ${y2} Z`;
+        const d = `M ${pCx} ${pCy} L ${x1} ${y1} A ${bigR} ${bigR} 0 ${secStep>180?1:0} 1 ${x2} ${y2} Z`;
         if (cells[i]) s += `\n<path d="${d}" fill="${c.light}" fill-opacity="0.6" stroke="none" ${clip}/>`;
-        s += `\n<line x1="${pCx}" y1="${pCy}" x2="${x1}" y2="${y1}" stroke="${c.dark}" stroke-width="1.2" ${clip}/>`;
+        // Divider at sector start: solid for main-cell boundary, dashed for sub-cell
+        if (i % cellSubs === 0) {
+          s += `\n<line x1="${pCx}" y1="${pCy}" x2="${x1}" y2="${y1}" stroke="${c.dark}" stroke-width="1.2" ${clip}/>`;
+        } else {
+          s += `\n<line x1="${pCx}" y1="${pCy}" x2="${x1}" y2="${y1}" stroke="${c.dark}" stroke-width="0.6" stroke-dasharray="3,2" opacity="0.5" ${clip}/>`;
+        }
       }
-      for (let i = 0; i < den; i++) {
-        const step2 = 360 / den;
-        const mid = (-90 + (i+0.5) * step2) * Math.PI/180;
-        s += cellTextSVG(pCx + pR*0.57*Math.cos(mid), pCy + pR*0.57*Math.sin(mid), i, cells[i]);
+      // Cell text — per main cell
+      for (let j = 0; j < den; j++) {
+        const mid = (-90 + (j+0.5) * 360/den) * Math.PI/180;
+        s += cellTextSVG(pCx + pR*0.57*Math.cos(mid), pCy + pR*0.57*Math.sin(mid), j, cells.slice(j*cellSubs, (j+1)*cellSubs).some(Boolean));
       }
     }
     s += `\n<polygon points="${ptStr}" fill="none" stroke="${c.dark}" stroke-width="2.5"/>`;
-    if (den === 1) {
+    if (totalCells === 1) {
       s += `\n<polygon ${de} data-cell="0" points="${ptStr}" fill="transparent" stroke="none" pointer-events="fill" style="cursor:pointer"/>`;
       s += cellTextSVG(pCx, pCy, 0, cells[0]);
     } else {
-      const step = 360 / den;
+      const secStep = 360 / totalCells;
       const bigR = pR * 1.7;
-      for (let i = 0; i < den; i++) {
-        const a1 = (-90 + i * step) * Math.PI/180;
-        const a2 = (-90 + (i+1) * step) * Math.PI/180;
+      for (let i = 0; i < totalCells; i++) {
+        const a1 = (-90 + i * secStep) * Math.PI/180;
+        const a2 = (-90 + (i+1) * secStep) * Math.PI/180;
         const x1 = fmt(pCx + bigR*Math.cos(a1)), y1 = fmt(pCy + bigR*Math.sin(a1));
         const x2 = fmt(pCx + bigR*Math.cos(a2)), y2 = fmt(pCy + bigR*Math.sin(a2));
-        const d = `M ${pCx} ${pCy} L ${x1} ${y1} A ${bigR} ${bigR} 0 ${step>180?1:0} 1 ${x2} ${y2} Z`;
+        const d = `M ${pCx} ${pCy} L ${x1} ${y1} A ${bigR} ${bigR} 0 ${secStep>180?1:0} 1 ${x2} ${y2} Z`;
         s += `\n<path ${de} data-cell="${i}" d="${d}" fill="transparent" stroke="none" pointer-events="fill" style="cursor:pointer" ${clip}/>`;
       }
     }
@@ -303,22 +344,37 @@ function _genFracEl(elIdx, c) {
     const paraStr = `${x0+skew},${y0} ${x0+skew+pW},${y0} ${x0+pW},${y0+pH} ${x0},${y0+pH}`;
     s = svgOpen(_W, _H);
     const stripW = pW / den;
-    for (let i = 0; i < den; i++) {
-      const bx1 = x0 + i*stripW, bx2 = x0 + (i+1)*stripW;
-      if (cells[i]) s += `\n<polygon points="${bx1+skew},${y0} ${bx2+skew},${y0} ${bx2},${y0+pH} ${bx1},${y0+pH}" fill="${c.light}" fill-opacity="0.6" stroke="none"/>`;
-    }
+    const subSW  = stripW / cellSubs;
+    // Shaded fills — per sub-cell
+    for (let i = 0; i < den; i++)
+      for (let k = 0; k < cellSubs; k++) {
+        if (!cells[i * cellSubs + k]) continue;
+        const bx1 = x0 + i*stripW + k*subSW, bx2 = bx1 + subSW;
+        s += `\n<polygon points="${bx1+skew},${y0} ${bx2+skew},${y0} ${bx2},${y0+pH} ${bx1},${y0+pH}" fill="${c.light}" fill-opacity="0.6" stroke="none"/>`;
+      }
+    // Main cell dividers
     for (let i = 1; i < den; i++) {
       const bx = x0 + i*stripW;
       s += `\n<line x1="${fmt(bx+skew)}" y1="${y0}" x2="${fmt(bx)}" y2="${y0+pH}" stroke="${c.dark}" stroke-width="1.2"/>`;
     }
+    // Sub-cell dividers
+    if (cellSubs > 1)
+      for (let i = 0; i < den; i++)
+        for (let k = 1; k < cellSubs; k++) {
+          const bx = x0 + i * stripW + k * subSW;
+          s += `\n<line x1="${fmt(bx+skew)}" y1="${y0}" x2="${fmt(bx)}" y2="${y0+pH}" stroke="${c.dark}" stroke-width="0.6" stroke-dasharray="3,2" opacity="0.5"/>`;
+        }
+    // Cell text — per main cell
     for (let i = 0; i < den; i++) {
       const bx1 = x0 + i*stripW, bx2 = x0 + (i+1)*stripW;
-      s += cellTextSVG((bx1+bx2)/2 + skew/2, y0+pH/2, i, cells[i]);
+      s += cellTextSVG((bx1+bx2)/2 + skew/2, y0+pH/2, i, cells.slice(i*cellSubs, (i+1)*cellSubs).some(Boolean));
     }
-    for (let i = 0; i < den; i++) {
-      const bx1 = x0 + i*stripW, bx2 = x0 + (i+1)*stripW;
-      s += `\n<polygon ${de} data-cell="${i}" points="${bx1+skew},${y0} ${bx2+skew},${y0} ${bx2},${y0+pH} ${bx1},${y0+pH}" fill="transparent" stroke="none" pointer-events="fill" style="cursor:pointer"/>`;
-    }
+    // Hit areas — per sub-cell
+    for (let i = 0; i < den; i++)
+      for (let k = 0; k < cellSubs; k++) {
+        const bx1 = x0 + i*stripW + k*subSW, bx2 = bx1 + subSW;
+        s += `\n<polygon ${de} data-cell="${i * cellSubs + k}" points="${bx1+skew},${y0} ${bx2+skew},${y0} ${bx2},${y0+pH} ${bx1},${y0+pH}" fill="transparent" stroke="none" pointer-events="fill" style="cursor:pointer"/>`;
+      }
     s += `\n<polygon points="${paraStr}" fill="none" stroke="${c.dark}" stroke-width="2.5"/>`;
     s += lblSVG(shpCx, y0 + pH + 14);
   }
@@ -1231,6 +1287,7 @@ function generateShape() {
     graphPlot:       generateGraphPlot,
     stage:           generateStage,
     svgCharacter:    generateCharacter,
+    svgPatterns:     generatePatterns,
   };
   return (map[currentShape] || (() => ''))();
 }
