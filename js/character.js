@@ -403,30 +403,36 @@ function _thoughtBubble(cx, cy, bw, bh, tailX, tailY, text, opts) {
   const fst = opts.fst || 'normal';
 
   const rx = bw / 2, ry = bh / 2;
-  // Bump radii: 5 equal bumps span the full width, slightly taller than wide
-  const N = 5, brx = rx / N, bry = brx * 1.35;
+  // 4 bumps spanning the full width; bry > brx for visible height
+  const N = 4, brx = rx / N, bry = brx * 1.5;
 
   let s = '';
 
-  // Two trailing spheres from the character toward the cloud
+  // Two trailing spheres, placed just outside the cloud body
   const dx = tailX - cx, dy = tailY - cy;
   const dist = Math.hypot(dx, dy);
   const ux = dx / dist, uy = dy / dist;
-  const r1 = Math.max(6, Math.round(bsw * 3));
-  const r2 = Math.max(10, Math.round(bsw * 5));
-  s += `<circle cx="${fmt(cx + ux*dist*0.90)}" cy="${fmt(cy + uy*dist*0.90)}" r="${r1}" fill="${bg}" stroke="${bord}" stroke-width="${bsw}"/>`;
-  s += `<circle cx="${fmt(cx + ux*dist*0.75)}" cy="${fmt(cy + uy*dist*0.75)}" r="${r2}" fill="${bg}" stroke="${bord}" stroke-width="${bsw}"/>`;
+  // cloud boundary distance in tail direction (ellipse formula, using ry*0.72 for bottom arc)
+  const ryEff = uy > 0 ? ry * 0.72 : bry;
+  const cloudBound = Math.sqrt(1 / (ux * ux / (rx * rx) + uy * uy / (ryEff * ryEff)));
+  const r1 = Math.max(6,  Math.round(bsw * 2.8));
+  const r2 = Math.max(10, Math.round(bsw * 4.8));
+  // sphere2 (larger) just outside cloud; sphere1 (smaller) between sphere2 and tail
+  const p2d = cloudBound + r2 * 1.6;
+  const p1d = p2d + r2 + r1 * 1.8;
+  s += `<circle cx="${fmt(cx + ux*p2d)}" cy="${fmt(cy + uy*p2d)}" r="${r2}" fill="${bg}" stroke="${bord}" stroke-width="${bsw}"/>`;
+  s += `<circle cx="${fmt(cx + ux*p1d)}" cy="${fmt(cy + uy*p1d)}" r="${r1}" fill="${bg}" stroke="${bord}" stroke-width="${bsw}"/>`;
 
-  // Cloud path: N bumps going left across the top, smooth arc across the bottom
+  // Cloud path: N bumps on TOP (sweep=0 = CCW = upward), smooth arc on BOTTOM (sweep=1 = CW = downward)
   let d = `M ${fmt(cx + rx)} ${fmt(cy)} `;
   for (let i = 0; i < N; i++) {
-    d += `A ${fmt(brx)} ${fmt(bry)} 0 0 1 ${fmt(cx + rx - (i + 1) * 2 * brx)} ${fmt(cy)} `;
+    d += `A ${fmt(brx)} ${fmt(bry)} 0 0 0 ${fmt(cx + rx - (i + 1) * 2 * brx)} ${fmt(cy)} `;
   }
-  d += `A ${fmt(rx)} ${fmt(ry * 0.72)} 0 0 0 ${fmt(cx + rx)} ${fmt(cy)} Z`;
+  d += `A ${fmt(rx)} ${fmt(ry * 0.72)} 0 0 1 ${fmt(cx + rx)} ${fmt(cy)} Z`;
   s += `<path d="${d}" fill="${bg}" stroke="${bord}" stroke-width="${bsw}" stroke-linejoin="round"/>`;
 
-  // Text centred slightly into the bottom-arc half of the cloud
-  const textCY  = cy + ry * 0.12;
+  // Text centred at cy — bumps above, smooth arc below, so cy is mid-cloud
+  const textCY  = cy;
   const lines   = text ? text.split('\n') : [''];
   const lineH   = fs * 1.35;
   const totalH  = lines.length * lineH;
