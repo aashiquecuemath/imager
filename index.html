@@ -2540,6 +2540,7 @@ May,18</textarea>
     <div class="controls controls--character">
 
       <!-- Character selector -->
+      <input type="hidden" id="char-name" value="jiggi">
       <div class="card char-col1">
         <div class="card-title">Character</div>
         <div class="char-selector">
@@ -2554,10 +2555,18 @@ May,18</textarea>
             </svg>
             <span>Jiggi</span>
           </button>
-          <div class="char-card char-soon" title="More coming soon">
-            <svg width="44" height="44" viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="18" fill="currentColor" fill-opacity=".1" stroke="currentColor" stroke-width="2" stroke-dasharray="5 3"/><text x="22" y="27" font-size="16" text-anchor="middle" fill="currentColor">?</text></svg>
-            <span>Soon</span>
-          </div>
+          <button class="char-card" data-char="froggie">
+            <svg width="44" height="44" viewBox="160 50 580 530" aria-hidden="true">
+              <!-- Froggie thumbnail -->
+              <path fill-rule="evenodd" clip-rule="evenodd" d="M253.529 187.018C253.529 209.28 260.202 229.983 271.656 247.237C227.133 278.746 200.306 319.43 200.306 363.85C200.306 463.882 336.356 544.974 504.183 544.974C672.009 544.974 808.059 463.882 808.059 363.85C808.059 315.891 776.787 272.285 725.733 239.883C734.432 224.225 739.386 206.2 739.386 187.018C739.386 126.809 690.577 78 630.368 78C571.5 78 523.53 124.659 521.422 183.012C515.716 182.822 509.968 182.726 504.183 182.726C493.147 182.726 482.248 183.076 471.517 183.76C469.794 125.058 421.666 78 362.547 78C302.338 78 253.529 126.809 253.529 187.018Z" fill="#3DD771" stroke="#005E2C" stroke-width="14"/>
+              <circle cx="361" cy="181" r="58" fill="white"/>
+              <circle cx="634" cy="181" r="58" fill="white"/>
+              <ellipse cx="361" cy="181" rx="27" ry="26" fill="#005E2C"/>
+              <ellipse cx="634" cy="181" rx="27" ry="26" fill="#005E2C"/>
+              <path d="M618 292C618 339 565 376 499 375C434 374 381 334 381 287" stroke="#005E2C" stroke-width="10" stroke-linecap="round"/>
+            </svg>
+            <span>Froggie</span>
+          </button>
         </div>
       </div>
 
@@ -2612,6 +2621,10 @@ May,18</textarea>
                   <option value="float">Float</option>
                   <option value="wave">Wave hand</option>
                   <option value="shake">Shake</option>
+                  <option value="eye-roll-left">Eye roll left</option>
+                  <option value="eye-roll-right">Eye roll right</option>
+                  <option value="eye-roll-up">Eye roll up</option>
+                  <option value="eye-roll-down">Eye roll down</option>
                 </select></div>
               <div><label>Speed</label>
                 <select id="char-anim-speed">
@@ -2635,6 +2648,7 @@ May,18</textarea>
             <div><label>Type</label>
               <select id="char-bubble-type">
                 <option value="none">None</option>
+                <option value="dialog">Dialog box</option>
                 <option value="speech">Speech bubble</option>
                 <option value="thought">Thought bubble</option>
                 <option value="shout">Shout burst</option>
@@ -2656,7 +2670,7 @@ May,18</textarea>
             </div>
             <div class="row2">
               <div><label>Text color</label><input type="color" id="char-bubble-tc" value="#333333"></div>
-              <div><label>Font size</label><input type="number" id="char-bubble-fs" value="16" min="8" max="40"></div>
+              <div><label>Font size (px)</label><input type="number" id="char-bubble-fs" value="18" min="6" max="60"></div>
             </div>
             <div class="row2">
               <div><label>Weight</label>

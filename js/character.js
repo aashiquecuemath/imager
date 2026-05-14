@@ -1,13 +1,13 @@
 'use strict';
 
 /* ═══════════════════════════════════════════════════════
-   SVG CHARACTER GENERATOR  —  Jiggi and friends
+   SVG CHARACTER GENERATOR  —  Jiggi & Froggie
    Canvas: 900 × 800 viewBox units
-   Character transform: translate(280,430) scale(0.75) translate(-520,-635)
-   For left-side bubble: translate(620,430) scale(0.75) translate(-520,-635)
+   Jiggi transform:   translate(tx,430) scale(0.75) translate(-520,-635)
+   Froggie transform: translate(tx,430) scale(0.75) translate(-503,-490)
 ═══════════════════════════════════════════════════════ */
 
-// ── Jiggi base body parts (never change) ───────────────
+// ── Jiggi base body parts ───────────────────────────────
 const _J = {
   shadow: `<ellipse cx="585.7" cy="1055" rx="181.15" ry="22" fill="#FFDC83" opacity="0.6"/>`,
   leftLeg: `<path fill-rule="evenodd" clip-rule="evenodd" d="M580.172 644.72C587.505 639.779 597.455 641.717 602.396 649.049C614.983 667.726 638.529 703.867 645.855 750.684C652.617 793.896 645.38 844.932 606.275 898.582L636.391 911.61C644.506 915.121 648.239 924.545 644.728 932.661C641.218 940.776 631.793 944.509 623.678 940.998L574.474 919.713C569.82 917.699 566.394 913.6 565.241 908.662C564.087 903.723 565.341 898.53 568.621 894.663C613.286 842.002 620.245 794.136 614.22 755.635C608.057 716.251 588.072 685.09 575.843 666.944C570.902 659.612 572.84 649.662 580.172 644.72Z" fill="#FFBA07" stroke="#995200" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>`,
@@ -24,18 +24,16 @@ const _J = {
   eyeLeftOutline:  `<ellipse cx="586" cy="381.5" rx="53.5" ry="51.5" fill="none" stroke="#995200" stroke-width="10"/>`,
 };
 
-// ── Waving left-hand group pivot (in original coords) ──
 const _WAVE_PIVOT = { x: 725, y: 531 };
 
-// ── Emotion definitions ─────────────────────────────────
+// ── Jiggi emotions ──────────────────────────────────────
 const JIGGI_EMOTIONS = {
   happy: {
     eyeRightCornea: `<circle cx="474.856" cy="383.856" r="33.8558" fill="white"/>`,
     eyeLeftCornea:  `<circle cx="575.734" cy="383.856" r="33.8558" fill="white"/>`,
     eyeRightIris:   `<circle cx="482.5" cy="390.5" r="18.5" fill="#995200"/>`,
     eyeLeftIris:    `<circle cx="568.5" cy="390.5" r="18.5" fill="#995200"/>`,
-    eyeRightExtra: '',
-    eyeLeftExtra: '',
+    eyeRightExtra: '', eyeLeftExtra: '',
     eyebrows: `<path d="M418 381L369 385.5M642 381L676.5 385.5" fill="none" stroke="#995200" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>`,
     mouth: `<path d="M473.251 455H579.714C585.395 455 587.903 462.186 583.425 465.682C562.357 482.129 548.659 490.532 524.614 490.532C501.348 490.532 487.163 480.216 469.419 465.846C464.999 462.266 467.564 455 473.251 455Z" fill="#995200" transform="translate(-1.5,-1.5)"/>
     <path d="M501.008 450.465H550.008V460.465C550.008 464.883 546.426 468.465 542.008 468.465H509.008C504.59 468.465 501.008 464.883 501.008 460.465V450.465Z" fill="white" transform="translate(-1.5,6.1)"/>`,
@@ -46,8 +44,7 @@ const JIGGI_EMOTIONS = {
     eyeLeftCornea:  `<circle cx="575.734" cy="383.856" r="33.8558" fill="white"/>`,
     eyeRightIris:   `<circle cx="481" cy="395" r="18.5" fill="#995200"/>`,
     eyeLeftIris:    `<circle cx="570" cy="395" r="18.5" fill="#995200"/>`,
-    eyeRightExtra: '',
-    eyeLeftExtra: '',
+    eyeRightExtra: '', eyeLeftExtra: '',
     eyebrows: `<path d="M418 381L369 397M642 381L676.5 397" fill="none" stroke="#995200" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>`,
     mouth: `<path d="M477 486 Q524 455 571 486" fill="none" stroke="#995200" stroke-width="11" stroke-linecap="round"/>`,
     extras: '',
@@ -93,8 +90,7 @@ const JIGGI_EMOTIONS = {
     eyeLeftCornea:  `<circle cx="575.734" cy="383.856" r="33.8558" fill="white"/>`,
     eyeRightIris:   `<circle cx="476" cy="379" r="18.5" fill="#995200"/>`,
     eyeLeftIris:    `<circle cx="568.5" cy="390.5" r="18.5" fill="#995200"/>`,
-    eyeRightExtra: '',
-    eyeLeftExtra: '',
+    eyeRightExtra: '', eyeLeftExtra: '',
     eyebrows: `<path d="M418 373L369 377M642 379L676.5 387" fill="none" stroke="#995200" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>`,
     mouth: `<path d="M492 462 Q513 478 550 460" fill="none" stroke="#995200" stroke-width="11" stroke-linecap="round"/>`,
     extras: `<circle cx="582" cy="368" r="7" fill="#995200" opacity="0.35"/>
@@ -129,8 +125,162 @@ const JIGGI_EMOTIONS = {
   },
 };
 
+// ── Froggie base body parts ─────────────────────────────
+// Original viewBox: 0 0 900 900  |  Pivot used: (503, 490)
+const _F = {
+  shadow: `<ellipse cx="503" cy="800" rx="220" ry="22" fill="#2db84a" opacity="0.4"/>`,
+
+  // Character's LEFT leg (viewer's right side)
+  leftLeg: `<path d="M659.916 635.454C655.093 636.515 646.454 640.219 635.507 650.37C623.554 661.453 604.899 660.726 593.841 648.745C582.783 636.764 583.509 618.067 595.462 606.983C614.125 589.679 635.232 578.302 656.275 576.3C678.402 574.195 701.524 583.079 712.798 606.071C722.945 626.764 719.524 651.204 709.936 673.443C706.662 681.038 702.481 688.867 697.366 696.895H742.516C747.986 696.895 753.109 698.389 757.5 700.991L792 688L769.027 713.5C769.652 714.784 770.188 716.12 770.624 717.5L810.5 726.448L769.869 737.499C768.69 740.428 767.056 743.124 765.055 745.5L777 766.5L754 753.674C750.47 755.172 746.59 756 742.516 756H634.222C622.196 756 611.375 748.679 606.877 737.499C602.38 726.32 605.107 713.523 613.77 705.161C637.284 682.464 649.932 663.62 655.805 649.998C658.815 643.017 659.715 638.306 659.916 635.454Z" fill="#149A53" stroke="#005E2C" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<ellipse cx="781" cy="765.5" rx="11" ry="10.5" fill="#149A53" stroke="#005E2C" stroke-width="10"/>
+<ellipse cx="811" cy="727.5" rx="11" ry="10.5" fill="#149A53" stroke="#005E2C" stroke-width="10"/>
+<ellipse cx="789" cy="687.5" rx="11" ry="10.5" fill="#149A53" stroke="#005E2C" stroke-width="10"/>`,
+
+  // Character's RIGHT leg (viewer's left side)
+  rightLeg: `<path d="M347.084 635.454C351.907 636.515 360.546 640.219 371.493 650.37C383.446 661.453 402.101 660.726 413.159 648.745C424.217 636.764 423.491 618.067 411.538 606.983C392.875 589.679 371.768 578.302 350.725 576.3C328.598 574.195 305.476 583.079 294.202 606.071C284.055 626.764 287.476 651.204 297.064 673.443C300.338 681.038 304.519 688.867 309.634 696.895H264.484C259.014 696.895 253.891 698.389 249.5 700.991L215 688L237.973 713.5C237.348 714.784 236.812 716.12 236.376 717.5L196.5 726.448L237.131 737.499C238.31 740.428 239.944 743.124 241.945 745.5L230 766.5L253 753.674C256.53 755.172 260.41 756 264.484 756H372.778C384.804 756 395.625 748.679 400.123 737.499C404.62 726.32 401.893 713.523 393.23 705.161C369.716 682.464 357.068 663.62 351.195 649.998C348.185 643.017 347.285 638.306 347.084 635.454Z" fill="#149A53" stroke="#005E2C" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<ellipse cx="11" cy="10.5" rx="11" ry="10.5" transform="matrix(-1 0 0 1 237 755)" fill="#149A53" stroke="#005E2C" stroke-width="10"/>
+<ellipse cx="11" cy="10.5" rx="11" ry="10.5" transform="matrix(-1 0 0 1 207 717)" fill="#149A53" stroke="#005E2C" stroke-width="10"/>
+<ellipse cx="11" cy="10.5" rx="11" ry="10.5" transform="matrix(-1 0 0 1 229 677)" fill="#149A53" stroke="#005E2C" stroke-width="10"/>`,
+
+  // Body ellipse + belly highlight
+  body: `<path d="M503.372 457.858C557.859 457.858 606.982 473.781 642.357 499.274C677.74 524.773 699.061 559.561 699.061 597.484C699.06 635.407 677.74 670.195 642.357 695.693C606.982 721.187 557.859 737.109 503.372 737.109C448.885 737.109 399.762 721.187 364.387 695.693C329.004 670.195 307.684 635.407 307.684 597.484C307.684 559.561 329.004 524.773 364.387 499.274C399.762 473.781 448.885 457.858 503.372 457.858Z" fill="#3DD771" stroke="#005E2C" stroke-width="10"/>
+<ellipse cx="504.186" cy="642.984" rx="136.501" ry="78.0004" fill="#AFE8C2"/>`,
+
+  // Character's LEFT hand (viewer's right) — in front of body
+  leftHand: `<path d="M629.081 494.658C644.703 500.178 652.892 517.318 647.371 532.939L571.74 746.969C570.695 749.926 569.234 752.616 567.446 754.998L570.751 793.287L553.632 765.195C549.602 766.652 545.244 767.255 540.845 766.868L521.797 798.26L526.702 761.87C523.036 759.407 520.025 756.2 517.804 752.535L486.365 763.467L513.464 735.922C513.569 732.946 514.123 729.935 515.168 726.979L590.799 512.949C596.32 497.327 613.459 489.138 629.081 494.658Z" fill="#3DD771" stroke="#005E2C" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<ellipse cx="487.198" cy="761.11" rx="11" ry="10.5" transform="rotate(19.4618 487.198 761.11)" fill="#3DD771" stroke="#005E2C" stroke-width="10"/>
+<ellipse cx="525.182" cy="794.683" rx="11" ry="10.5" transform="rotate(19.4618 525.182 794.683)" fill="#3DD771" stroke="#005E2C" stroke-width="10"/>
+<ellipse cx="572.056" cy="791.096" rx="11" ry="10.5" transform="rotate(19.4618 572.056 791.096)" fill="#3DD771" stroke="#005E2C" stroke-width="10"/>`,
+
+  // Character's RIGHT hand (viewer's left) — rendered BEHIND body
+  rightHand: `<path d="M409.729 490.568C406.776 506.872 391.165 517.694 374.862 514.741L151.497 474.278C148.412 473.719 145.523 472.707 142.886 471.323L105.617 480.703L130.612 459.316C128.53 455.57 127.239 451.364 126.918 446.96L92.8855 433.173L129.592 432.2C131.437 428.188 134.122 424.703 137.386 421.925L121.57 392.637L153.091 414.986C156.046 414.615 159.107 414.68 162.192 415.239L385.557 455.701C401.86 458.655 412.682 474.265 409.729 490.568Z" fill="#3DD771" stroke="#005E2C" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+<ellipse cx="124.031" cy="393.082" rx="11" ry="10.5" transform="rotate(100.268 124.031 393.082)" fill="#3DD771" stroke="#005E2C" stroke-width="10"/>
+<ellipse cx="96.9569" cy="435.942" rx="11" ry="10.5" transform="rotate(100.268 96.9569 435.942)" fill="#3DD771" stroke="#005E2C" stroke-width="10"/>
+<ellipse cx="107.988" cy="481.641" rx="11" ry="10.5" transform="rotate(100.268 107.988 481.641)" fill="#3DD771" stroke="#005E2C" stroke-width="10"/>`,
+
+  // Head (complex masked shape with eye bumps)
+  head: `<mask id="froggie-head-mask" fill="white">
+  <path fill-rule="evenodd" clip-rule="evenodd" d="M253.529 187.018C253.529 209.28 260.202 229.983 271.656 247.237C227.133 278.746 200.306 319.43 200.306 363.85C200.306 463.882 336.356 544.974 504.183 544.974C672.009 544.974 808.059 463.882 808.059 363.85C808.059 315.891 776.787 272.285 725.733 239.883C734.432 224.225 739.386 206.2 739.386 187.018C739.386 126.809 690.577 78 630.368 78C571.5 78 523.53 124.659 521.422 183.012C515.716 182.822 509.968 182.726 504.183 182.726C493.147 182.726 482.248 183.076 471.517 183.76C469.794 125.058 421.666 78 362.547 78C302.338 78 253.529 126.809 253.529 187.018Z"/>
+</mask>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M253.529 187.018C253.529 209.28 260.202 229.983 271.656 247.237C227.133 278.746 200.306 319.43 200.306 363.85C200.306 463.882 336.356 544.974 504.183 544.974C672.009 544.974 808.059 463.882 808.059 363.85C808.059 315.891 776.787 272.285 725.733 239.883C734.432 224.225 739.386 206.2 739.386 187.018C739.386 126.809 690.577 78 630.368 78C571.5 78 523.53 124.659 521.422 183.012C515.716 182.822 509.968 182.726 504.183 182.726C493.147 182.726 482.248 183.076 471.517 183.76C469.794 125.058 421.666 78 362.547 78C302.338 78 253.529 126.809 253.529 187.018Z" fill="#3DD771"/>
+<path d="M271.656 247.237L277.433 255.4L285.356 249.793L279.987 241.706L271.656 247.237ZM725.733 239.883L716.991 235.026L712.411 243.272L720.374 248.326L725.733 239.883ZM521.422 183.012L521.089 193.007L531.056 193.339L531.416 183.373L521.422 183.012ZM471.517 183.76L461.521 184.053L461.825 194.398L472.152 193.74L471.517 183.76ZM279.987 241.706C269.587 226.041 263.529 207.252 263.529 187.018H243.529C243.529 211.308 250.816 233.926 263.325 252.768L279.987 241.706ZM210.306 363.85C210.306 323.789 234.496 285.786 277.433 255.4L265.88 239.075C219.77 271.706 190.306 315.072 190.306 363.85H210.306ZM504.183 534.974C421.759 534.974 347.623 515.04 294.429 483.334C241.026 451.503 210.306 408.941 210.306 363.85H190.306C190.306 418.791 227.611 466.791 284.19 500.514C340.977 534.362 418.78 554.974 504.183 554.974V534.974ZM798.059 363.85C798.059 408.941 767.339 451.503 713.936 483.334C660.742 515.04 586.607 534.974 504.183 534.974V554.974C589.585 554.974 667.388 534.362 724.176 500.514C780.754 466.791 818.059 418.791 818.059 363.85H798.059ZM720.374 248.326C769.833 279.716 798.059 320.609 798.059 363.85H818.059C818.059 311.173 783.74 264.854 731.092 231.44L720.374 248.326ZM729.386 187.018C729.386 204.457 724.886 220.816 716.991 235.026L734.475 244.739C743.977 227.633 749.386 207.942 749.386 187.018H729.386ZM630.368 88C685.054 88 729.386 132.332 729.386 187.018H749.386C749.386 121.286 696.099 68 630.368 68V88ZM531.416 183.373C533.33 130.379 576.902 88 630.368 88V68C566.098 68 513.73 118.939 511.429 182.651L531.416 183.373ZM504.183 192.726C509.857 192.726 515.494 192.82 521.089 193.007L521.755 173.018C515.938 172.824 510.079 172.726 504.183 172.726V192.726ZM472.152 193.74C482.672 193.07 493.358 192.726 504.183 192.726V172.726C492.935 172.726 481.825 173.083 470.881 173.78L472.152 193.74ZM362.547 88C416.241 88 459.956 130.742 461.521 184.053L481.512 183.467C479.631 119.375 427.09 68 362.547 68V88ZM263.529 187.018C263.529 132.332 307.861 88 362.547 88V68C296.815 68 243.529 121.286 243.529 187.018H263.529Z" fill="#005E2C" mask="url(#froggie-head-mask)"/>`,
+};
+
+// Wave pivot for Froggie's left hand (shoulder attachment point)
+const _FROGGIE_WAVE_PIVOT = { x: 629, y: 494 };
+
+// ── Froggie emotions ────────────────────────────────────
+const FROGGIE_EMOTIONS = {
+  happy: {
+    eyeRightCornea: `<circle cx="361.443" cy="180.757" r="58.1241" fill="white"/>`,
+    eyeLeftCornea:  `<circle cx="634.417" cy="180.757" r="58.1241" fill="white"/>`,
+    eyeRightIris:   `<ellipse cx="360.831" cy="181.006" rx="26.6107" ry="25.7522" fill="#005E2C"/>`,
+    eyeLeftIris:    `<ellipse cx="633.806" cy="181.006" rx="26.6107" ry="25.7522" fill="#005E2C"/>`,
+    eyeRightExtra: '', eyeLeftExtra: '',
+    eyebrows: '',
+    mouth: `<path d="M618.438 291.939C618.024 338.92 564.609 376 499.132 374.761C433.656 373.521 380.913 334.431 381.327 287.45" stroke="#005E2C" stroke-width="10" stroke-linecap="round"/>`,
+    extras: '',
+  },
+  sad: {
+    eyeRightCornea: `<circle cx="361.443" cy="180.757" r="58.1241" fill="white"/>`,
+    eyeLeftCornea:  `<circle cx="634.417" cy="180.757" r="58.1241" fill="white"/>`,
+    eyeRightIris:   `<ellipse cx="360.831" cy="193" rx="26.6107" ry="25.7522" fill="#005E2C"/>`,
+    eyeLeftIris:    `<ellipse cx="633.806" cy="193" rx="26.6107" ry="25.7522" fill="#005E2C"/>`,
+    eyeRightExtra: '', eyeLeftExtra: '',
+    eyebrows: `<path d="M303 128 L419 150 M580 150 L696 128" fill="none" stroke="#005E2C" stroke-width="9" stroke-linecap="round"/>`,
+    mouth: `<path d="M381 295 C381 258 499 248 618 295" fill="none" stroke="#005E2C" stroke-width="10" stroke-linecap="round"/>`,
+    extras: '',
+  },
+  surprised: {
+    eyeRightCornea: `<circle cx="361.443" cy="177" r="70" fill="white"/>`,
+    eyeLeftCornea:  `<circle cx="634.417" cy="177" r="70" fill="white"/>`,
+    eyeRightIris:   `<ellipse cx="361" cy="177" rx="30" ry="30" fill="#005E2C"/>`,
+    eyeLeftIris:    `<ellipse cx="634" cy="177" rx="30" ry="30" fill="#005E2C"/>`,
+    eyeRightExtra: `<circle cx="350" cy="166" r="11" fill="white" opacity="0.7"/>`,
+    eyeLeftExtra:  `<circle cx="623" cy="166" r="11" fill="white" opacity="0.7"/>`,
+    eyebrows: '',
+    mouth: `<ellipse cx="499" cy="328" rx="38" ry="45" fill="#005E2C"/>`,
+    extras: '',
+  },
+  angry: {
+    eyeRightCornea: `<circle cx="361.443" cy="183" r="54" fill="white"/>`,
+    eyeLeftCornea:  `<circle cx="634.417" cy="183" r="54" fill="white"/>`,
+    eyeRightIris:   `<ellipse cx="360.831" cy="196" rx="26.6107" ry="25.7522" fill="#005E2C"/>`,
+    eyeLeftIris:    `<ellipse cx="633.806" cy="196" rx="26.6107" ry="25.7522" fill="#005E2C"/>`,
+    eyeRightExtra: `<line x1="303" y1="152" x2="420" y2="172" stroke="#3DD771" stroke-width="18" stroke-linecap="round"/>`,
+    eyeLeftExtra:  `<line x1="580" y1="172" x2="697" y2="152" stroke="#3DD771" stroke-width="18" stroke-linecap="round"/>`,
+    eyebrows: `<path d="M310 141 L419 166 M580 166 L689 141" fill="none" stroke="#005E2C" stroke-width="9" stroke-linecap="round"/>`,
+    mouth: `<path d="M420 295 C420 308 499 313 578 295" fill="none" stroke="#005E2C" stroke-width="10" stroke-linecap="round"/>`,
+    extras: '',
+  },
+  excited: {
+    eyeRightCornea: `<circle cx="361.443" cy="174" r="68" fill="white"/>`,
+    eyeLeftCornea:  `<circle cx="634.417" cy="174" r="68" fill="white"/>`,
+    eyeRightIris:   `<ellipse cx="361" cy="168" rx="28" ry="28" fill="#005E2C"/>`,
+    eyeLeftIris:    `<ellipse cx="634" cy="168" rx="28" ry="28" fill="#005E2C"/>`,
+    eyeRightExtra: `<circle cx="350" cy="158" r="11" fill="white" opacity="0.75"/>`,
+    eyeLeftExtra:  `<circle cx="623" cy="158" r="11" fill="white" opacity="0.75"/>`,
+    eyebrows: '',
+    mouth: `<path d="M361 290 C361 392 499 418 637 290Z" fill="#005E2C"/>
+<rect x="381" y="290" width="236" height="26" fill="white" rx="3"/>`,
+    extras: `<path d="M208 192 L220 174 M214 204 L230 190" fill="none" stroke="#FFD700" stroke-width="6" stroke-linecap="round"/>
+<path d="M796 192 L784 174 M790 204 L774 190" fill="none" stroke="#FFD700" stroke-width="6" stroke-linecap="round"/>`,
+  },
+  thinking: {
+    eyeRightCornea: `<circle cx="361.443" cy="180.757" r="58.1241" fill="white"/>`,
+    eyeLeftCornea:  `<circle cx="634.417" cy="180.757" r="58.1241" fill="white"/>`,
+    eyeRightIris:   `<ellipse cx="352" cy="174" rx="26.6107" ry="25.7522" fill="#005E2C"/>`,
+    eyeLeftIris:    `<ellipse cx="633.806" cy="188" rx="26.6107" ry="25.7522" fill="#005E2C"/>`,
+    eyeRightExtra: '', eyeLeftExtra: '',
+    eyebrows: '',
+    mouth: `<path d="M430 290 C460 282 525 295 565 310" fill="none" stroke="#005E2C" stroke-width="10" stroke-linecap="round"/>`,
+    extras: `<circle cx="672" cy="138" r="7" fill="#005E2C" opacity="0.35"/>
+<circle cx="695" cy="116" r="6" fill="#005E2C" opacity="0.3"/>
+<circle cx="716" cy="96" r="5" fill="#005E2C" opacity="0.25"/>`,
+  },
+  winking: {
+    eyeRightCornea: '',
+    eyeLeftCornea:  `<circle cx="634.417" cy="180.757" r="58.1241" fill="white"/>`,
+    eyeRightIris:   '',
+    eyeLeftIris:    `<ellipse cx="633.806" cy="181.006" rx="26.6107" ry="25.7522" fill="#005E2C"/>`,
+    eyeRightExtra: `<ellipse cx="361" cy="181" rx="62" ry="28" fill="#3DD771"/>
+<path d="M303 177 Q361 201 419 177" fill="none" stroke="#005E2C" stroke-width="10" stroke-linecap="round"/>`,
+    eyeLeftExtra: '',
+    eyebrows: '',
+    mouth: `<path d="M618.438 291.939C618.024 338.92 564.609 376 499.132 374.761C433.656 373.521 380.913 334.431 381.327 287.45" stroke="#005E2C" stroke-width="10" stroke-linecap="round"/>`,
+    extras: '',
+  },
+  crying: {
+    eyeRightCornea: `<circle cx="361.443" cy="180.757" r="58.1241" fill="white"/>`,
+    eyeLeftCornea:  `<circle cx="634.417" cy="180.757" r="58.1241" fill="white"/>`,
+    eyeRightIris:   `<ellipse cx="360.831" cy="193" rx="26.6107" ry="25.7522" fill="#005E2C"/>`,
+    eyeLeftIris:    `<ellipse cx="633.806" cy="193" rx="26.6107" ry="25.7522" fill="#005E2C"/>`,
+    eyeRightExtra: `<ellipse cx="338" cy="244" rx="9" ry="20" fill="#87CEEB" opacity="0.85"/>
+<ellipse cx="344" cy="268" rx="7" ry="14" fill="#87CEEB" opacity="0.7"/>`,
+    eyeLeftExtra: `<ellipse cx="658" cy="244" rx="9" ry="20" fill="#87CEEB" opacity="0.85"/>
+<ellipse cx="652" cy="268" rx="7" ry="14" fill="#87CEEB" opacity="0.7"/>`,
+    eyebrows: `<path d="M303 128 L419 150 M580 150 L696 128" fill="none" stroke="#005E2C" stroke-width="9" stroke-linecap="round"/>`,
+    mouth: `<path d="M381 295 C381 258 499 248 618 295" fill="none" stroke="#005E2C" stroke-width="10" stroke-linecap="round"/>`,
+    extras: '',
+  },
+};
+
 // ── Animation durations ─────────────────────────────────
 const _ANIM_DUR = { slow: 2, normal: 1, fast: 0.5 };
+
+// ── Eye-roll animation injector ─────────────────────────
+// Injects a SMIL <animate> into a self-closing iris element string.
+function _addIrisAnim(irisStr, axis, delta, dur) {
+  if (!irisStr) return irisStr;
+  const re = new RegExp(` ${axis}="([^"]+)"`);
+  const m  = irisStr.match(re);
+  if (!m) return irisStr;
+  const base   = parseFloat(m[1]);
+  const target = parseFloat((base + delta).toFixed(3));
+  const anim   = `<animate attributeName="${axis}" values="${base};${target};${base}" dur="${dur}s" repeatCount="indefinite" calcMode="ease"/>`;
+  const tag    = (irisStr.match(/^<(\w+)/) || [])[1] || 'circle';
+  return irisStr.replace('/>', `>${anim}</${tag}>`);
+}
 
 // ── Bubble generators ───────────────────────────────────
 
@@ -139,6 +289,7 @@ function _speechBubble(cx, cy, bw, bh, tailX, tailY, text, opts) {
   const bg   = opts.bg   || '#FFFFFF';
   const bord = opts.bord || '#333333';
   const bsw  = opts.bsw  || 3;
+  const tw   = opts.tw   || 14;
   const tc   = opts.tc   || '#333333';
   const fs   = opts.fs   || 16;
   const ff   = opts.ff   || 'Arial,sans-serif';
@@ -146,24 +297,66 @@ function _speechBubble(cx, cy, bw, bh, tailX, tailY, text, opts) {
   const fst  = opts.fst  || 'normal';
 
   const x = cx - bw / 2, y = cy - bh / 2;
-
-  // Find closest bubble edge point to tail tip for tail attachment
   const tailBaseX = Math.max(x + r, Math.min(x + bw - r, tailX));
   const closestEdgeY = tailY < y ? y : y + bh;
-  const tb1x = tailBaseX - 14, tb2x = tailBaseX + 14;
-  const tby  = closestEdgeY;
+  const tb1x = tailBaseX - tw, tb2x = tailBaseX + tw;
 
   let s = '';
-  // Draw tail first so bubble rect overlaps its base
-  s += `<polygon points="${tb1x},${tby} ${tb2x},${tby} ${tailX},${tailY}" fill="${bg}"/>`;
-  s += `<line x1="${tb1x}" y1="${tby}" x2="${tailX}" y2="${tailY}" stroke="${bord}" stroke-width="${bsw}" stroke-linejoin="round"/>`;
-  s += `<line x1="${tb2x}" y1="${tby}" x2="${tailX}" y2="${tailY}" stroke="${bord}" stroke-width="${bsw}" stroke-linejoin="round"/>`;
-  // Bubble body
+  s += `<polygon points="${tb1x},${closestEdgeY} ${tb2x},${closestEdgeY} ${tailX},${tailY}" fill="${bg}"/>`;
+  s += `<line x1="${tb1x}" y1="${closestEdgeY}" x2="${tailX}" y2="${tailY}" stroke="${bord}" stroke-width="${bsw}" stroke-linejoin="round"/>`;
+  s += `<line x1="${tb2x}" y1="${closestEdgeY}" x2="${tailX}" y2="${tailY}" stroke="${bord}" stroke-width="${bsw}" stroke-linejoin="round"/>`;
+  s += `<rect x="${x}" y="${y}" width="${bw}" height="${bh}" rx="${r}" ry="${r}" fill="${bg}" stroke="${bord}" stroke-width="${bsw}"/>`;
+
+  const lines  = text ? text.split('\n') : [''];
+  const lineH  = fs * 1.35;
+  const totalH = lines.length * lineH;
+  const startY = cy - totalH / 2 + fs * 0.5;
+  lines.forEach((ln, i) => {
+    s += `<text x="${cx}" y="${startY + i * lineH}" font-family="${ff}" font-size="${fs}" font-weight="${fw}" font-style="${fst}" fill="${tc}" text-anchor="middle" dominant-baseline="central">${escXml(ln)}</text>`;
+  });
+  return s;
+}
+
+// Guide-spec dialog box: rounded rect, drop shadow, thin border, corner arrow
+function _dialogBox(cx, cy, bw, bh, tailX, tailY, text, opts) {
+  const bg   = opts.bg   || '#FFFFFF';
+  const bord = opts.bord || '#CCCCCC';
+  const tc   = opts.tc   || '#333333';
+  const fs   = opts.fs   || 40;
+  const ff   = opts.ff   || "'Nunito','Arial Rounded MT Bold',Arial,sans-serif";
+  const fw   = opts.fw   || '500';
+  const fst  = opts.fst  || 'normal';
+  const tw   = opts.tw   || 25;
+  const r    = Math.max(8, Math.round(tw * 0.6));
+  const bsw  = Math.max(1.5, opts.bsw * 0.5 || 2);
+
+  const x = cx - bw / 2, y = cy - bh / 2;
+  const boxBottom = y + bh;
+
+  // Arrow at bottom corner: left corner when bubble is to the right (tailX < cx), right corner otherwise
+  const arrowAtRight = tailX > cx;
+  let ab1x, ab2x;
+  if (arrowAtRight) {
+    ab1x = x + bw - r - tw;
+    ab2x = x + bw - r;
+  } else {
+    ab1x = x + r;
+    ab2x = x + r + tw;
+  }
+
+  let s = '';
+  // Drop shadow (offset rect, no filter needed)
+  s += `<rect x="${x + 3}" y="${y + 3}" width="${bw}" height="${bh}" rx="${r}" ry="${r}" fill="rgba(0,0,0,0.10)" stroke="none"/>`;
+  // Arrow polygon (drawn before box so box overlaps the base)
+  s += `<polygon points="${ab1x},${boxBottom} ${ab2x},${boxBottom} ${tailX},${tailY}" fill="${bg}" stroke="${bord}" stroke-width="${bsw}" stroke-linejoin="round"/>`;
+  // Seam cover line to hide arrow-box join
+  s += `<line x1="${ab1x}" y1="${boxBottom - 0.5}" x2="${ab2x}" y2="${boxBottom - 0.5}" stroke="${bg}" stroke-width="${bsw + 1.5}"/>`;
+  // Box
   s += `<rect x="${x}" y="${y}" width="${bw}" height="${bh}" rx="${r}" ry="${r}" fill="${bg}" stroke="${bord}" stroke-width="${bsw}"/>`;
 
   // Text
   const lines  = text ? text.split('\n') : [''];
-  const lineH  = fs * 1.35;
+  const lineH  = fs * 1.4;
   const totalH = lines.length * lineH;
   const startY = cy - totalH / 2 + fs * 0.5;
   lines.forEach((ln, i) => {
@@ -182,10 +375,8 @@ function _thoughtBubble(cx, cy, bw, bh, tailX, tailY, text, opts) {
   const fw  = opts.fw  || 'normal';
   const fst = opts.fst || 'normal';
 
-  // Cloud shape: main ellipse + smaller lobes
   const rx = bw / 2, ry = bh / 2;
   let s = '';
-  // Thought trail circles
   const dx = tailX - cx, dy = tailY - cy;
   const dist = Math.hypot(dx, dy);
   const ux = dx / dist, uy = dy / dist;
@@ -193,7 +384,6 @@ function _thoughtBubble(cx, cy, bw, bh, tailX, tailY, text, opts) {
     const px = cx + ux * dist * t, py = cy + uy * dist * t;
     s += `<circle cx="${fmt(px)}" cy="${fmt(py)}" r="${r}" fill="${bg}" stroke="${bord}" stroke-width="${bsw}"/>`;
   });
-  // Cloud lobes (decorative bumps around ellipse)
   const lobes = 6;
   for (let i = 0; i < lobes; i++) {
     const ang = (i / lobes) * Math.PI * 2;
@@ -201,9 +391,7 @@ function _thoughtBubble(cx, cy, bw, bh, tailX, tailY, text, opts) {
     const lr = Math.min(rx, ry) * 0.42;
     s += `<circle cx="${fmt(lx)}" cy="${fmt(ly)}" r="${fmt(lr)}" fill="${bg}" stroke="${bord}" stroke-width="${bsw}"/>`;
   }
-  // Main ellipse
   s += `<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="${bg}" stroke="${bord}" stroke-width="${bsw}"/>`;
-  // Text
   const lines  = text ? text.split('\n') : [''];
   const lineH  = fs * 1.35;
   const totalH = lines.length * lineH;
@@ -244,12 +432,13 @@ function _shoutBurst(cx, cy, r, text, opts) {
 }
 
 // ── Convert original char coords → canvas coords ────────
-function _toCanvas(ox, oy, tx, ty) {
-  return { x: (ox - 520) * 0.75 + tx, y: (oy - 635) * 0.75 + ty };
+function _toCanvas(ox, oy, pivotX, pivotY, tx, ty) {
+  return { x: (ox - pivotX) * 0.75 + tx, y: (oy - pivotY) * 0.75 + ty };
 }
 
 // ── Main character generator ─────────────────────────────
 function generateCharacter() {
+  const charName   = val('char-name')  || 'jiggi';
   const emotion    = val('char-emotion') || 'happy';
   const animated   = chk('char-animate');
   const animType   = val('char-anim-type')  || 'bounce';
@@ -261,30 +450,41 @@ function generateCharacter() {
   const bgEnable   = chk('char-bg-enable');
   const bgColor    = val('char-bg-color') || '#FFFFFF';
 
+  const isJiggi   = charName !== 'froggie';
+  const EMOTIONS  = isJiggi ? JIGGI_EMOTIONS  : FROGGIE_EMOTIONS;
+  const PIVOT     = isJiggi ? { x: 520, y: 635 } : { x: 503, y: 490 };
+  const WPIVOT    = isJiggi ? _WAVE_PIVOT : _FROGGIE_WAVE_PIVOT;
+
+  // Output dimensions first — needed to scale bubble units
+  const sizeMap = { small: 280, medium: 360, large: 470, xlarge: 580 };
+  const outW = sizeMap[sizeName] || 360;
+  const vx = 0, vy = 0, vw = 900, vh = 800;
+
   // Bubble text opts
+  // char-bubble-fs is a TARGET SCREEN SIZE in px; convert to viewBox units so the
+  // bubble stays proportional at every output size (medium 360, large 470, etc.)
+  const targetFsPx = Math.max(6, num('char-bubble-fs') || 18);
+  const scaledFs   = Math.round(targetFsPx * vw / outW);   // viewBox units
+  // Stroke and tail widths also scale with the output
+  const scaledBsw  = Math.max(2, Math.round(2 * vw / outW));
+  const scaledTw   = Math.max(12, Math.round(10 * vw / outW)); // tail half-width
+
   const bOpts = {
     bg:   val('char-bubble-bg')    || '#FFFFFF',
     bord: val('char-bubble-border')|| '#333333',
-    bsw:  3,
+    bsw:  scaledBsw,
+    tw:   scaledTw,
     tc:   val('char-bubble-tc')    || '#333333',
-    fs:   Math.max(8, num('char-bubble-fs') || 16),
+    fs:   scaledFs,
     ff:   val('char-bubble-ff')    || 'Arial,sans-serif',
     fw:   val('char-bubble-fw')    || 'normal',
     fst:  val('char-bubble-fstyle')|| 'normal',
-    r:    22,
+    r:    Math.max(14, Math.round(16 * vw / outW)),
   };
-
-  // Output dimensions
-  const sizeMap = { small: 280, medium: 360, large: 470, xlarge: 580 };
-  const outW = sizeMap[sizeName] || 360;
-
-  // Canvas viewBox: 900 × 800 for all positions
-  const vx = 0, vy = 0, vw = 900, vh = 800;
   const outH = Math.round(outW * vh / vw);
 
-  // Character positioning — shift to make room for bubble
-  const CHAR_CX_R = 280; // char center-x when bubble on right
-  const CHAR_CX_L = 620; // char center-x when bubble on left
+  const CHAR_CX_R = 280;
+  const CHAR_CX_L = 620;
   const CHAR_CY   = 430;
 
   const hasBubble  = bubbleType !== 'none' && bubbleText.trim() !== '';
@@ -292,21 +492,38 @@ function generateCharacter() {
   const charTX = hasBubble ? (isLeftSide ? CHAR_CX_L : CHAR_CX_R) : 450;
   const charTY = CHAR_CY;
 
-  // ── Build character inner SVG ───────────────────────────
-  const em = JIGGI_EMOTIONS[emotion] || JIGGI_EMOTIONS.happy;
+  // ── Emotion ──────────────────────────────────────────────
+  const em = EMOTIONS[emotion] || EMOTIONS.happy;
 
-  // Left hand: normal or waving
+  // ── Eye roll: inject SMIL animation into iris elements ──
+  const isEyeRoll = animated && (animType === 'eye-roll-left' || animType === 'eye-roll-right' ||
+                                  animType === 'eye-roll-up'   || animType === 'eye-roll-down');
+  const dur = _ANIM_DUR[animSpeed] || 1;
+
+  let eyeRightIris = em.eyeRightIris;
+  let eyeLeftIris  = em.eyeLeftIris;
+  if (isEyeRoll) {
+    const axis  = (animType === 'eye-roll-left' || animType === 'eye-roll-right') ? 'cx' : 'cy';
+    const delta = (animType === 'eye-roll-right' || animType === 'eye-roll-down') ? 13 : -13;
+    eyeRightIris = _addIrisAnim(eyeRightIris, axis, delta, dur);
+    eyeLeftIris  = _addIrisAnim(eyeLeftIris,  axis, delta, dur);
+  }
+
+  // ── Wave hand group ──────────────────────────────────────
   const doWave = animated && animType === 'wave';
+  const waveAnim = doWave
+    ? `<animateTransform attributeName="transform" type="rotate"
+        values="0 ${WPIVOT.x} ${WPIVOT.y};-35 ${WPIVOT.x} ${WPIVOT.y};0 ${WPIVOT.x} ${WPIVOT.y}"
+        dur="${_ANIM_DUR[animSpeed]}s" repeatCount="indefinite" calcMode="ease"/>`
+    : '';
   const leftHandGroup = doWave
-    ? `<g>
-        <animateTransform attributeName="transform" type="rotate"
-          values="0 ${_WAVE_PIVOT.x} ${_WAVE_PIVOT.y};-35 ${_WAVE_PIVOT.x} ${_WAVE_PIVOT.y};0 ${_WAVE_PIVOT.x} ${_WAVE_PIVOT.y}"
-          dur="${_ANIM_DUR[animSpeed]}s" repeatCount="indefinite" calcMode="ease"/>
-        ${_J.leftHand}
-      </g>`
-    : _J.leftHand;
+    ? `<g>${waveAnim}${isJiggi ? _J.leftHand : _F.leftHand}</g>`
+    : (isJiggi ? _J.leftHand : _F.leftHand);
 
-  const charInner = `
+  // ── Assemble character inner SVG ─────────────────────────
+  let charInner;
+  if (isJiggi) {
+    charInner = `
     ${_J.rightLeg}
     ${_J.leftLeg}
     ${_J.rightHand}
@@ -316,8 +533,8 @@ function generateCharacter() {
     ${_J.bodyStroke}
     ${em.eyeRightCornea}
     ${em.eyeLeftCornea}
-    ${em.eyeRightIris}
-    ${em.eyeLeftIris}
+    ${eyeRightIris}
+    ${eyeLeftIris}
     ${em.eyeRightExtra}
     ${em.eyeLeftExtra}
     ${_J.eyeRightOutline}
@@ -325,11 +542,29 @@ function generateCharacter() {
     ${em.eyebrows}
     ${em.mouth}
     ${em.extras}`;
+  } else {
+    // Froggie: rightHand rendered BEFORE body so it appears behind
+    charInner = `
+    ${_F.rightLeg}
+    ${_F.leftLeg}
+    ${_F.rightHand}
+    ${_F.body}
+    ${leftHandGroup}
+    ${_F.head}
+    ${em.eyeRightCornea}
+    ${em.eyeLeftCornea}
+    ${eyeRightIris}
+    ${eyeLeftIris}
+    ${em.eyeRightExtra}
+    ${em.eyeLeftExtra}
+    ${em.eyebrows}
+    ${em.mouth}
+    ${em.extras}`;
+  }
 
-  // ── Animation wrapper ────────────────────────────────────
-  const dur = _ANIM_DUR[animSpeed] || 1;
+  // ── Body animation wrapper ────────────────────────────────
   let animEl = '';
-  if (animated) {
+  if (animated && !isEyeRoll) {
     if (animType === 'bounce') {
       animEl = `<animateTransform attributeName="transform" type="translate"
         values="0 0;0 -35;0 0" dur="${dur}s" repeatCount="indefinite" additive="sum" calcMode="ease"/>`;
@@ -340,41 +575,39 @@ function generateCharacter() {
       animEl = `<animateTransform attributeName="transform" type="translate"
         values="0 0;-12 0;12 0;-12 0;0 0" dur="${dur * 0.5}s" repeatCount="indefinite" additive="sum"/>`;
     }
-    // 'wave' is handled above on the leftHand subgroup
+    // 'wave' is handled on the leftHand subgroup; eye rolls are in the iris elements
   }
 
-  const charTransform = `translate(${charTX}, ${charTY}) scale(0.75) translate(-520, -635)`;
+  const charTransform = `translate(${charTX}, ${charTY}) scale(0.75) translate(-${PIVOT.x}, -${PIVOT.y})`;
   const charGroup = `<g transform="${charTransform}">${animEl}${charInner}</g>`;
 
   // ── Bubble ───────────────────────────────────────────────
   let bubbleSVG = '';
-  if (bubbleType !== 'none' && bubbleText.trim() !== '') {
-    // Estimate lines to size the bubble
+  if (hasBubble) {
     const lines = bubbleText.split('\n');
     const maxChars = Math.max(...lines.map(l => l.length));
-    const bw = Math.min(420, Math.max(160, maxChars * (bOpts.fs * 0.62) + 40));
-    const bh = lines.length * (bOpts.fs * 1.4) + 36;
+    // bw/bh in viewBox units — bOpts.fs is already scaled so text is targetFsPx on screen
+    const bw = Math.min(520, Math.max(200, maxChars * (bOpts.fs * 0.6) + bOpts.fs * 2));
+    const bh = lines.length * (bOpts.fs * 1.45) + bOpts.fs * 1.2;
 
-    // Bubble placement — all positions at mouth height, to the side of the character
-    const mouthCanvas = _toCanvas(524, 468, charTX, charTY);
+    const mouthCanvas = _toCanvas(
+      isJiggi ? 524 : 499,
+      isJiggi ? 468 : 332,
+      PIVOT.x, PIVOT.y, charTX, charTY
+    );
 
-    // Approx character body edge at mouth level (original x ≈ 710 right, 338 left)
-    const bodyEdgeRightX = _toCanvas(710, 468, charTX, charTY).x;
-    const bodyEdgeLeftX  = _toCanvas(338, 468, charTX, charTY).x;
+    const bodyEdgeRightX = _toCanvas(isJiggi ? 710 : 699, 468, PIVOT.x, PIVOT.y, charTX, charTY).x;
+    const bodyEdgeLeftX  = _toCanvas(isJiggi ? 338 : 307, 468, PIVOT.x, PIVOT.y, charTX, charTY).x;
 
-    // Bubble center slightly above mouth; arrow tip stops short of touching character
-    const bcy    = mouthCanvas.y - 25;
-    const ARROW_GAP = 20;
+    const bcy    = mouthCanvas.y - bh * 0.1;
+    const ARROW_GAP = Math.round(18 * vw / outW);
 
     let bcx, tailX, tailY;
-
     if (!isLeftSide) {
-      // Bubble on right side
       tailX = bodyEdgeRightX + ARROW_GAP;
       tailY = mouthCanvas.y;
       bcx   = Math.min(vw - bw / 2 - 15, bodyEdgeRightX + bw / 2 + 35);
     } else {
-      // Bubble on left side
       tailX = bodyEdgeLeftX - ARROW_GAP;
       tailY = mouthCanvas.y;
       bcx   = Math.max(bw / 2 + 15, bodyEdgeLeftX - bw / 2 - 35);
@@ -387,6 +620,12 @@ function generateCharacter() {
     } else if (bubbleType === 'shout') {
       const br = Math.max(bw, bh) / 2 + 20;
       bubbleSVG = _shoutBurst(bcx, bcy, br, bubbleText, { ...bOpts, fw: bOpts.fw === 'normal' ? 'bold' : bOpts.fw });
+    } else if (bubbleType === 'dialog') {
+      bubbleSVG = _dialogBox(bcx, bcy, bw, bh, tailX, tailY, bubbleText, {
+        ...bOpts,
+        bord: bOpts.bord === '#333333' ? '#CCCCCC' : bOpts.bord,
+        fw:   bOpts.fw   === 'normal'  ? '500'     : bOpts.fw,
+      });
     }
   }
 

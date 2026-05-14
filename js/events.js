@@ -411,6 +411,7 @@ function wireAll() {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.char-card').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
+      const ni = $('char-name'); if (ni) ni.value = btn.dataset.char || 'jiggi';
       render();
     });
   });
