@@ -363,15 +363,14 @@ function _dialogBox(cx, cy, bw, bh, tailX, tailY, text, opts) {
   const x = cx - bw / 2, y = cy - bh / 2;
   const xr = x + bw, yb = y + bh;
 
-  // Determine tail attachment on bottom edge
+  // Determine tail attachment on bottom edge based on horizontal position of tail tip
   let ab1, ab2;
-  if (tailY > yb) {
-    // Centre-bottom arrow (top position)
-    ab1 = cx - tw; ab2 = cx + tw;
+  if (tailX < cx - bw * 0.2) {
+    ab1 = x + r;       ab2 = x + r + tw;   // bottom-left corner (tail exits left)
+  } else if (tailX > cx + bw * 0.2) {
+    ab1 = xr - r - tw; ab2 = xr - r;       // bottom-right corner (tail exits right)
   } else {
-    // Corner arrow — left corner when bubble is right of character, right corner otherwise
-    if (tailX > cx) { ab1 = xr - r - tw; ab2 = xr - r; }
-    else             { ab1 = x + r;       ab2 = x + r + tw; }
+    ab1 = cx - tw;     ab2 = cx + tw;       // bottom-center
   }
 
   const d = `M ${fmt(x+r)} ${fmt(y)}
@@ -693,16 +692,27 @@ function generateCharacter() {
       tailY = headTopY + 8;
       bcx   = charTX;
       bcy   = tailY - bh / 2 - 35;
-    } else if (!isLeftSide) {
-      tailX = bodyEdgeRightX + 10;
+    } else if (bubbleType === 'dialog') {
+      // Dialog box: tail exits bottom of box and points down to the character's mouth
+      tailX = mouthCanvas.x;
       tailY = mouthCanvas.y;
-      bcx   = Math.min(vw - bw / 2 - 15, tailX + ARROW_LEN + bw / 2);
-      bcy   = mouthCanvas.y - bh * 0.1;
+      bcy   = tailY - bh / 2 - 30;   // box bottom sits 30 units above the tail tip
+      bcx   = !isLeftSide
+        ? Math.min(vw - bw / 2 - 15, mouthCanvas.x + bw / 2 + 60)
+        : Math.max(bw / 2 + 15, mouthCanvas.x - bw / 2 - 60);
     } else {
-      tailX = bodyEdgeLeftX - 10;
-      tailY = mouthCanvas.y;
-      bcx   = Math.max(bw / 2 + 15, tailX - ARROW_LEN - bw / 2);
-      bcy   = mouthCanvas.y - bh * 0.1;
+      // Thought / speech: tail exits the side of the box pointing horizontally to body edge
+      if (!isLeftSide) {
+        tailX = bodyEdgeRightX + 10;
+        tailY = mouthCanvas.y;
+        bcx   = Math.min(vw - bw / 2 - 15, tailX + ARROW_LEN + bw / 2);
+        bcy   = mouthCanvas.y - bh * 0.1;
+      } else {
+        tailX = bodyEdgeLeftX - 10;
+        tailY = mouthCanvas.y;
+        bcx   = Math.max(bw / 2 + 15, tailX - ARROW_LEN - bw / 2);
+        bcy   = mouthCanvas.y - bh * 0.1;
+      }
     }
 
     if (bubbleType === 'speech') {
