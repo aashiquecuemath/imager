@@ -775,6 +775,12 @@ function generateDotPlot() {
   const maxV  = Math.max(...values);
   let xMin    = _niceFloor(minV);
   let xMax    = _niceMax(maxV);
+  // Manual range: user can only EXTEND the axis beyond the data range, never restrict it
+  if (chk('dp-xrange-manual')) {
+    const xMinIn = num('dp-xmin'), xMaxIn = num('dp-xmax');
+    if (!isNaN(xMinIn)) xMin = Math.min(xMinIn, xMin);
+    if (!isNaN(xMaxIn)) xMax = Math.max(xMaxIn, xMax);
+  }
   if (xMin >= xMax) xMax = xMin + 10;
   const tStep = _niceTick(xMax - xMin);
 

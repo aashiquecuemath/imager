@@ -495,6 +495,14 @@ function wireAll() {
   $('hs-bin-mode')?.addEventListener('change', _hsSyncBinMode);
   _hsSyncBinMode();
 
+  /* ── Dot plot: manual x-axis range toggle ── */
+  function _dpSyncXRange() {
+    const w = $('dp-xrange-fields');
+    if (w) w.style.display = chk('dp-xrange-manual') ? '' : 'none';
+  }
+  $('dp-xrange-manual')?.addEventListener('change', () => { _dpSyncXRange(); render(); });
+  _dpSyncXRange();
+
   /* ── Pie chart: donut toggle ── */
   function _pcSyncDonut() {
     const w = $('pc-hole-wrap');
