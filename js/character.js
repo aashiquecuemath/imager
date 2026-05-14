@@ -284,51 +284,59 @@ function _addIrisAnim(irisStr, axis, delta, dur) {
 
 // ── Bubble generators ───────────────────────────────────
 
+// Speech bubble — single closed path; tail detours through the nearest edge.
 function _speechBubble(cx, cy, bw, bh, tailX, tailY, text, opts) {
-  const r    = opts.r    || 22;
-  const bg   = opts.bg   || '#FFFFFF';
-  const bord = opts.bord || '#333333';
-  const bsw  = opts.bsw  || 3;
-  const tw   = opts.tw   || 14;
-  const tc   = opts.tc   || '#333333';
-  const fs   = opts.fs   || 16;
-  const ff   = opts.ff   || 'Arial,sans-serif';
-  const fw   = opts.fw   || 'normal';
-  const fst  = opts.fst  || 'normal';
+  const r   = opts.r   || 22;
+  const bg  = opts.bg  || '#FFFFFF';
+  const bord= opts.bord|| '#333333';
+  const bsw = opts.bsw || 3;
+  const tw  = opts.tw  || 14;
+  const tc  = opts.tc  || '#333333';
+  const fs  = opts.fs  || 16;
+  const ff  = opts.ff  || 'Arial,sans-serif';
+  const fw  = opts.fw  || 'normal';
+  const fst = opts.fst || 'normal';
 
   const x = cx - bw / 2, y = cy - bh / 2;
-  let s = '';
+  const xr = x + bw, yb = y + bh;
+  let d;
 
   if (tailX < x) {
-    // Tail to the LEFT — side arrow on left edge (bubble right of character)
-    const tyBase = Math.max(y + r, Math.min(y + bh - r, tailY));
-    const tt1y = tyBase - tw, tt2y = tyBase + tw;
-    s += `<polygon points="${x},${tt1y} ${x},${tt2y} ${tailX},${tailY}" fill="${bg}"/>`;
-    s += `<line x1="${x}" y1="${tt1y}" x2="${tailX}" y2="${tailY}" stroke="${bord}" stroke-width="${bsw}" stroke-linejoin="round"/>`;
-    s += `<line x1="${x}" y1="${tt2y}" x2="${tailX}" y2="${tailY}" stroke="${bord}" stroke-width="${bsw}" stroke-linejoin="round"/>`;
-    s += `<rect x="${x}" y="${y}" width="${bw}" height="${bh}" rx="${r}" ry="${r}" fill="${bg}" stroke="${bord}" stroke-width="${bsw}"/>`;
-    s += `<line x1="${x + bsw * 0.6}" y1="${tt1y}" x2="${x + bsw * 0.6}" y2="${tt2y}" stroke="${bg}" stroke-width="${bsw * 1.6}"/>`;
-  } else if (tailX > x + bw) {
-    // Tail to the RIGHT — side arrow on right edge (bubble left of character)
-    const ex = x + bw;
-    const tyBase = Math.max(y + r, Math.min(y + bh - r, tailY));
-    const tt1y = tyBase - tw, tt2y = tyBase + tw;
-    s += `<polygon points="${ex},${tt1y} ${ex},${tt2y} ${tailX},${tailY}" fill="${bg}"/>`;
-    s += `<line x1="${ex}" y1="${tt1y}" x2="${tailX}" y2="${tailY}" stroke="${bord}" stroke-width="${bsw}" stroke-linejoin="round"/>`;
-    s += `<line x1="${ex}" y1="${tt2y}" x2="${tailX}" y2="${tailY}" stroke="${bord}" stroke-width="${bsw}" stroke-linejoin="round"/>`;
-    s += `<rect x="${x}" y="${y}" width="${bw}" height="${bh}" rx="${r}" ry="${r}" fill="${bg}" stroke="${bord}" stroke-width="${bsw}"/>`;
-    s += `<line x1="${ex - bsw * 0.6}" y1="${tt1y}" x2="${ex - bsw * 0.6}" y2="${tt2y}" stroke="${bg}" stroke-width="${bsw * 1.6}"/>`;
+    // Tail exits LEFT edge — detour replaces a segment of the left side
+    const tb = Math.max(y + r, Math.min(yb - r, tailY));
+    d = `M ${fmt(x+r)} ${fmt(y)}
+         L ${fmt(xr-r)} ${fmt(y)} A ${r} ${r} 0 0 1 ${fmt(xr)} ${fmt(y+r)}
+         L ${fmt(xr)} ${fmt(yb-r)} A ${r} ${r} 0 0 1 ${fmt(xr-r)} ${fmt(yb)}
+         L ${fmt(x+r)} ${fmt(yb)} A ${r} ${r} 0 0 1 ${fmt(x)} ${fmt(yb-r)}
+         L ${fmt(x)} ${fmt(tb+tw)}
+         L ${fmt(tailX)} ${fmt(tailY)}
+         L ${fmt(x)} ${fmt(tb-tw)}
+         L ${fmt(x)} ${fmt(y+r)} A ${r} ${r} 0 0 1 ${fmt(x+r)} ${fmt(y)} Z`;
+  } else if (tailX > xr) {
+    // Tail exits RIGHT edge
+    const tb = Math.max(y + r, Math.min(yb - r, tailY));
+    d = `M ${fmt(x+r)} ${fmt(y)}
+         L ${fmt(xr-r)} ${fmt(y)} A ${r} ${r} 0 0 1 ${fmt(xr)} ${fmt(y+r)}
+         L ${fmt(xr)} ${fmt(tb-tw)}
+         L ${fmt(tailX)} ${fmt(tailY)}
+         L ${fmt(xr)} ${fmt(tb+tw)}
+         L ${fmt(xr)} ${fmt(yb-r)} A ${r} ${r} 0 0 1 ${fmt(xr-r)} ${fmt(yb)}
+         L ${fmt(x+r)} ${fmt(yb)} A ${r} ${r} 0 0 1 ${fmt(x)} ${fmt(yb-r)}
+         L ${fmt(x)} ${fmt(y+r)} A ${r} ${r} 0 0 1 ${fmt(x+r)} ${fmt(y)} Z`;
   } else {
-    // Tail above or below the box (top position)
-    const tailBaseX = Math.max(x + r, Math.min(x + bw - r, tailX));
-    const closestEdgeY = tailY < y ? y : y + bh;
-    const tb1x = tailBaseX - tw, tb2x = tailBaseX + tw;
-    s += `<polygon points="${tb1x},${closestEdgeY} ${tb2x},${closestEdgeY} ${tailX},${tailY}" fill="${bg}"/>`;
-    s += `<line x1="${tb1x}" y1="${closestEdgeY}" x2="${tailX}" y2="${tailY}" stroke="${bord}" stroke-width="${bsw}" stroke-linejoin="round"/>`;
-    s += `<line x1="${tb2x}" y1="${closestEdgeY}" x2="${tailX}" y2="${tailY}" stroke="${bord}" stroke-width="${bsw}" stroke-linejoin="round"/>`;
-    s += `<rect x="${x}" y="${y}" width="${bw}" height="${bh}" rx="${r}" ry="${r}" fill="${bg}" stroke="${bord}" stroke-width="${bsw}"/>`;
+    // Tail exits BOTTOM edge (top position)
+    const tbx = Math.max(x + r, Math.min(xr - r, tailX));
+    d = `M ${fmt(x+r)} ${fmt(y)}
+         L ${fmt(xr-r)} ${fmt(y)} A ${r} ${r} 0 0 1 ${fmt(xr)} ${fmt(y+r)}
+         L ${fmt(xr)} ${fmt(yb-r)} A ${r} ${r} 0 0 1 ${fmt(xr-r)} ${fmt(yb)}
+         L ${fmt(tbx+tw)} ${fmt(yb)}
+         L ${fmt(tailX)} ${fmt(tailY)}
+         L ${fmt(tbx-tw)} ${fmt(yb)}
+         L ${fmt(x+r)} ${fmt(yb)} A ${r} ${r} 0 0 1 ${fmt(x)} ${fmt(yb-r)}
+         L ${fmt(x)} ${fmt(y+r)} A ${r} ${r} 0 0 1 ${fmt(x+r)} ${fmt(y)} Z`;
   }
 
+  let s = `<path d="${d}" fill="${bg}" stroke="${bord}" stroke-width="${bsw}" stroke-linejoin="round"/>`;
   const lines  = text ? text.split('\n') : [''];
   const lineH  = fs * 1.35;
   const totalH = lines.length * lineH;
@@ -339,49 +347,45 @@ function _speechBubble(cx, cy, bw, bh, tailX, tailY, text, opts) {
   return s;
 }
 
-// Guide-spec dialog box: rounded rect, drop shadow, thin border, corner arrow
+// Dialog box — single closed path with drop shadow behind it.
 function _dialogBox(cx, cy, bw, bh, tailX, tailY, text, opts) {
-  const bg   = opts.bg   || '#FFFFFF';
-  const bord = opts.bord || '#CCCCCC';
-  const tc   = opts.tc   || '#333333';
-  const fs   = opts.fs   || 40;
-  const ff   = opts.ff   || "'Nunito','Arial Rounded MT Bold',Arial,sans-serif";
-  const fw   = opts.fw   || '500';
-  const fst  = opts.fst  || 'normal';
-  const tw   = opts.tw   || 25;
-  const r    = Math.max(8, Math.round(tw * 0.6));
-  const bsw  = Math.max(1.5, opts.bsw * 0.5 || 2);
+  const bg  = opts.bg  || '#FFFFFF';
+  const bord= opts.bord|| '#CCCCCC';
+  const tc  = opts.tc  || '#333333';
+  const fs  = opts.fs  || 40;
+  const ff  = opts.ff  || "'Nunito','Arial Rounded MT Bold',Arial,sans-serif";
+  const fw  = opts.fw  || '500';
+  const fst = opts.fst || 'normal';
+  const tw  = opts.tw  || 25;
+  const r   = Math.max(8, Math.round(tw * 0.6));
+  const bsw = Math.max(1.5, opts.bsw * 0.5 || 2);
 
   const x = cx - bw / 2, y = cy - bh / 2;
-  const boxBottom = y + bh;
+  const xr = x + bw, yb = y + bh;
 
-  // Arrow: centre-bottom when tail is below the box (top position), otherwise bottom corner
-  let ab1x, ab2x;
-  if (tailY > boxBottom) {
-    ab1x = cx - tw;
-    ab2x = cx + tw;
+  // Determine tail attachment on bottom edge
+  let ab1, ab2;
+  if (tailY > yb) {
+    // Centre-bottom arrow (top position)
+    ab1 = cx - tw; ab2 = cx + tw;
   } else {
-    const arrowAtRight = tailX > cx;
-    if (arrowAtRight) {
-      ab1x = x + bw - r - tw;
-      ab2x = x + bw - r;
-    } else {
-      ab1x = x + r;
-      ab2x = x + r + tw;
-    }
+    // Corner arrow — left corner when bubble is right of character, right corner otherwise
+    if (tailX > cx) { ab1 = xr - r - tw; ab2 = xr - r; }
+    else             { ab1 = x + r;       ab2 = x + r + tw; }
   }
 
-  let s = '';
-  // Drop shadow (offset rect, no filter needed)
-  s += `<rect x="${x + 3}" y="${y + 3}" width="${bw}" height="${bh}" rx="${r}" ry="${r}" fill="rgba(0,0,0,0.10)" stroke="none"/>`;
-  // Arrow polygon (drawn before box so box overlaps the base)
-  s += `<polygon points="${ab1x},${boxBottom} ${ab2x},${boxBottom} ${tailX},${tailY}" fill="${bg}" stroke="${bord}" stroke-width="${bsw}" stroke-linejoin="round"/>`;
-  // Seam cover line to hide arrow-box join
-  s += `<line x1="${ab1x}" y1="${boxBottom - 0.5}" x2="${ab2x}" y2="${boxBottom - 0.5}" stroke="${bg}" stroke-width="${bsw + 1.5}"/>`;
-  // Box
-  s += `<rect x="${x}" y="${y}" width="${bw}" height="${bh}" rx="${r}" ry="${r}" fill="${bg}" stroke="${bord}" stroke-width="${bsw}"/>`;
+  const d = `M ${fmt(x+r)} ${fmt(y)}
+             L ${fmt(xr-r)} ${fmt(y)} A ${r} ${r} 0 0 1 ${fmt(xr)} ${fmt(y+r)}
+             L ${fmt(xr)} ${fmt(yb-r)} A ${r} ${r} 0 0 1 ${fmt(xr-r)} ${fmt(yb)}
+             L ${fmt(ab2)} ${fmt(yb)}
+             L ${fmt(tailX)} ${fmt(tailY)}
+             L ${fmt(ab1)} ${fmt(yb)}
+             L ${fmt(x+r)} ${fmt(yb)} A ${r} ${r} 0 0 1 ${fmt(x)} ${fmt(yb-r)}
+             L ${fmt(x)} ${fmt(y+r)} A ${r} ${r} 0 0 1 ${fmt(x+r)} ${fmt(y)} Z`;
 
-  // Text
+  let s = `<rect x="${fmt(x+3)}" y="${fmt(y+3)}" width="${fmt(bw)}" height="${fmt(bh)}" rx="${r}" ry="${r}" fill="rgba(0,0,0,0.10)" stroke="none"/>`;
+  s += `<path d="${d}" fill="${bg}" stroke="${bord}" stroke-width="${bsw}" stroke-linejoin="round"/>`;
+
   const lines  = text ? text.split('\n') : [''];
   const lineH  = fs * 1.4;
   const totalH = lines.length * lineH;
@@ -392,6 +396,9 @@ function _dialogBox(cx, cy, bw, bh, tailX, tailY, text, opts) {
   return s;
 }
 
+// Thought bubble — cloud body as single path tracing outer silhouette of overlapping circles
+// (reference 9-bump cloud from dialog-box-rules.txt, scaled to fit bw×bh),
+// plus 3 separate tail circles (intentional per spec).
 function _thoughtBubble(cx, cy, bw, bh, tailX, tailY, text, opts) {
   const bg  = opts.bg  || '#FFFFFF';
   const bord= opts.bord|| '#333333';
@@ -402,41 +409,65 @@ function _thoughtBubble(cx, cy, bw, bh, tailX, tailY, text, opts) {
   const fw  = opts.fw  || 'normal';
   const fst = opts.fst || 'normal';
 
-  const rx = bw / 2, ry = bh / 2;
-  // 4 bumps spanning the full width; bry > brx for visible height
-  const N = 4, brx = rx / N, bry = brx * 1.5;
+  // Reference cloud: 9-bump outer silhouette, bounding box x:30-195, y:30-122 → centre (112.5, 76)
+  const RC = 112.5, RY = 76, RW = 165, RH = 92;
+  const sx = bw / RW, sy = bh / RH;
+  const tp = (px, py) => `${fmt(cx + (px - RC) * sx)} ${fmt(cy + (py - RY) * sy)}`;
+  const ar = (r) => `${fmt(r * sx)} ${fmt(r * sy)}`;
 
-  let s = '';
+  const cloudD = [
+    `M ${tp(30, 80)}`,
+    `A ${ar(28)} 0 0 1 ${tp(50, 53)}`,
+    `A ${ar(30)} 0 0 1 ${tp(80, 38)}`,
+    `A ${ar(28)} 0 0 1 ${tp(110, 30)}`,
+    `A ${ar(32)} 0 0 1 ${tp(145, 32)}`,
+    `A ${ar(26)} 0 0 1 ${tp(175, 48)}`,
+    `A ${ar(24)} 0 0 1 ${tp(195, 72)}`,
+    `A ${ar(26)} 0 0 1 ${tp(188, 100)}`,
+    `A ${ar(30)} 0 0 1 ${tp(155, 118)}`,
+    `A ${ar(30)} 0 0 1 ${tp(110, 122)}`,
+    `A ${ar(26)} 0 0 1 ${tp(70, 118)}`,
+    `A ${ar(26)} 0 0 1 ${tp(40, 105)}`,
+    `A ${ar(28)} 0 0 1 ${tp(30, 80)} Z`,
+  ].join(' ');
 
-  // Two trailing spheres, placed just outside the cloud body
+  let s = `<path d="${cloudD}" fill="${bg}" stroke="${bord}" stroke-width="${bsw}" stroke-linejoin="round"/>`;
+
+  // Tail: 3 circles (ratio 1.0 : 0.7 : 0.4) descending from cloud toward character
   const dx = tailX - cx, dy = tailY - cy;
   const dist = Math.hypot(dx, dy);
   const ux = dx / dist, uy = dy / dist;
-  // cloud boundary distance in tail direction (ellipse formula, using ry*0.72 for bottom arc)
-  const ryEff = uy > 0 ? ry * 0.72 : bry;
-  const cloudBound = Math.sqrt(1 / (ux * ux / (rx * rx) + uy * uy / (ryEff * ryEff)));
-  const r1 = Math.max(6,  Math.round(bsw * 2.8));
-  const r2 = Math.max(10, Math.round(bsw * 4.8));
-  // sphere2 (larger) just outside cloud; sphere1 (smaller) between sphere2 and tail
-  const p2d = cloudBound + r2 * 1.6;
-  const p1d = p2d + r2 + r1 * 1.8;
-  s += `<circle cx="${fmt(cx + ux*p2d)}" cy="${fmt(cy + uy*p2d)}" r="${r2}" fill="${bg}" stroke="${bord}" stroke-width="${bsw}"/>`;
-  s += `<circle cx="${fmt(cx + ux*p1d)}" cy="${fmt(cy + uy*p1d)}" r="${r1}" fill="${bg}" stroke="${bord}" stroke-width="${bsw}"/>`;
 
-  // Cloud path: N bumps on TOP (sweep=0 = CCW = upward), smooth arc on BOTTOM (sweep=1 = CW = downward)
-  let d = `M ${fmt(cx + rx)} ${fmt(cy)} `;
-  for (let i = 0; i < N; i++) {
-    d += `A ${fmt(brx)} ${fmt(bry)} 0 0 0 ${fmt(cx + rx - (i + 1) * 2 * brx)} ${fmt(cy)} `;
-  }
-  d += `A ${fmt(rx)} ${fmt(ry * 0.72)} 0 0 1 ${fmt(cx + rx)} ${fmt(cy)} Z`;
-  s += `<path d="${d}" fill="${bg}" stroke="${bord}" stroke-width="${bsw}" stroke-linejoin="round"/>`;
+  // Cloud boundary in tail direction — approximate using effective ellipse radii
+  const cRx = bw * 0.44, cRy = uy > 0 ? bh * 0.32 : bh * 0.42;
+  const cBound = Math.sqrt(1 / (ux * ux / (cRx * cRx) + uy * uy / (cRy * cRy)));
 
-  // Text centred at cy — bumps above, smooth arc below, so cy is mid-cloud
-  const textCY  = cy;
-  const lines   = text ? text.split('\n') : [''];
-  const lineH   = fs * 1.35;
-  const totalH  = lines.length * lineH;
-  const startY  = textCY - totalH / 2 + fs * 0.5;
+  // Base radius scaled proportionally to cloud size (spec: ~10px for 220px cloud)
+  const baseR = Math.max(6, Math.round(bw * 0.055));
+  const cr1 = baseR, cr2 = Math.round(baseR * 0.7), cr3 = Math.max(3, Math.round(baseR * 0.4));
+
+  // Place circles so they fit in the available gap between cloud and tail
+  const chainLen = cr1 * 2.4 + cr2 * 2.4 + cr3 * 1.4;
+  const avail = dist - cBound;
+  const fit = avail > 0 && avail < chainLen ? avail / chainLen : 1;
+  const sr1 = Math.max(3, Math.round(cr1 * fit));
+  const sr2 = Math.max(2, Math.round(cr2 * fit));
+  const sr3 = Math.max(1, Math.round(cr3 * fit));
+
+  const c1d = cBound + sr1 * 1.4;
+  const c2d = c1d + sr1 + sr2 * 1.4;
+  const c3d = c2d + sr2 + sr3 * 1.4;
+
+  [{ d: c1d, r: sr1 }, { d: c2d, r: sr2 }, { d: c3d, r: sr3 }].forEach(({ d: cd, r: cr }) => {
+    s += `<circle cx="${fmt(cx + ux * cd)}" cy="${fmt(cy + uy * cd)}" r="${cr}" fill="${bg}" stroke="${bord}" stroke-width="${bsw}"/>`;
+  });
+
+  // Text: cloud visual centroid is slightly below geometric centre due to bump asymmetry
+  const textCY = cy + bh * 0.05;
+  const lines  = text ? text.split('\n') : [''];
+  const lineH  = fs * 1.35;
+  const totalH = lines.length * lineH;
+  const startY = textCY - totalH / 2 + fs * 0.5;
   lines.forEach((ln, i) => {
     s += `<text x="${cx}" y="${startY + i * lineH}" font-family="${ff}" font-size="${fs}" font-weight="${fw}" font-style="${fst}" fill="${tc}" text-anchor="middle" dominant-baseline="central">${escXml(ln)}</text>`;
   });
