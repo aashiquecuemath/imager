@@ -297,15 +297,37 @@ function _speechBubble(cx, cy, bw, bh, tailX, tailY, text, opts) {
   const fst  = opts.fst  || 'normal';
 
   const x = cx - bw / 2, y = cy - bh / 2;
-  const tailBaseX = Math.max(x + r, Math.min(x + bw - r, tailX));
-  const closestEdgeY = tailY < y ? y : y + bh;
-  const tb1x = tailBaseX - tw, tb2x = tailBaseX + tw;
-
   let s = '';
-  s += `<polygon points="${tb1x},${closestEdgeY} ${tb2x},${closestEdgeY} ${tailX},${tailY}" fill="${bg}"/>`;
-  s += `<line x1="${tb1x}" y1="${closestEdgeY}" x2="${tailX}" y2="${tailY}" stroke="${bord}" stroke-width="${bsw}" stroke-linejoin="round"/>`;
-  s += `<line x1="${tb2x}" y1="${closestEdgeY}" x2="${tailX}" y2="${tailY}" stroke="${bord}" stroke-width="${bsw}" stroke-linejoin="round"/>`;
-  s += `<rect x="${x}" y="${y}" width="${bw}" height="${bh}" rx="${r}" ry="${r}" fill="${bg}" stroke="${bord}" stroke-width="${bsw}"/>`;
+
+  if (tailX < x) {
+    // Tail to the LEFT — side arrow on left edge (bubble right of character)
+    const tyBase = Math.max(y + r, Math.min(y + bh - r, tailY));
+    const tt1y = tyBase - tw, tt2y = tyBase + tw;
+    s += `<polygon points="${x},${tt1y} ${x},${tt2y} ${tailX},${tailY}" fill="${bg}"/>`;
+    s += `<line x1="${x}" y1="${tt1y}" x2="${tailX}" y2="${tailY}" stroke="${bord}" stroke-width="${bsw}" stroke-linejoin="round"/>`;
+    s += `<line x1="${x}" y1="${tt2y}" x2="${tailX}" y2="${tailY}" stroke="${bord}" stroke-width="${bsw}" stroke-linejoin="round"/>`;
+    s += `<rect x="${x}" y="${y}" width="${bw}" height="${bh}" rx="${r}" ry="${r}" fill="${bg}" stroke="${bord}" stroke-width="${bsw}"/>`;
+    s += `<line x1="${x + bsw * 0.6}" y1="${tt1y}" x2="${x + bsw * 0.6}" y2="${tt2y}" stroke="${bg}" stroke-width="${bsw * 1.6}"/>`;
+  } else if (tailX > x + bw) {
+    // Tail to the RIGHT — side arrow on right edge (bubble left of character)
+    const ex = x + bw;
+    const tyBase = Math.max(y + r, Math.min(y + bh - r, tailY));
+    const tt1y = tyBase - tw, tt2y = tyBase + tw;
+    s += `<polygon points="${ex},${tt1y} ${ex},${tt2y} ${tailX},${tailY}" fill="${bg}"/>`;
+    s += `<line x1="${ex}" y1="${tt1y}" x2="${tailX}" y2="${tailY}" stroke="${bord}" stroke-width="${bsw}" stroke-linejoin="round"/>`;
+    s += `<line x1="${ex}" y1="${tt2y}" x2="${tailX}" y2="${tailY}" stroke="${bord}" stroke-width="${bsw}" stroke-linejoin="round"/>`;
+    s += `<rect x="${x}" y="${y}" width="${bw}" height="${bh}" rx="${r}" ry="${r}" fill="${bg}" stroke="${bord}" stroke-width="${bsw}"/>`;
+    s += `<line x1="${ex - bsw * 0.6}" y1="${tt1y}" x2="${ex - bsw * 0.6}" y2="${tt2y}" stroke="${bg}" stroke-width="${bsw * 1.6}"/>`;
+  } else {
+    // Tail above or below the box (top position)
+    const tailBaseX = Math.max(x + r, Math.min(x + bw - r, tailX));
+    const closestEdgeY = tailY < y ? y : y + bh;
+    const tb1x = tailBaseX - tw, tb2x = tailBaseX + tw;
+    s += `<polygon points="${tb1x},${closestEdgeY} ${tb2x},${closestEdgeY} ${tailX},${tailY}" fill="${bg}"/>`;
+    s += `<line x1="${tb1x}" y1="${closestEdgeY}" x2="${tailX}" y2="${tailY}" stroke="${bord}" stroke-width="${bsw}" stroke-linejoin="round"/>`;
+    s += `<line x1="${tb2x}" y1="${closestEdgeY}" x2="${tailX}" y2="${tailY}" stroke="${bord}" stroke-width="${bsw}" stroke-linejoin="round"/>`;
+    s += `<rect x="${x}" y="${y}" width="${bw}" height="${bh}" rx="${r}" ry="${r}" fill="${bg}" stroke="${bord}" stroke-width="${bsw}"/>`;
+  }
 
   const lines  = text ? text.split('\n') : [''];
   const lineH  = fs * 1.35;
@@ -333,15 +355,20 @@ function _dialogBox(cx, cy, bw, bh, tailX, tailY, text, opts) {
   const x = cx - bw / 2, y = cy - bh / 2;
   const boxBottom = y + bh;
 
-  // Arrow at bottom corner: left corner when bubble is to the right (tailX < cx), right corner otherwise
-  const arrowAtRight = tailX > cx;
+  // Arrow: centre-bottom when tail is below the box (top position), otherwise bottom corner
   let ab1x, ab2x;
-  if (arrowAtRight) {
-    ab1x = x + bw - r - tw;
-    ab2x = x + bw - r;
+  if (tailY > boxBottom) {
+    ab1x = cx - tw;
+    ab2x = cx + tw;
   } else {
-    ab1x = x + r;
-    ab2x = x + r + tw;
+    const arrowAtRight = tailX > cx;
+    if (arrowAtRight) {
+      ab1x = x + bw - r - tw;
+      ab2x = x + bw - r;
+    } else {
+      ab1x = x + r;
+      ab2x = x + r + tw;
+    }
   }
 
   let s = '';
@@ -376,26 +403,34 @@ function _thoughtBubble(cx, cy, bw, bh, tailX, tailY, text, opts) {
   const fst = opts.fst || 'normal';
 
   const rx = bw / 2, ry = bh / 2;
+  // Bump radii: 5 equal bumps span the full width, slightly taller than wide
+  const N = 5, brx = rx / N, bry = brx * 1.35;
+
   let s = '';
+
+  // Two trailing spheres from the character toward the cloud
   const dx = tailX - cx, dy = tailY - cy;
   const dist = Math.hypot(dx, dy);
   const ux = dx / dist, uy = dy / dist;
-  [[0.72, 12], [0.85, 8], [0.94, 5]].forEach(([t, r]) => {
-    const px = cx + ux * dist * t, py = cy + uy * dist * t;
-    s += `<circle cx="${fmt(px)}" cy="${fmt(py)}" r="${r}" fill="${bg}" stroke="${bord}" stroke-width="${bsw}"/>`;
-  });
-  const lobes = 6;
-  for (let i = 0; i < lobes; i++) {
-    const ang = (i / lobes) * Math.PI * 2;
-    const lx = cx + Math.cos(ang) * (rx * 0.78), ly = cy + Math.sin(ang) * (ry * 0.78);
-    const lr = Math.min(rx, ry) * 0.42;
-    s += `<circle cx="${fmt(lx)}" cy="${fmt(ly)}" r="${fmt(lr)}" fill="${bg}" stroke="${bord}" stroke-width="${bsw}"/>`;
+  const r1 = Math.max(6, Math.round(bsw * 3));
+  const r2 = Math.max(10, Math.round(bsw * 5));
+  s += `<circle cx="${fmt(cx + ux*dist*0.90)}" cy="${fmt(cy + uy*dist*0.90)}" r="${r1}" fill="${bg}" stroke="${bord}" stroke-width="${bsw}"/>`;
+  s += `<circle cx="${fmt(cx + ux*dist*0.75)}" cy="${fmt(cy + uy*dist*0.75)}" r="${r2}" fill="${bg}" stroke="${bord}" stroke-width="${bsw}"/>`;
+
+  // Cloud path: N bumps going left across the top, smooth arc across the bottom
+  let d = `M ${fmt(cx + rx)} ${fmt(cy)} `;
+  for (let i = 0; i < N; i++) {
+    d += `A ${fmt(brx)} ${fmt(bry)} 0 0 1 ${fmt(cx + rx - (i + 1) * 2 * brx)} ${fmt(cy)} `;
   }
-  s += `<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="${bg}" stroke="${bord}" stroke-width="${bsw}"/>`;
-  const lines  = text ? text.split('\n') : [''];
-  const lineH  = fs * 1.35;
-  const totalH = lines.length * lineH;
-  const startY = cy - totalH / 2 + fs * 0.5;
+  d += `A ${fmt(rx)} ${fmt(ry * 0.72)} 0 0 0 ${fmt(cx + rx)} ${fmt(cy)} Z`;
+  s += `<path d="${d}" fill="${bg}" stroke="${bord}" stroke-width="${bsw}" stroke-linejoin="round"/>`;
+
+  // Text centred slightly into the bottom-arc half of the cloud
+  const textCY  = cy + ry * 0.12;
+  const lines   = text ? text.split('\n') : [''];
+  const lineH   = fs * 1.35;
+  const totalH  = lines.length * lineH;
+  const startY  = textCY - totalH / 2 + fs * 0.5;
   lines.forEach((ln, i) => {
     s += `<text x="${cx}" y="${startY + i * lineH}" font-family="${ff}" font-size="${fs}" font-weight="${fw}" font-style="${fst}" fill="${tc}" text-anchor="middle" dominant-baseline="central">${escXml(ln)}</text>`;
   });
@@ -444,7 +479,7 @@ function generateCharacter() {
   const animType   = val('char-anim-type')  || 'bounce';
   const animSpeed  = val('char-anim-speed') || 'normal';
   const bubbleType = val('char-bubble-type') || 'none';
-  const bubblePos  = val('char-bubble-pos')  || 'top-right';
+  const bubblePos  = val('char-bubble-pos')  || 'right';
   const bubbleText = val('char-bubble-text') || '';
   const sizeName   = val('char-size')  || 'medium';
   const bgEnable   = chk('char-bg-enable');
@@ -455,10 +490,10 @@ function generateCharacter() {
   const PIVOT     = isJiggi ? { x: 520, y: 635 } : { x: 503, y: 490 };
   const WPIVOT    = isJiggi ? _WAVE_PIVOT : _FROGGIE_WAVE_PIVOT;
 
-  // Output dimensions first — needed to scale bubble units
+  // Output dimensions — needed to scale bubble units
   const sizeMap = { small: 280, medium: 360, large: 470, xlarge: 580 };
   const outW = sizeMap[sizeName] || 360;
-  const vx = 0, vy = 0, vw = 900, vh = 800;
+  const vx = 0, vw = 900;
 
   // Bubble text opts
   // char-bubble-fs is a TARGET SCREEN SIZE in px; convert to viewBox units so the
@@ -481,16 +516,28 @@ function generateCharacter() {
     fst:  val('char-bubble-fstyle')|| 'normal',
     r:    Math.max(14, Math.round(16 * vw / outW)),
   };
-  const outH = Math.round(outW * vh / vw);
 
-  const CHAR_CX_R = 280;
+  const CHAR_CX_R = 350;
   const CHAR_CX_L = 620;
   const CHAR_CY   = 430;
 
   const hasBubble  = bubbleType !== 'none' && bubbleText.trim() !== '';
-  const isLeftSide = bubblePos === 'left' || bubblePos === 'top-left';
-  const charTX = hasBubble ? (isLeftSide ? CHAR_CX_L : CHAR_CX_R) : 450;
+  const isTopPos   = bubblePos === 'top';
+  const isLeftSide = bubblePos === 'left';
+  const charTX = hasBubble && !isTopPos ? (isLeftSide ? CHAR_CX_L : CHAR_CX_R) : 450;
   const charTY = CHAR_CY;
+
+  // For top bubble, expand the viewBox upward to give room above the character's head
+  let vy = 0, vh = 800;
+  if (hasBubble && isTopPos) {
+    const headRefY   = isJiggi ? 90 : 50;
+    const headTopY   = (headRefY - PIVOT.y) * 0.75 + CHAR_CY;
+    const linesCount = bubbleText.split('\n').length;
+    const estBh      = linesCount * (scaledFs * 1.45) + scaledFs * 1.2;
+    const bubbleTop  = headTopY - 35 - estBh;
+    if (bubbleTop < 10) { vy = Math.floor(bubbleTop - 10); vh = 800 - vy; }
+  }
+  const outH = Math.round(outW * vh / vw);
 
   // ── Emotion ──────────────────────────────────────────────
   const em = EMOTIONS[emotion] || EMOTIONS.happy;
@@ -599,18 +646,26 @@ function generateCharacter() {
     const bodyEdgeRightX = _toCanvas(isJiggi ? 710 : 699, 468, PIVOT.x, PIVOT.y, charTX, charTY).x;
     const bodyEdgeLeftX  = _toCanvas(isJiggi ? 338 : 307, 468, PIVOT.x, PIVOT.y, charTX, charTY).x;
 
-    const bcy    = mouthCanvas.y - bh * 0.1;
-    const ARROW_GAP = Math.round(18 * vw / outW);
+    const ARROW_LEN = Math.round(30 * vw / outW); // horizontal arrow length in viewBox units
 
-    let bcx, tailX, tailY;
-    if (!isLeftSide) {
-      tailX = bodyEdgeRightX + ARROW_GAP;
+    let bcx, bcy, tailX, tailY;
+    if (isTopPos) {
+      const headRefY   = isJiggi ? 90 : 50;
+      const headTopY   = (headRefY - PIVOT.y) * 0.75 + CHAR_CY;
+      tailX = charTX;
+      tailY = headTopY + 8;
+      bcx   = charTX;
+      bcy   = tailY - bh / 2 - 35;
+    } else if (!isLeftSide) {
+      tailX = bodyEdgeRightX + 10;
       tailY = mouthCanvas.y;
-      bcx   = Math.min(vw - bw / 2 - 15, bodyEdgeRightX + bw / 2 + 35);
+      bcx   = Math.min(vw - bw / 2 - 15, tailX + ARROW_LEN + bw / 2);
+      bcy   = mouthCanvas.y - bh * 0.1;
     } else {
-      tailX = bodyEdgeLeftX - ARROW_GAP;
+      tailX = bodyEdgeLeftX - 10;
       tailY = mouthCanvas.y;
-      bcx   = Math.max(bw / 2 + 15, bodyEdgeLeftX - bw / 2 - 35);
+      bcx   = Math.max(bw / 2 + 15, tailX - ARROW_LEN - bw / 2);
+      bcy   = mouthCanvas.y - bh * 0.1;
     }
 
     if (bubbleType === 'speech') {
