@@ -1,4 +1,4 @@
-'use strict';
+﻿'use strict';
 
 const SHAPE_SHADING_KEY = {
   rectangle:  'rectangle',
@@ -55,6 +55,10 @@ function _activateTab(tab) {
     currentShape = 'svgCharacter';
     if (stageRow) stageRow.style.display = 'none';
     if (stageDivider) stageDivider.style.display = 'none';
+  } else if (tab === 'svgtable') {
+    currentShape = 'svgTable';
+    if (stageRow) stageRow.style.display = 'none';
+    if (stageDivider) stageDivider.style.display = 'none';
   } else {
     if (currentShape === 'graphPlot' || currentShape === 'svgCharacter') {
       currentShape = 'numberLine';
@@ -89,36 +93,6 @@ function wireAll() {
     });
   });
 
-  /* ── Graph series auto-show/hide body ── */
-  function syncSeriesBody(n) {
-    const cb   = $(`gp-s${n}-enable`);
-    const body = $(`gp-s${n}-body`);
-    if (cb && body) body.style.display = cb.checked ? '' : 'none';
-  }
-  [2, 3].forEach(n => {
-    $(`gp-s${n}-enable`)?.addEventListener('change', () => syncSeriesBody(n));
-    syncSeriesBody(n);
-  });
-
-  /* ── Graph series input type toggle (equation / points / vertical) ── */
-  function syncSeriesType(n) {
-    const type   = $(`gp-s${n}-type`)?.value;
-    const eqRow  = $(`gp-s${n}-eq-row`);
-    const lpRow  = $(`gp-s${n}-lpts-row`);
-    const eqIn   = $(`gp-s${n}-eq`);
-    const eqLbl  = $(`gp-s${n}-eq-lbl`);
-    const lineRow = $(`gp-s${n}-line-row`);
-    const isEq   = type === 'equation' || type === 'vertical';
-    if (eqRow)  eqRow.style.display  = isEq      ? '' : 'none';
-    if (lpRow)  lpRow.style.display  = (type === 'points') ? '' : 'none';
-    if (lineRow) lineRow.style.display = (type === 'vertical') ? 'none' : '';
-    if (eqIn)  eqIn.placeholder = type === 'vertical' ? 'x-value (e.g. 3)' : 'e.g. x^2 - 2';
-    if (eqLbl) eqLbl.textContent = type === 'vertical' ? 'x = (constant)' : 'Equation y = f(x)';
-  }
-  [1, 2, 3].forEach(n => {
-    $(`gp-s${n}-type`)?.addEventListener('change', () => { syncSeriesType(n); render(); });
-    syncSeriesType(n);
-  });
 
   /* ── Shape cards ── */
   document.querySelectorAll('.shape-card').forEach(btn => {
@@ -495,6 +469,14 @@ function wireAll() {
   $('hs-bin-mode')?.addEventListener('change', _hsSyncBinMode);
   _hsSyncBinMode();
 
+  /* ── SVG Table: alternate row color toggle ── */
+  function _stSyncAltRows() {
+    const w = $('st-alt-color-wrap');
+    if (w) w.style.display = chk('st-alt-rows') ? '' : 'none';
+  }
+  $('st-alt-rows')?.addEventListener('change', () => { _stSyncAltRows(); render(); });
+  _stSyncAltRows();
+
   /* ── Dot plot: manual x-axis range toggle ── */
   function _dpSyncXRange() {
     const w = $('dp-xrange-fields');
@@ -520,7 +502,7 @@ function wireAll() {
   _pcSyncColorMode();
 
   /* ── Hash-based routing ── */
-  const VALID_TOOLS = new Set(['imager','grapher','character','editor','cube3d','patterns']);
+  const VALID_TOOLS = new Set(['imager','grapher','character','editor','cube3d','patterns','svgtable']);
 
   function _showHome() {
     const homeScreen = document.getElementById('home-screen');

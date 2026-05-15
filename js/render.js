@@ -22,6 +22,13 @@ function render() {
     _updateDims();
     return;
   }
+  if (currentShape === 'svgTable') {
+    $('svgPreview').innerHTML = svg;
+    $('svgCode').value = svg;
+    _updateDims();
+    if (typeof attachSTClickHandlers === 'function') attachSTClickHandlers();
+    return;
+  }
 
   svg = applyCanvas(svg);
   svg = applyRotation(svg);

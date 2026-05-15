@@ -64,7 +64,199 @@ function _gpLblOffset(pos, r) {
   if (pos === 'below') return { dx: 0,        dy: gap + 10, anchor: 'middle' };
   if (pos === 'left')  return { dx: -(gap + 3), dy: 4,      anchor: 'end'    };
   if (pos === 'right') return { dx:  (gap + 3), dy: 4,      anchor: 'start'  };
-  return                      { dx: 0,         dy: -(gap + 2), anchor: 'middle' }; // above
+  return                      { dx: 0,         dy: -(gap + 2), anchor: 'middle' };
+}
+
+/* ─── Dynamic series system ─── */
+
+const _GP_COLORS = ['#0066CC', '#CC3300', '#009944', '#9900CC', '#CC7700', '#007B8A'];
+
+let _gpSeries = [{ id: 101 }];
+let _gpNextId = 102;
+
+const _GP_PRESETS = {
+  'prop':        { type: 'equation', eq: 'x',                               line: 'solid'  },
+  'line-pos':    { type: 'equation', eq: 'x + 2',                           line: 'solid'  },
+  'line-neg':    { type: 'equation', eq: 'x - 2',                           line: 'solid'  },
+  'horiz':       { type: 'equation', eq: '3',                               line: 'solid'  },
+  'vert':        { type: 'vertical', eq: '3',                               line: 'solid'  },
+  'parab':       { type: 'equation', eq: 'x^2',                             line: 'solid'  },
+  'parab-up':    { type: 'equation', eq: 'x^2 + 2',                         line: 'solid'  },
+  'parab-down':  { type: 'equation', eq: 'x^2 - 2',                         line: 'solid'  },
+  'cubic':       { type: 'equation', eq: 'x^3',                             line: 'solid'  },
+  'step':        { type: 'points',   eq: '', linePts: '0,0\n1,0\n2,1\n3,1\n4,2', line: 'step'  },
+  'zigzag':      { type: 'points',   eq: '', linePts: '0,0\n1,2\n2,0\n3,2\n4,0', line: 'solid' },
+};
+
+function _gpApplyPreset(id) {
+  const sel = $(`gp-s${id}-curve-preset`);
+  if (!sel || !sel.value) return;
+  const p = _GP_PRESETS[sel.value];
+  if (!p) return;
+  const typeEl = $(`gp-s${id}-type`);
+  if (typeEl) typeEl.value = p.type;
+  const eqEl = $(`gp-s${id}-eq`);
+  if (eqEl && p.eq !== undefined) eqEl.value = p.eq;
+  const lineEl = $(`gp-s${id}-line`);
+  if (lineEl && p.line) lineEl.value = p.line;
+  const lptsEl = $(`gp-s${id}-line-pts`);
+  if (lptsEl && p.linePts) lptsEl.value = p.linePts;
+  _gpSyncSeriesType(id);
+  sel.value = '';
+  render();
+}
+
+function _gpSyncSeriesType(id) {
+  const type    = val(`gp-s${id}-type`) || 'equation';
+  const eqRow   = $(`gp-s${id}-eq-row`);
+  const lptsRow = $(`gp-s${id}-lpts-row`);
+  const lineRow = $(`gp-s${id}-line-row`);
+  const eqLbl   = $(`gp-s${id}-eq-lbl`);
+  const eqIn    = $(`gp-s${id}-eq`);
+  if (eqRow)   eqRow.style.display   = type !== 'points' ? '' : 'none';
+  if (lptsRow) lptsRow.style.display = type === 'points' ? '' : 'none';
+  if (lineRow) lineRow.style.display = type === 'vertical' ? 'none' : '';
+  if (eqIn)    eqIn.placeholder      = type === 'vertical' ? 'x-value (e.g. 3)' : 'e.g. x^2 - 2';
+  if (eqLbl)   eqLbl.textContent     = type === 'vertical' ? 'x = (constant)' : 'Equation y = f(x)';
+}
+
+function _gpToggleSeriesPanel(id, e) {
+  if (e.target.closest('button, input[type=checkbox], label')) return;
+  $(`gp-s${id}-panel`)?.classList.toggle('collapsed');
+}
+
+function _gpAddSeries() {
+  if (_gpSeries.length >= 6) return;
+  _gpSeries.push({ id: _gpNextId++ });
+  _gpRenderSeriesList();
+  render();
+}
+
+function _gpRemoveSeries(id) {
+  if (_gpSeries.length <= 1) return;
+  _gpSeries = _gpSeries.filter(s => s.id !== id);
+  _gpRenderSeriesList();
+  render();
+}
+
+function _gpSeriesHTML(s, idx) {
+  const id    = s.id;
+  const color = _GP_COLORS[idx % _GP_COLORS.length];
+  const num   = idx + 1;
+  const first = idx === 0;
+
+  return `<div class="sub-group collapsible sub-group--gps collapsed" id="gp-s${id}-panel">
+  <div class="sub-group-title gp-stitle" style="border-left:3px solid ${color}" onclick="_gpToggleSeriesPanel(${id},event)">
+    <span class="gp-sdot" style="background:${color}"></span>
+    <span>Plot ${num}</span>
+    ${!first ? `<button class="gp-sdel" onclick="_gpRemoveSeries(${id})" title="Remove">✕</button>` : ''}
+    <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true" style="margin-left:auto"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+  <div class="sub-body">
+    <div class="row2">
+      <div><label>Color</label><input type="color" id="gp-s${id}-color" value="${color}" oninput="render()"></div>
+      <div><label for="gp-s${id}-label">Legend label</label><input type="text" id="gp-s${id}-label" placeholder="Plot ${num}" oninput="render()"></div>
+    </div>
+    <label for="gp-s${id}-curve-preset">Curve preset</label>
+    <select id="gp-s${id}-curve-preset" onchange="_gpApplyPreset(${id})">
+      <option value="">— Custom —</option>
+      <option value="prop">Proportional line  y = x</option>
+      <option value="line-pos">Line, +y-intercept  y = x + 2</option>
+      <option value="line-neg">Line, −y-intercept  y = x − 2</option>
+      <option value="horiz">Horizontal line  y = 3</option>
+      <option value="vert">Vertical line  x = 3</option>
+      <option value="parab">Parabola  y = x²</option>
+      <option value="parab-up">Parabola shifted up  y = x² + 2</option>
+      <option value="parab-down">Parabola shifted down  y = x² − 2</option>
+      <option value="cubic">Cubic  y = x³</option>
+      <option value="step">Step function</option>
+      <option value="zigzag">Zigzag / piecewise</option>
+    </select>
+    <label for="gp-s${id}-type" style="margin-top:7px">Input type</label>
+    <select id="gp-s${id}-type" onchange="_gpSyncSeriesType(${id});render()">
+      <option value="equation">Equation y = f(x)</option>
+      <option value="points">Points (x,y)</option>
+      <option value="vertical">Vertical line x = const</option>
+    </select>
+    <div id="gp-s${id}-eq-row">
+      <label id="gp-s${id}-eq-lbl" for="gp-s${id}-eq">Equation y = f(x) <span class="hint" style="display:inline">(e.g. 2*x+1, x^2)</span></label>
+      <input type="text" id="gp-s${id}-eq" value="${first ? '2*x + 1' : ''}" placeholder="e.g. x^2 - 2" oninput="render()">
+      <div class="check-row"><input type="checkbox" id="gp-s${id}-dots" onchange="render()"><label for="gp-s${id}-dots">Show dots at integer x values</label></div>
+    </div>
+    <div id="gp-s${id}-lpts-row" style="display:none">
+      <label for="gp-s${id}-line-pts">Plot points <span class="hint" style="display:inline">(x,y per line)</span></label>
+      <textarea id="gp-s${id}-line-pts" rows="3" placeholder="0,0&#10;1,2&#10;3,4" oninput="render()"></textarea>
+    </div>
+    <div id="gp-s${id}-line-row">
+      <label for="gp-s${id}-line">Line style</label>
+      <select id="gp-s${id}-line" onchange="render()">
+        <option value="solid">Solid</option>
+        <option value="dashed">Dashed</option>
+        <option value="dotted">Dotted</option>
+        <option value="step">Step function</option>
+        <option value="none">None (dots only)</option>
+      </select>
+      <label for="gp-s${id}-lw" style="margin-top:6px">Line width (px)</label>
+      <input type="number" id="gp-s${id}-lw" value="2.5" min="0.5" max="12" step="0.5" oninput="render()">
+    </div>
+    <div class="check-row" style="margin-top:6px"><input type="checkbox" id="gp-s${id}-dashes" onchange="render()"><label for="gp-s${id}-dashes">Projection lines to axes</label></div>
+    <div class="row2">
+      <div>
+        <label for="gp-s${id}-drop-style">Drop line style</label>
+        <select id="gp-s${id}-drop-style" onchange="render()">
+          <option value="dashed">Dashed</option>
+          <option value="dotted">Dotted</option>
+          <option value="solid">Solid</option>
+        </select>
+      </div>
+      <div><label for="gp-s${id}-drop-color">Drop line color</label><input type="color" id="gp-s${id}-drop-color" value="#999999" oninput="render()"></div>
+    </div>
+    <label for="gp-s${id}-pts" style="margin-top:9px">Labeled points <span class="hint" style="display:inline">(x,y:Label per line)</span></label>
+    <textarea id="gp-s${id}-pts" rows="3" placeholder="1,3:A&#10;-2,-3:B" oninput="render()"></textarea>
+    <div class="row2" style="margin-top:5px">
+      <div><label>Dot color</label><input type="color" id="gp-s${id}-dot-color" value="${color}" oninput="render()"></div>
+      <div>
+        <label for="gp-s${id}-pt-style">Point style</label>
+        <select id="gp-s${id}-pt-style" onchange="render()">
+          <option value="filled">Filled dot</option>
+          <option value="open">Open circle</option>
+          <option value="cross">Cross ×</option>
+        </select>
+      </div>
+    </div>
+    <div class="row2" style="margin-top:5px">
+      <div>
+        <label for="gp-s${id}-pt-lbl-pos">Label position</label>
+        <select id="gp-s${id}-pt-lbl-pos" onchange="render()">
+          <option value="above">Above</option>
+          <option value="below">Below</option>
+          <option value="left">Left</option>
+          <option value="right">Right</option>
+        </select>
+      </div>
+      <div><div class="check-row" style="margin-top:20px"><input type="checkbox" id="gp-s${id}-pt-labels" checked onchange="render()"><label for="gp-s${id}-pt-labels">Show labels</label></div></div>
+    </div>
+    <div class="check-row" style="margin-top:6px"><input type="checkbox" id="gp-s${id}-callouts" onchange="render()"><label for="gp-s${id}-callouts">Axis value callouts</label></div>
+    <div class="row2">
+      <div>
+        <label for="gp-s${id}-callout-style">Callout style</label>
+        <select id="gp-s${id}-callout-style" onchange="render()">
+          <option value="bold">Bold</option>
+          <option value="normal">Normal</option>
+          <option value="bold-lg">Bold + larger</option>
+        </select>
+      </div>
+    </div>
+  </div>
+</div>`;
+}
+
+function _gpRenderSeriesList() {
+  const container = $('gp-series-list');
+  if (!container) return;
+  container.innerHTML = _gpSeries.map((s, idx) => _gpSeriesHTML(s, idx)).join('');
+  const addBtn = $('gp-add-series-btn');
+  if (addBtn) addBtn.style.display = _gpSeries.length >= 6 ? 'none' : '';
 }
 
 /* ─── Graph Plot Generator ─── */
@@ -110,7 +302,6 @@ function generateGraphPlot() {
   const showArrows = $('gp-axis-arrows') ? chk('gp-axis-arrows') : true;
   const axisColor  = val('gp-axis-color') || '#333333';
 
-  // ── Style params ──────────────────────────────────────────────
   const tkSize   = Math.max(7, num('gp-tk-size')  || 11);
   const tkColor  = val('gp-tk-color')  || '#444444';
   const tkStyle  = val('gp-tk-style')  || 'normal';
@@ -123,9 +314,8 @@ function generateGraphPlot() {
   const lblWeight = chk('gp-lbl-bold')   ? 'bold' : 'normal';
   const lblFont   = `font-family="Arial,sans-serif" font-size="${lblSize}" font-style="${lblStyle}" font-weight="${lblWeight}" fill="${lblColor}"`;
 
-  // ── Layout ────────────────────────────────────────────────────
-  const TK   = 5;   // tick length px
-  const OVER = 18;  // axes extend past plot boundary
+  const TK   = 5;
+  const OVER = 18;
 
   const yLblMargin  = yLbl ? lblSize + 10 : 0;
   const tkLblMargin = showTkLbl ? Math.round(tkSize * 4) : 22;
@@ -138,39 +328,33 @@ function generateGraphPlot() {
   const plotW = (xMax - xMin) * UNIT;
   const plotH = (yMax - yMin) * UNIT;
 
-  // ── Collect enabled series ────────────────────────────────────
-  const SDEFS = [
-    { id: 1, def: '#0066CC' },
-    { id: 2, def: '#CC3300' },
-    { id: 3, def: '#009944' },
-  ];
-
-  const series = SDEFS.map(({ id, def }) => {
-    if (id > 1 && !chk(`gp-s${id}-enable`)) return null;
-    const dotColor    = val(`gp-s${id}-dot-color`) || def;
+  // ── Collect series from dynamic list ─────────────────────────────
+  const series = _gpSeries.map(({ id }, idx) => {
+    const def      = _GP_COLORS[idx % _GP_COLORS.length];
+    const dotColor = val(`gp-s${id}-dot-color`) || def;
     const dropColorRaw = val(`gp-s${id}-drop-color`);
     return {
       id,
-      color:        val(`gp-s${id}-color`) || def,
-      label:        val(`gp-s${id}-label`).trim(),
-      type:         val(`gp-s${id}-type`) || 'equation',
-      eq:           val(`gp-s${id}-eq`).trim(),
+      color:        val(`gp-s${id}-color`)     || def,
+      label:        (val(`gp-s${id}-label`)    || '').trim(),
+      type:         val(`gp-s${id}-type`)      || 'equation',
+      eq:           (val(`gp-s${id}-eq`)       || '').trim(),
       linePtsRaw:   (val(`gp-s${id}-line-pts`) || '').trim(),
-      ptsRaw:       val(`gp-s${id}-pts`).trim(),
+      ptsRaw:       (val(`gp-s${id}-pts`)      || '').trim(),
       dotColor,
-      lineStyle:    val(`gp-s${id}-line`) || 'solid',
+      lineStyle:    val(`gp-s${id}-line`)      || 'solid',
       lineWidth:    Math.max(0.5, num(`gp-s${id}-lw`) || 2.5),
       showDots:     chk(`gp-s${id}-dots`),
       showLbls:     chk(`gp-s${id}-pt-labels`),
       showDash:     chk(`gp-s${id}-dashes`),
-      ptStyle:      val(`gp-s${id}-pt-style`) || 'filled',
+      ptStyle:      val(`gp-s${id}-pt-style`)  || 'filled',
       ptLblPos:     val(`gp-s${id}-pt-lbl-pos`) || 'above',
       dropStyle:    val(`gp-s${id}-drop-style`) || 'dashed',
       dropColor:    dropColorRaw || dotColor,
       callouts:     chk(`gp-s${id}-callouts`),
       calloutStyle: val(`gp-s${id}-callout-style`) || 'bold',
     };
-  }).filter(Boolean);
+  });
 
   const hasLegend = showLegnd && series.some(s => s.label);
   const legendW   = hasLegend ? 130 : 0;
@@ -178,17 +362,14 @@ function generateGraphPlot() {
   const W = Math.ceil(plotW + ML + MR + legendW);
   const H = Math.ceil(plotH + MT + MB);
 
-  // Math → SVG coordinate transforms
   const OX  = ML + (0 - xMin) * UNIT;
   const OY  = MT + (yMax - 0) * UNIT;
   const toX = mx => OX + mx * UNIT;
   const toY = my => OY - my * UNIT;
 
-  // Axes positions clamped to plot area
   const axY = Math.max(MT, Math.min(MT + plotH, OY));
   const axX = Math.max(ML, Math.min(ML + plotW, OX));
 
-  // ── SVG open + defs ───────────────────────────────────────────
   let s = svgOpen(W, H);
   s += `\n<defs>
   <clipPath id="gpc">
@@ -202,12 +383,10 @@ function generateGraphPlot() {
   </marker>
 </defs>`;
 
-  // ── Title ─────────────────────────────────────────────────────
   if (title) {
     s += `\n<text x="${fmt(ML + plotW / 2)}" y="20" font-family="Arial,sans-serif" font-size="15" font-weight="bold" fill="#111" text-anchor="middle">${escXml(title)}</text>`;
   }
 
-  // ── Grid lines ────────────────────────────────────────────────
   if (showGrid) {
     const gd = gridStyle === 'dashed' ? ' stroke-dasharray="6 4"'
              : gridStyle === 'dotted' ? ' stroke-dasharray="2 4"' : '';
@@ -227,7 +406,6 @@ function generateGraphPlot() {
     }
   }
 
-  // ── Tick marks & labels ───────────────────────────────────────
   if (showTicks || showTkLbl) {
     const xTickVals = specificVals
       ? specificVals.filter(v => v >= xMin - 1e-9 && v <= xMax + 1e-9)
@@ -242,7 +420,6 @@ function generateGraphPlot() {
         s += `\n<line x1="${sx}" y1="${fmt(axY - TK)}" x2="${sx}" y2="${fmt(axY + TK)}" stroke="#555" stroke-width="1.5"/>`;
       }
       const isZero = Math.abs(tx) < 1e-9;
-      // In all-quadrant mode: zero handled separately; in first-quadrant: show all including 0
       if (showTkLbl && (!isZero || firstOnly)) {
         const lbl = Number.isInteger(tx) ? tx : parseFloat(tx.toFixed(8));
         s += `\n<text x="${sx}" y="${fmt(axY + TK + 4 + tkSize)}" ${tkFont} text-anchor="middle">${lbl}</text>`;
@@ -261,7 +438,6 @@ function generateGraphPlot() {
       }
     }
 
-    // Origin "0" label in all-quadrant mode when axes cross inside the plot
     if (showTkLbl && !firstOnly && xMin < 0 && xMax > 0 && yMin < 0 && yMax > 0) {
       if (showZero) {
         s += `\n<text x="${fmt(axX - TK - 5)}" y="${fmt(axY + TK + 4 + tkSize)}" ${tkFont} text-anchor="end">0</text>`;
@@ -269,7 +445,6 @@ function generateGraphPlot() {
     }
   }
 
-  // ── Axes with arrowheads ──────────────────────────────────────
   const mkEnd   = showArrows ? ' marker-end="url(#gpa)"'              : '';
   const mkStart = showArrows && !firstOnly ? ' marker-start="url(#gpar)"' : '';
 
@@ -281,7 +456,6 @@ function generateGraphPlot() {
   const yA2 = MT - OVER;
   s += `\n<line x1="${fmt(axX)}" y1="${yA1}" x2="${fmt(axX)}" y2="${yA2}" stroke="${axisColor}" stroke-width="2.5"${mkStart}${mkEnd}/>`;
 
-  // ── Axis labels — centered relative to plot ───────────────────
   if (xLbl) {
     const xLblY = fmt(axY + TK + 4 + tkSize + 12 + lblSize);
     s += `\n<text x="${fmt(ML + plotW / 2)}" y="${xLblY}" ${lblFont} text-anchor="middle">${escXml(xLbl)}</text>`;
@@ -293,7 +467,7 @@ function generateGraphPlot() {
     s += `\n<text x="${yLblCX}" y="${yLblY}" ${lblFont} text-anchor="middle" transform="rotate(-90,${yLblCX},${yLblY})">${escXml(yLbl)}</text>`;
   }
 
-  // ── Series ────────────────────────────────────────────────────
+  // ── Render all series ─────────────────────────────────────────────
   for (const ser of series) {
     const col  = ser.color;
     const dotC = ser.dotColor;
@@ -301,7 +475,6 @@ function generateGraphPlot() {
     const dash = ser.lineStyle === 'dashed' ? ' stroke-dasharray="8 5"'
                : ser.lineStyle === 'dotted'  ? ' stroke-dasharray="2 5"' : '';
 
-    // Vertical line (x = constant)
     if (ser.type === 'vertical') {
       const vx = parseFloat(ser.eq);
       if (!isNaN(vx)) {
@@ -310,10 +483,6 @@ function generateGraphPlot() {
       }
     }
 
-    // Horizontal line shortcut: if type=equation and eq is a plain number with no x
-    // (users can just type "3" and it renders as y=3 automatically via eval)
-
-    // Equation curve
     if (ser.type === 'equation' && ser.eq && ser.lineStyle !== 'none') {
       const N = 600;
       let path = '', open = false;
@@ -331,13 +500,11 @@ function generateGraphPlot() {
       }
     }
 
-    // Points mode: polyline or step function through linePtsRaw
     if (ser.type === 'points' && ser.lineStyle !== 'none') {
       const linePts = _gpParsePts(ser.linePtsRaw);
       if (linePts.length > 1) {
         let d;
         if (ser.lineStyle === 'step') {
-          // Staircase: horizontal to next x, then vertical to next y
           d = `M${fmt(toX(linePts[0].x))} ${fmt(toY(linePts[0].y))}`;
           for (let i = 1; i < linePts.length; i++) {
             d += ` H${fmt(toX(linePts[i].x))} V${fmt(toY(linePts[i].y))}`;
@@ -350,7 +517,6 @@ function generateGraphPlot() {
       }
     }
 
-    // Auto integer-x dots for equation mode
     let intrinsicDots = [];
     if (ser.type === 'equation' && ser.showDots && ser.eq) {
       for (let mx = Math.ceil(xMin); mx <= Math.floor(xMax); mx++) {
@@ -359,14 +525,10 @@ function generateGraphPlot() {
       }
     }
 
-    // Labeled dots (from ptsRaw — both modes)
     const labeledPts = _gpParsePts(ser.ptsRaw);
-
-    // Drop line dash style
     const dropDash = ser.dropStyle === 'dotted' ? ' stroke-dasharray="2 4"'
                    : ser.dropStyle === 'solid'  ? '' : ' stroke-dasharray="5 4"';
 
-    // Projection lines to axes (labeled pts only)
     if (ser.showDash && labeledPts.length) {
       for (const pt of labeledPts) {
         const sx = fmt(toX(pt.x)), sy = fmt(toY(pt.y));
@@ -379,17 +541,13 @@ function generateGraphPlot() {
       }
     }
 
-    // Intrinsic equation dots (series color)
     for (const pt of intrinsicDots) {
       s += _gpDot(fmt(toX(pt.x)), fmt(toY(pt.y)), 4, col, ser.ptStyle, true);
     }
-
-    // Labeled dots (dotColor)
     for (const pt of labeledPts) {
       s += _gpDot(fmt(toX(pt.x)), fmt(toY(pt.y)), 4.5, dotC, ser.ptStyle, true);
     }
 
-    // Point labels
     if (ser.showLbls && labeledPts.length) {
       const off = _gpLblOffset(ser.ptLblPos, 4.5);
       for (const pt of labeledPts) {
@@ -400,7 +558,6 @@ function generateGraphPlot() {
       }
     }
 
-    // Axis value callouts: show coordinates on axes at each labeled point
     if (ser.callouts && labeledPts.length) {
       const cSz = ser.calloutStyle === 'bold-lg' ? tkSize + 3 : tkSize;
       const cWt = ser.calloutStyle === 'normal'  ? 'normal'   : 'bold';
@@ -414,7 +571,6 @@ function generateGraphPlot() {
     }
   }
 
-  // ── Legend ────────────────────────────────────────────────────
   if (hasLegend) {
     const lx = ML + plotW + OVER + 8;
     let ly = MT + 16;
@@ -439,3 +595,6 @@ function _gpSyncUI() {
 }
 
 $('gp-quadrant')?.addEventListener('change', _gpSyncUI);
+
+// Populate the series list on page load (DOM is ready — script is at bottom of body)
+_gpRenderSeriesList();

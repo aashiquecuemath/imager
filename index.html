@@ -15,6 +15,7 @@
     };
   </script>
   <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" crossorigin="anonymous">
 </head>
 <body>
 
@@ -160,6 +161,22 @@
         <h3>SVG Patterns</h3>
         <p>Build numeric &amp; shape sequence patterns</p>
         <span class="tile-badge">Pattern</span>
+      </button>
+
+      <button class="home-tile" data-tool="svgtable">
+        <div class="home-tile-icon">
+          <svg width="52" height="52" viewBox="0 0 52 52" fill="none" aria-hidden="true">
+            <rect x="6" y="10" width="40" height="32" rx="3" fill="#e0f2fe" stroke="#0ea5e9" stroke-width="1.5"/>
+            <rect x="6" y="10" width="40" height="10" rx="3" fill="#0ea5e9"/>
+            <line x1="6" y1="20" x2="46" y2="20" stroke="#0ea5e9" stroke-width="1.5"/>
+            <line x1="6" y1="30" x2="46" y2="30" stroke="#0ea5e9" stroke-width="1"/>
+            <line x1="20" y1="10" x2="20" y2="42" stroke="#0ea5e9" stroke-width="1"/>
+            <line x1="34" y1="10" x2="34" y2="42" stroke="#0ea5e9" stroke-width="1"/>
+          </svg>
+        </div>
+        <h3>SVG Tables</h3>
+        <p>Render HTML or CSV data as clean SVG tables</p>
+        <span class="tile-badge">Table</span>
       </button>
 
     </div>
@@ -1638,12 +1655,11 @@
       <div class="card grapher-col2" id="gp-line-col2">
         <div class="card-title">Series</div>
 
-        <!-- Series 1 — always visible -->
-        <div class="sub-group collapsible collapsed sub-group--s1">
-          <div class="sub-group-title">
-            Series 1
-            <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </div>
+        <!-- Series panels rendered dynamically by _gpRenderSeriesList() -->
+        <div id="gp-series-list"></div>
+        <button class="btn btn-ghost" id="gp-add-series-btn" onclick="_gpAddSeries()" style="margin-top:8px;font-size:.8rem">＋ Add plot</button>
+
+        <div style="display:none"><div>
           <div class="sub-body">
             <div class="row2">
               <div><label>Color</label><input type="color" id="gp-s1-color" value="#0066CC"></div>
@@ -1955,6 +1971,8 @@
             </div>
           </div>
         </div>
+
+        </div><!-- /placeholder hidden -->
 
       </div><!-- /Series -->
 
@@ -3063,6 +3081,241 @@ May,18</textarea>
     </div><!-- /controls -->
   </div><!-- /#tab-patterns -->
 
+  <!-- ══ SVG TABLES panel ══ -->
+  <div id="tab-svgtable" class="tab-content">
+    <div class="controls controls--svgtable">
+
+      <!-- ── Style column ── -->
+      <div class="card st-col1">
+        <div class="card-title">Table Style</div>
+
+        <label for="st-title">Title</label>
+        <input type="text" id="st-title" placeholder="e.g. Reading Log">
+
+        <label for="st-font-family" style="margin-top:8px">Font family</label>
+        <select id="st-font-family">
+          <option value="Arial,sans-serif">Arial</option>
+          <option value="Helvetica,sans-serif">Helvetica</option>
+          <option value="Verdana,sans-serif">Verdana</option>
+          <option value="'Trebuchet MS',sans-serif">Trebuchet MS</option>
+          <option value="Georgia,serif">Georgia</option>
+          <option value="'Times New Roman',serif">Times New Roman</option>
+          <option value="'Courier New',monospace">Courier New</option>
+        </select>
+
+        <div class="sub-group collapsible sub-group--st-hdr" style="margin-top:8px">
+          <div class="sub-group-title">Header Row <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="sub-body">
+            <div class="row2">
+              <div><label for="st-hdr-bg">Background</label><input type="color" id="st-hdr-bg" value="#374151"></div>
+              <div><label for="st-hdr-tc">Text color</label><input type="color" id="st-hdr-tc" value="#ffffff"></div>
+            </div>
+            <div class="row3" style="margin-top:7px">
+              <div><label for="st-hdr-fs">Size</label><input type="number" id="st-hdr-fs" value="14" min="8" max="36"></div>
+              <div><label for="st-hdr-align">H-Align</label>
+                <select id="st-hdr-align">
+                  <option value="center">Center</option>
+                  <option value="left">Left</option>
+                  <option value="right">Right</option>
+                </select>
+              </div>
+              <div><label for="st-hdr-valign">V-Align</label>
+                <select id="st-hdr-valign">
+                  <option value="middle">Middle</option>
+                  <option value="top">Top</option>
+                  <option value="bottom">Bottom</option>
+                </select>
+              </div>
+            </div>
+            <div class="check-row"><input type="checkbox" id="st-hdr-bold" checked><label for="st-hdr-bold">Bold</label></div>
+            <div class="check-row"><input type="checkbox" id="st-hdr-italic"><label for="st-hdr-italic">Italic</label></div>
+          </div>
+        </div>
+
+        <div class="sub-group collapsible sub-group--st-body">
+          <div class="sub-group-title">Body Rows <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="sub-body">
+            <div class="row2">
+              <div><label for="st-row-bg">Row color</label><input type="color" id="st-row-bg" value="#ffffff"></div>
+              <div><label for="st-row-tc">Text color</label><input type="color" id="st-row-tc" value="#111111"></div>
+            </div>
+            <div class="check-row" style="margin-top:5px">
+              <input type="checkbox" id="st-alt-rows">
+              <label for="st-alt-rows">Alternating row color</label>
+            </div>
+            <div id="st-alt-color-wrap" style="display:none;margin-top:5px">
+              <label for="st-alt-bg">Alternate color</label>
+              <input type="color" id="st-alt-bg" value="#f3f4f6">
+            </div>
+            <div class="row3" style="margin-top:7px">
+              <div><label for="st-row-fs">Size</label><input type="number" id="st-row-fs" value="13" min="8" max="36"></div>
+              <div><label for="st-row-align">H-Align</label>
+                <select id="st-row-align">
+                  <option value="center">Center</option>
+                  <option value="left">Left</option>
+                  <option value="right">Right</option>
+                </select>
+              </div>
+              <div><label for="st-row-valign">V-Align</label>
+                <select id="st-row-valign">
+                  <option value="middle">Middle</option>
+                  <option value="top">Top</option>
+                  <option value="bottom">Bottom</option>
+                </select>
+              </div>
+            </div>
+            <div class="check-row"><input type="checkbox" id="st-row-bold"><label for="st-row-bold">Bold</label></div>
+            <div class="check-row"><input type="checkbox" id="st-row-italic"><label for="st-row-italic">Italic</label></div>
+            <div class="check-row" style="margin-top:5px">
+              <input type="checkbox" id="st-smart-align" checked>
+              <label for="st-smart-align">Smart align (numeric cols center)</label>
+            </div>
+            <label for="st-col0-align" style="margin-top:7px">First col align</label>
+            <select id="st-col0-align">
+              <option value="left">Left</option>
+              <option value="center">Center</option>
+              <option value="right">Right</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="sub-group collapsible sub-group--st-border">
+          <div class="sub-group-title">Border &amp; Layout <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="sub-body">
+            <div class="row2">
+              <div><label for="st-border-color">Border color</label><input type="color" id="st-border-color" value="#d1d5db"></div>
+              <div><label for="st-border-w">Width (px)</label><input type="number" id="st-border-w" value="1" min="0" max="6" step="0.5"></div>
+            </div>
+            <label for="st-pad" style="margin-top:7px">Cell padding (px)</label>
+            <input type="number" id="st-pad" value="10" min="2" max="30">
+            <label for="st-rx" style="margin-top:7px">Outer corner radius</label>
+            <input type="number" id="st-rx" value="4" min="0" max="20">
+            <label for="st-col0-w" style="margin-top:7px">First col width (0 = auto)</label>
+            <input type="number" id="st-col0-w" value="0" min="0" max="400">
+            <div class="check-row" style="margin-top:7px">
+              <input type="checkbox" id="st-transparent-bg">
+              <label for="st-transparent-bg">Transparent background</label>
+            </div>
+          </div>
+        </div>
+        <div class="sub-group collapsible sub-group--st-col" style="margin-top:8px">
+          <div class="sub-group-title">Column Overrides <svg class="chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true"><path d="M1 1L6 7L11 1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="sub-body">
+            <label for="st-col-sel">Column</label>
+            <select id="st-col-sel" onchange="_stOnColSelChange()"></select>
+
+            <div class="row2" style="align-items:center;margin-top:7px">
+              <div style="display:flex;align-items:center;gap:5px">
+                <input type="checkbox" id="st-col-bg-en" onchange="$('st-col-bg').disabled=!this.checked">
+                <label for="st-col-bg-en">Bg</label>
+                <input type="color" id="st-col-bg" value="#ffffff" disabled>
+              </div>
+              <div style="display:flex;align-items:center;gap:5px">
+                <input type="checkbox" id="st-col-tc-en" onchange="$('st-col-tc').disabled=!this.checked">
+                <label for="st-col-tc-en">Text</label>
+                <input type="color" id="st-col-tc" value="#111111" disabled>
+              </div>
+            </div>
+
+            <div class="row3" style="margin-top:7px">
+              <div><label for="st-col-fs">Size (0=inh.)</label><input type="number" id="st-col-fs" value="0" min="0" max="36"></div>
+              <div><label for="st-col-bold">Weight</label>
+                <select id="st-col-bold">
+                  <option value="">—</option>
+                  <option value="bold">Bold</option>
+                  <option value="normal">Normal</option>
+                </select>
+              </div>
+              <div><label for="st-col-ital">Style</label>
+                <select id="st-col-ital">
+                  <option value="">—</option>
+                  <option value="italic">Italic</option>
+                  <option value="normal">Normal</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="row2" style="margin-top:7px">
+              <div><label for="st-col-ha">H-Align</label>
+                <select id="st-col-ha">
+                  <option value="">—</option>
+                  <option value="left">Left</option>
+                  <option value="center">Center</option>
+                  <option value="right">Right</option>
+                </select>
+              </div>
+              <div><label for="st-col-va">V-Align</label>
+                <select id="st-col-va">
+                  <option value="">—</option>
+                  <option value="top">Top</option>
+                  <option value="middle">Middle</option>
+                  <option value="bottom">Bottom</option>
+                </select>
+              </div>
+            </div>
+
+            <label for="st-col-w" style="margin-top:7px">Width px (0=auto)</label>
+            <input type="number" id="st-col-w" value="0" min="0" max="600">
+
+            <div class="row2" style="margin-top:10px">
+              <button class="btn btn-ghost btn-sm" onclick="_stClearColOverride()">Clear</button>
+              <button class="btn btn-primary btn-sm" onclick="_stApplyColOverride()">Apply</button>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /st-col1 -->
+
+      <!-- ── Data column ── -->
+      <div class="card st-col2">
+        <div class="card-title">Table Data</div>
+
+        <div class="st-mode-group">
+          <button class="st-mode-btn active" data-mode="html" onclick="_stSwitchMode('html')">HTML Table</button>
+          <button class="st-mode-btn" data-mode="csv" onclick="_stSwitchMode('csv')">CSV / Manual</button>
+        </div>
+        <input type="hidden" id="st-mode" value="html">
+
+        <div id="st-html-panel">
+          <label for="st-html-input" style="display:block;margin-bottom:4px">Paste HTML table code</label>
+          <textarea id="st-html-input" rows="18" oninput="render()" placeholder="&lt;table&gt;...&lt;/table&gt;"><table>
+  <thead>
+    <tr>
+      <th>Student</th>
+      <th>A</th>
+      <th>B</th>
+      <th>C</th>
+      <th>D</th>
+      <th>E</th>
+      <th>F</th>
+      <th>G</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Books read</td>
+      <td>15</td>
+      <td>8</td>
+      <td>12</td>
+      <td>20</td>
+      <td>11</td>
+      <td>18</td>
+      <td>9</td>
+    </tr>
+  </tbody>
+</table></textarea>
+        </div>
+
+        <div id="st-csv-panel" style="display:none">
+          <label for="st-csv-input" style="display:block;margin-bottom:4px">First row = headers, comma or tab separated. Use <code>\n</code> for line breaks within a cell.</label>
+          <textarea id="st-csv-input" rows="18" oninput="render()" placeholder="Student,A,B,C,D&#10;Books read,15,8,12,20">Student,A,B,C,D,E,F,G
+Books read,15,8,12,20,11,18,9</textarea>
+        </div>
+      </div><!-- /st-col2 -->
+
+    </div><!-- /controls -->
+  </div><!-- /#tab-svgtable -->
+
   <!-- ── Export panel (always visible) ── -->
   <div class="card export-panel">
     <div class="card-title">Export</div>
@@ -3163,6 +3416,8 @@ May,18</textarea>
 <script src="js/render.js"></script>
 <script src="js/stage.js"></script>
 <script src="js/patterns.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" crossorigin="anonymous"></script>
+<script src="js/svgTable.js"></script>
 <script src="js/events.js"></script>
 <script src="js/main.js"></script>
 
@@ -3266,6 +3521,61 @@ window.render = function () { _origRender(); syncClearBtn(); };
     <div class="pt-ced-actions">
       <button class="btn" style="background:#f0f4f8;color:var(--muted);border:1.5px solid var(--border)" onclick="_ptResetCustomPos();_openCustomEditor()">↺ Reset</button>
       <button class="btn btn-primary" onclick="_closeCustomEditor()">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── SVG Table cell editor modal ── -->
+<div id="st-cell-editor" style="display:none" class="st-ce">
+  <div class="st-ce-head">
+    <span id="st-ce-label">Cell</span>
+    <button class="st-ce-close" onclick="_stCloseCellEditor()" title="Close">✕</button>
+  </div>
+  <div class="st-ce-body">
+    <label class="st-ce-sec">Content <small>(\( LaTeX \) · Enter = new line)</small></label>
+    <textarea id="st-ce-text" class="st-ce-ta" rows="3"></textarea>
+
+    <label class="st-ce-sec" style="margin-top:10px">Style overrides <small>(— = inherit)</small></label>
+    <div class="row2" style="align-items:center;margin-top:5px">
+      <div style="display:flex;align-items:center;gap:5px">
+        <input type="checkbox" id="st-ce-bg-en" onchange="$('st-ce-bg').disabled=!this.checked">
+        <label for="st-ce-bg-en">Bg</label>
+        <input type="color" id="st-ce-bg" value="#ffffff" disabled>
+      </div>
+      <div style="display:flex;align-items:center;gap:5px">
+        <input type="checkbox" id="st-ce-tc-en" onchange="$('st-ce-tc').disabled=!this.checked">
+        <label for="st-ce-tc-en">Text</label>
+        <input type="color" id="st-ce-tc" value="#111111" disabled>
+      </div>
+    </div>
+    <div class="row3" style="margin-top:7px">
+      <div><label for="st-ce-fs">Size (0=inh.)</label><input type="number" id="st-ce-fs" value="0" min="0" max="72"></div>
+      <div><label for="st-ce-bold">Weight</label>
+        <select id="st-ce-bold">
+          <option value="">—</option><option value="bold">Bold</option><option value="normal">Normal</option>
+        </select>
+      </div>
+      <div><label for="st-ce-ital">Style</label>
+        <select id="st-ce-ital">
+          <option value="">—</option><option value="italic">Italic</option><option value="normal">Normal</option>
+        </select>
+      </div>
+    </div>
+    <div class="row2" style="margin-top:7px">
+      <div><label for="st-ce-ha">H-Align</label>
+        <select id="st-ce-ha">
+          <option value="">—</option><option value="left">Left</option><option value="center">Center</option><option value="right">Right</option>
+        </select>
+      </div>
+      <div><label for="st-ce-va">V-Align</label>
+        <select id="st-ce-va">
+          <option value="">—</option><option value="top">Top</option><option value="middle">Middle</option><option value="bottom">Bottom</option>
+        </select>
+      </div>
+    </div>
+    <div class="st-ce-actions">
+      <button class="btn btn-ghost btn-sm" onclick="_stClearCellEdit()">Clear overrides</button>
+      <button class="btn btn-primary btn-sm" onclick="_stApplyCellEdit()">Apply</button>
     </div>
   </div>
 </div>

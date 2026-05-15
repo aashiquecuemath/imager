@@ -959,6 +959,129 @@ kbd {
 .char-col1 { grid-column: 1; }
 .char-col2 { grid-column: 2; }
 
+/* ── SVG Tables ── */
+.controls--svgtable {
+  display: grid;
+  grid-template-columns: minmax(200px, 230px) minmax(260px, 380px);
+  gap: 10px;
+  align-items: start;
+}
+.controls--svgtable > .card.st-col1 { grid-column: 1; }
+.controls--svgtable > .card.st-col2 { grid-column: 2; }
+
+.st-mode-group {
+  display: flex;
+  border: 1px solid #d0d5dd;
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+.st-mode-btn {
+  flex: 1;
+  padding: 6px 10px;
+  font-size: .78rem;
+  font-weight: 500;
+  background: white;
+  border: none;
+  border-right: 1px solid #d0d5dd;
+  cursor: pointer;
+  color: #555;
+  transition: background .14s, color .14s;
+}
+.st-mode-btn:last-child { border-right: none; }
+.st-mode-btn:hover      { background: #f0f4fa; }
+.st-mode-btn.active     { background: #0ea5e9; color: white; }
+
+/* Grapher dynamic series panels */
+.gp-stitle {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding-left: 8px !important;
+  cursor: pointer;
+  user-select: none;
+}
+.gp-sdot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.gp-sdel {
+  background: none;
+  border: none;
+  font-size: 13px;
+  cursor: pointer;
+  color: #888;
+  padding: 0 2px;
+  line-height: 1;
+  margin-left: 2px;
+}
+.gp-sdel:hover { color: #c0392b; }
+
+/* Cell editor modal */
+.st-ce {
+  position: fixed;
+  top: 50%;
+  right: 24px;
+  transform: translateY(-50%);
+  width: 290px;
+  background: #fff;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  box-shadow: 0 10px 32px rgba(0,0,0,.18);
+  z-index: 9999;
+  overflow: hidden;
+  font-size: .8rem;
+}
+.st-ce-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 13px;
+  background: #374151;
+  color: #fff;
+  font-weight: 600;
+  font-size: .8rem;
+}
+.st-ce-close {
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  font-size: 15px;
+  padding: 0 2px;
+  line-height: 1;
+  opacity: .8;
+}
+.st-ce-close:hover { opacity: 1; }
+.st-ce-body { padding: 12px; }
+.st-ce-sec {
+  display: block;
+  font-weight: 600;
+  font-size: .7rem;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: #6b7280;
+  margin-bottom: 3px;
+}
+.st-ce-ta {
+  width: 100%;
+  box-sizing: border-box;
+  font-family: monospace;
+  font-size: .78rem;
+  resize: vertical;
+  border: 1px solid #d1d5db;
+  border-radius: 5px;
+  padding: 5px 7px;
+}
+.st-ce-actions {
+  display: flex;
+  gap: 7px;
+  margin-top: 12px;
+  justify-content: flex-end;
+}
+
 /* Character selector */
 .char-selector { display: flex; gap: 8px; flex-wrap: wrap; }
 .char-card {
@@ -1007,6 +1130,9 @@ kbd {
   .controls--character { grid-template-columns: 1fr; }
   .controls--character > .char-col1,
   .controls--character > .char-col2 { grid-column: 1; }
+  .controls--svgtable { grid-template-columns: 1fr; }
+  .controls--svgtable > .card.st-col1,
+  .controls--svgtable > .card.st-col2 { grid-column: 1; }
 }
 
 /* ══════════════════════════════════════════════════════════════

@@ -1288,6 +1288,7 @@ function generateShape() {
     stage:           generateStage,
     svgCharacter:    generateCharacter,
     svgPatterns:     generatePatterns,
+    svgTable:        generateSVGTable,
   };
   return (map[currentShape] || (() => ''))();
 }
