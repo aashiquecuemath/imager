@@ -750,12 +750,31 @@ function generateDotPlot() {
   const dotColor    = val('dp-dot-color')    || '#3b82f6';
   const dotStroke   = val('dp-dot-stroke')   || '#1d4ed8';
   const dotStrokeW  = Math.max(0, num('dp-dot-stroke-w') || 1);
-  const axisGap     = Math.max(0, num('dp-axis-gap') || 8);
-  const dotGap      = Math.max(0, num('dp-dot-gap')  || 2);
+  const axisGap     = Math.max(0, num('dp-axis-gap')    || 8);
+  const dotGap      = Math.max(0, num('dp-dot-gap')    || 2);
+  const hSpacing    = Math.max(20, num('dp-h-spacing') || 60);
   const tickValsRaw = val('dp-tick-vals').trim();
   const customTicks = tickValsRaw
     ? tickValsRaw.split(',').map(v => parseFloat(v.trim())).filter(v => !isNaN(v))
     : null;
+  const customLabelsRaw = val('dp-custom-labels').trim();
+  const customLabels = customLabelsRaw
+    ? customLabelsRaw.split(',').map(s => s.trim())
+    : null;
+  // Extract numeric value from a label entry ($$\frac{a}{b}$$, $$a/b$$, or plain number)
+  const _parseLabelVal = raw => {
+    let m = raw.match(/\$\$\s*\\frac\{(-?\d+(?:\.\d+)?)\}\{(\d+(?:\.\d+)?)\}/);
+    if (m) return parseFloat(m[1]) / parseFloat(m[2]);
+    m = raw.match(/\$\$\s*(-?\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)/);
+    if (m) return parseFloat(m[1]) / parseFloat(m[2]);
+    const n = parseFloat(raw.replace(/\$\$/g, '').trim());
+    return isNaN(n) ? NaN : n;
+  };
+  // labelTicks: [{val, raw}] — positions AND labels driven by custom-labels field
+  const labelTicks = customLabels
+    ? customLabels.map(raw => ({ raw, val: _parseLabelVal(raw) })).filter(e => !isNaN(e.val))
+    : null;
+  const hasMathLabels = !!(customLabels && customLabels.some(l => l.includes('$$')));
   const showGrid    = chk('dp-grid');
   const gridColor   = val('dp-grid-color')   || '#dddddd';
   const showTkLbl   = chk('dp-tick-labels');
@@ -769,6 +788,7 @@ function generateDotPlot() {
   const lblBold     = chk('dp-lbl-bold')     ? 'bold' : 'normal';
   const lblStyle    = val('dp-lbl-style')    || 'normal';
   const showArrows  = chk('dp-axis-arrows');
+  const axisW       = Math.max(0.5, num('dp-axis-width') || 2);
   const OVER        = 12;
 
   const minV  = Math.min(...values);
@@ -780,6 +800,11 @@ function generateDotPlot() {
     const xMinIn = num('dp-xmin'), xMaxIn = num('dp-xmax');
     if (!isNaN(xMinIn)) xMin = Math.min(xMinIn, xMin);
     if (!isNaN(xMaxIn)) xMax = Math.max(xMaxIn, xMax);
+  }
+  // Extend range to cover all custom label positions
+  if (labelTicks && labelTicks.length) {
+    xMin = Math.min(xMin, Math.min(...labelTicks.map(e => e.val)));
+    xMax = Math.max(xMax, Math.max(...labelTicks.map(e => e.val)));
   }
   if (xMin >= xMax) xMax = xMin + 10;
   const tStep = _niceTick(xMax - xMin);
@@ -796,22 +821,24 @@ function generateDotPlot() {
   const dotStep = dotR * 2 + dotGap;
   const stackH  = maxStack * dotStep + dotR + axisGap;
   const axisY   = 20 + stackH;
-  const plotH   = axisY + (showTkLbl ? tkSize + 6 : 6) + (xLbl ? lblSize + 10 : 4);
+  const tkLblArea = showTkLbl ? (hasMathLabels ? tkSize * 3 + 8 : tkSize + 6) : 6;
+  const plotH     = axisY + tkLblArea + (xLbl ? lblSize + 10 : 4);
 
-  const ML    = 20;
+  const ML    = 20 + (showArrows ? OVER : 0);
   const MR    = 20;
   const MT    = title ? tkSize + 24 : 16;
   const nTicks = Math.round((xMax - xMin) / tStep) + 1;
-  const plotW = Math.max(300, nTicks * Math.max(dotStep * 2.5, 50));
+  const plotW = Math.max(300, nTicks * hSpacing);
   const W     = ML + plotW + MR + (showArrows ? OVER : 0);
   const H     = MT + plotH;
 
   const toX = v => ML + ((v - xD0) / (xD1 - xD0)) * plotW;
 
   const defs = showArrows
-    ? `\n<defs><marker id="dpa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="${axisColor}"/></marker></defs>`
+    ? `\n<defs><marker id="dpa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="${axisColor}"/></marker><marker id="dpal" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M10,0 L0,5 L10,10 Z" fill="${axisColor}"/></marker></defs>`
     : '';
-  const _mkEnd = showArrows ? ' marker-end="url(#dpa)"' : '';
+  const _mkEnd   = showArrows ? ' marker-end="url(#dpa)"' : '';
+  const _mkStart = showArrows ? ' marker-start="url(#dpal)"' : '';
 
   const tkFont  = `font-family="Arial,sans-serif" font-size="${tkSize}" font-weight="${tkBold}" font-style="${tkStyle}" fill="${tkColor}"`;
   const lblFont = `font-family="Arial,sans-serif" font-size="${lblSize}" font-weight="${lblBold}" font-style="${lblStyle}" fill="${lblColor}"`;
@@ -825,16 +852,18 @@ function generateDotPlot() {
 
   const baseY = MT + axisY;
 
-  const tickVals = customTicks && customTicks.length
-    ? customTicks
-    : (() => {
-        const arr = [];
-        for (let v = xMin; v <= xMax + 1e-9; v = parseFloat((v + tStep).toFixed(10))) {
-          if (v > xMax + 1e-9) break;
-          arr.push(v);
-        }
-        return arr;
-      })();
+  const tickVals = labelTicks && labelTicks.length
+    ? labelTicks.map(e => e.val)
+    : customTicks && customTicks.length
+      ? customTicks
+      : (() => {
+          const arr = [];
+          for (let v = xMin; v <= xMax + 1e-9; v = parseFloat((v + tStep).toFixed(10))) {
+            if (v > xMax + 1e-9) break;
+            arr.push(v);
+          }
+          return arr;
+        })();
 
   if (showGrid) {
     for (const v of tickVals) {
@@ -852,17 +881,24 @@ function generateDotPlot() {
   }
 
   // Axis spans full display range (half-tick padding beyond first/last ticks)
-  s += `\n<line x1="${fmt(toX(xD0))}" y1="${baseY}" x2="${fmt(toX(xD1) + (showArrows ? OVER : 0))}" y2="${baseY}" stroke="${axisColor}" stroke-width="2"${_mkEnd}/>`;
+  s += `\n<line x1="${fmt(toX(xD0) - (showArrows ? OVER : 0))}" y1="${baseY}" x2="${fmt(toX(xD1) + (showArrows ? OVER : 0))}" y2="${baseY}" stroke="${axisColor}" stroke-width="${axisW}"${_mkStart}${_mkEnd}/>`;
 
   if (showTkLbl) {
-    for (const v of tickVals) {
-      const lbl = Number.isInteger(v) ? v : parseFloat(v.toFixed(4));
-      s += `\n<text x="${fmt(toX(v))}" y="${fmt(baseY + tkSize + 3)}" ${tkFont} text-anchor="middle">${lbl}</text>`;
-    }
+    const tkBaselineY = baseY + (hasMathLabels ? tkSize * 2.2 + 3 : tkSize + 3);
+    tickVals.forEach((v, i) => {
+      const autoLbl = Number.isInteger(v) ? String(v) : String(parseFloat(v.toFixed(4)));
+      const raw = labelTicks ? labelTicks[i].raw
+                : (customLabels && customLabels[i] != null ? customLabels[i] : autoLbl);
+      const lbl = raw.replace(/\$\$([^$]+)\$\$/g, (_, inner) => {
+        const frac = inner.trim().replace(/^(-?\d+)\s*\/\s*(\d+)$/, '\\frac{$1}{$2}');
+        return `$${frac}$`;
+      });
+      s += '\n' + _renderLabel(lbl, toX(v), tkBaselineY, 'middle', tkSize, 'Arial, sans-serif', tkBold === 'bold', tkStyle === 'italic', tkColor);
+    });
   }
 
   if (xLbl) {
-    s += `\n<text x="${fmt(ML + plotW / 2)}" y="${fmt(baseY + tkSize + lblSize + 10)}" ${lblFont} text-anchor="middle">${escXml(xLbl)}</text>`;
+    s += `\n<text x="${fmt(ML + plotW / 2)}" y="${fmt(baseY + tkLblArea + lblSize + 4)}" ${lblFont} text-anchor="middle">${escXml(xLbl)}</text>`;
   }
 
   return s + '\n</svg>';
